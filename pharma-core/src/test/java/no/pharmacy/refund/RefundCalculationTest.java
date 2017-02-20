@@ -62,11 +62,6 @@ public class RefundCalculationTest {
 
         order.addAll(order1, order2, order3, order4);
 
-        assertThat(order.getRefundGroups()).extracting(g -> g.getMedicationOrders())
-            .contains(Arrays.asList(order1, order2))
-            .contains(Arrays.asList(order3))
-            .contains(Arrays.asList(order4));
-
         assertThat(order.getUncoveredTotal()).isEqualTo(medication1.getUncoveredAmount().times(3));
         assertThat(order.getCoveredTotal())
             .isEqualTo(medication1.getCoveredAmount().times(3).plus(medication2.getCoveredAmount()));
