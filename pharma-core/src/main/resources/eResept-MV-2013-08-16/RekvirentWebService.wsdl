@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="RekvirentWebService" targetNamespace="http://rekvirent.webservices.reseptformidleren.ergo.no/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://rekvirent.webservices.reseptformidleren.ergo.no/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns0="http://rekvirent.webservices.reseptformidleren.ergo.no/types/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+	<types>
+		<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://rekvirent.webservices.reseptformidleren.ergo.no/types/" elementFormDefault="qualified" xmlns:tns="http://rekvirent.webservices.reseptformidleren.ergo.no/types/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:soap11-enc="http://schemas.xmlsoap.org/soap/encoding/">
+			<import namespace="http://rekvirent.webservices.reseptformidleren.ergo.no/"/>
+			<complexType name="M1">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M4_1">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M4_2">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1">
+						<annotation>
+							<documentation>Ved normalsituasjon: meldingstype ERM42. Ved feilsituasjon: meldingstype APPREC</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</complexType>
+			<complexType name="M5">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M9_5">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M9_6">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1">
+						<annotation>
+							<documentation>Ved normalsituasjon: meldingstype ERM96. Ved feilsituasjon: meldingstype APPREC</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</complexType>
+			<complexType name="M24_1">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M24_2">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1">
+						<annotation>
+							<documentation>Ved normalsituasjon: meldingstype ERM242. Ved feilsituasjon: meldingstype APPREC</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</complexType>
+			<complexType name="M95kj">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M96kj">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1">
+						<annotation>
+							<documentation>Ved normalsituasjon: meldingstype ERM96. Ved feilsituasjon: meldingstype APPREC</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</complexType>
+			<complexType name="MV">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="AppRec">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M25_1">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M27_1">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M27_2">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1">
+						<annotation>
+							<documentation>Ved normalsituasjon: meldingstype ERM912. Ved feilsituasjon: meldingstype APPREC</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</complexType>
+			<complexType name="M9_11">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			<complexType name="M9_12">
+				<sequence>
+					<element name="dokument" type="anyType" minOccurs="1" maxOccurs="1">
+						<annotation>
+							<documentation>Ved normalsituasjon: meldingstype ERM912. Ved feilsituasjon: meldingstype APPREC</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</complexType>
+		</schema>
+		<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://rekvirent.webservices.reseptformidleren.ergo.no/" elementFormDefault="qualified" xmlns:tns="http://rekvirent.webservices.reseptformidleren.ergo.no/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:soap11-enc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="http://rekvirent.webservices.reseptformidleren.ergo.no/types/">
+			<import namespace="http://rekvirent.webservices.reseptformidleren.ergo.no/types/"/>
+			<element name="M1Element" type="ns1:M1" nillable="true"/>
+			<element name="M4_1Element" type="ns1:M4_1" nillable="true"/>
+			<element name="M4_2Element" type="ns1:M4_2" nillable="true"/>
+			<element name="AppRecElement" type="ns1:AppRec" nillable="true"/>
+			<element name="M5Element" type="ns1:M5" nillable="true"/>
+			<element name="M9_5Element" type="ns1:M9_5" nillable="true"/>
+			<element name="M9_6Element" type="ns1:M9_6" nillable="true"/>
+			<element name="M24_1Element" type="ns1:M24_1" nillable="true"/>
+			<element name="M24_2Element" type="ns1:M24_2" nillable="true"/>
+			<element name="M95kjElement" type="ns1:M95kj" nillable="true"/>
+			<element name="M96kjElement" type="ns1:M96kj" nillable="true"/>
+			<element name="MVElement" type="ns1:MV" nillable="true"/>
+			<element name="M25_1Element" type="ns1:M25_1" nillable="true"/>
+			<element name="M27_1Element" type="ns1:M27_1" nillable="true"/>
+			<element name="M27_2Element" type="ns1:M27_2" nillable="true"/>
+			<element name="M9_11Element" type="ns1:M9_11" nillable="true"/>
+			<element name="M9_12Element" type="ns1:M9_12" nillable="true"/>
+		</schema>
+	</types>
+	<message name="RekvirentWebService_m1">
+		<part name="parameters" element="tns:M1Element"/>
+	</message>
+	<message name="RekvirentWebService_m1Svar">
+		<part name="result" element="tns:AppRecElement"/>
+	</message>
+	<message name="RekvirentWebService_m5">
+		<part name="parameters" element="tns:M5Element"/>
+	</message>
+	<message name="RekvirentWebService_m5Svar">
+		<part name="result" element="tns:AppRecElement"/>
+	</message>
+	<message name="RekvirentWebService_m9_5">
+		<part name="parameters" element="tns:M9_5Element"/>
+	</message>
+	<message name="RekvirentWebService_m9_6">
+		<part name="result" element="tns:M9_6Element"/>
+	</message>
+	<message name="RekvirentWebService_m4_1">
+		<part name="parameters" element="tns:M4_1Element"/>
+	</message>
+	<message name="RekvirentWebService_m4_2">
+		<part name="result" element="tns:M4_2Element"/>
+	</message>
+	<message name="RekvirentWebService_m24_1">
+		<part name="parameters" element="tns:M24_1Element"/>
+	</message>
+	<message name="RekvirentWebService_m24_2">
+		<part name="result" element="tns:M24_2Element"/>
+	</message>
+	<message name="RekvirentWebService_M95kj">
+		<part name="parameters" element="tns:M95kjElement"/>
+	</message>
+	<message name="RekvirentWebService_M96kj">
+		<part name="result" element="tns:M96kjElement"/>
+	</message>
+	<message name="RekvirentWebService_m95kjFeil">
+		<part name="m95kjFeil" element="tns:AppRecElement"/>
+	</message>
+	<message name="RekvirentWebService_verify">
+		<part name="parameters" element="tns:MVElement"/>
+	</message>
+	<message name="RekvirentWebService_verifySvar">
+		<part name="result" element="tns:AppRecElement"/>
+	</message>
+	<message name="RekvirentWebService_m25_1">
+		<part name="parameters" element="tns:M25_1Element"/>
+	</message>
+	<message name="RekvirentWebService_m25_1Svar">
+		<part name="result" element="tns:AppRecElement"/>
+	</message>
+	<message name="RekvirentWebService_m27_1">
+		<part name="parameters" element="tns:M27_1Element"/>
+	</message>
+	<message name="RekvirentWebService_m27_2">
+		<part name="result" element="tns:M27_2Element"/>
+	</message>
+	<message name="RekvirentWebService_m27Feil">
+		<part name="m27Feil" element="tns:AppRecElement"/>
+	</message>
+	<message name="RekvirentWebService_m9_11">
+		<part name="parameters" element="tns:M9_11Element"/>
+	</message>
+	<message name="RekvirentWebService_m9_12">
+		<part name="result" element="tns:M9_12Element"/>
+	</message>
+	<message name="RekvirentWebService_m9_11Feil">
+		<part name="m9_11Feil" element="tns:AppRecElement"/>
+	</message>
+	<portType name="RekvirentWebService">
+		<operation name="m1">
+			<input message="tns:RekvirentWebService_m1"/>
+			<output message="tns:RekvirentWebService_m1Svar"/>
+		</operation>
+		<operation name="m5">
+			<input message="tns:RekvirentWebService_m5"/>
+			<output message="tns:RekvirentWebService_m5Svar"/>
+		</operation>
+		<operation name="m9_5">
+			<input message="tns:RekvirentWebService_m9_5"/>
+			<output message="tns:RekvirentWebService_m9_6"/>
+		</operation>
+		<operation name="m4_1">
+			<input message="tns:RekvirentWebService_m4_1"/>
+			<output message="tns:RekvirentWebService_m4_2"/>
+		</operation>
+		<operation name="m24_1">
+			<input message="tns:RekvirentWebService_m24_1"/>
+			<output message="tns:RekvirentWebService_m24_2"/>
+		</operation>
+		<operation name="M95kj">
+			<input message="tns:RekvirentWebService_M95kj"/>
+			<output message="tns:RekvirentWebService_M96kj"/>
+			<fault name="m95kjFeil" message="tns:RekvirentWebService_m95kjFeil"/>
+		</operation>
+		<operation name="verify">
+			<input message="tns:RekvirentWebService_verify"/>
+			<output message="tns:RekvirentWebService_verifySvar"/>
+		</operation>
+		<operation name="m25_1">
+			<input message="tns:RekvirentWebService_m25_1"/>
+			<output message="tns:RekvirentWebService_m25_1Svar"/>
+		</operation>
+		<operation name="m27_1">
+			<input message="tns:RekvirentWebService_m27_1"/>
+			<output message="tns:RekvirentWebService_m27_2"/>
+			<fault name="m27Feil" message="tns:RekvirentWebService_m27Feil"/>
+		</operation>
+		<operation name="m9_11">
+			<input message="tns:RekvirentWebService_m9_11"/>
+			<output message="tns:RekvirentWebService_m9_12"/>
+			<fault name="m9_11Feil" message="tns:RekvirentWebService_m9_11Feil"/>
+		</operation>
+	</portType>
+	<binding name="RekvirentWebServiceSoapHttp" type="tns:RekvirentWebService">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="m1">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//m1"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+		</operation>
+		<operation name="m5">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//m5"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+		</operation>
+		<operation name="m9_5">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//m9_5"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+		</operation>
+		<operation name="m4_1">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//m4_1"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+		</operation>
+		<operation name="m24_1">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//m24_1"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+		</operation>
+		<operation name="M95kj">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//M95kj"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+			<fault name="m95kjFeil">
+				<soap:fault name="m95kjFeil" use="literal"/>
+			</fault>
+		</operation>
+		<operation name="verify">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//verify"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+		</operation>
+		<operation name="m25_1">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//m25_1"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+		</operation>
+		<operation name="m27_1">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//m27_1"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+			<fault name="m27Feil">
+				<soap:fault name="m27Feil" use="literal"/>
+			</fault>
+		</operation>
+		<operation name="m9_11">
+			<soap:operation soapAction="http://rekvirent.webservices.reseptformidleren.ergo.no//m9_11"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal" parts="result"/>
+			</output>
+			<fault name="m9_11Feil">
+				<soap:fault name="m9_11Feil" use="literal"/>
+			</fault>
+		</operation>
+	</binding>
+	<service name="RekvirentWebService">
+		<port name="RekvirentWebServiceSoapHttpPort" binding="tns:RekvirentWebServiceSoapHttp">
+			<soap:address location="http://localhost:8888/Reseptformidleren/RekvirentWebServiceSoapHttpPort"/>
+		</port>
+	</service>
+</definitions>

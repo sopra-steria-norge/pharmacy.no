@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema.xsd" xmlns:kith="http://www.kith.no/xmlstds" xmlns:fk1="http://www.kith.no/xmlstds/felleskomponent1" targetNamespace="http://www.kith.no/xmlstds/felleskomponent1" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<import namespace="http://www.kith.no/xmlstds" schemaLocation="kith.xsd"/>
+	<!--Versjon 1.0 2006-08-29-->
+	<!--Skjema som inneholder Felles definisjoner for KITH for postadresse, identifikator og telekommunikasjonsadresse-->
+	<!--Felleskomponenter-->
+	<complexType name="Address">
+		<annotation>
+			<documentation>Adresseopplysninger.</documentation>
+		</annotation>
+		<sequence>
+			<element name="Type" type="kith:CS" minOccurs="0"/>
+			<element name="StreetAdr" type="string" minOccurs="0"/>
+			<element name="PostalCode" type="string" minOccurs="0"/>
+			<element name="City" type="string" minOccurs="0"/>
+			<element name="Postbox" type="string" minOccurs="0"/>
+			<element name="County" type="kith:CS" minOccurs="0"/>
+			<element name="Country" type="kith:CS" minOccurs="0"/>
+		</sequence>
+	</complexType>
+	<complexType name="TeleCom">
+		<annotation>
+			<documentation>Inneholder opplysninger om telekommunikasjonsadresse, inklusive kommunikasjonstype. Denne klassen benyttes for å registrere telefonnummer, telefaks, personsøker etc., knyttes opp mot de registrerte adressene.</documentation>
+		</annotation>
+		<sequence>
+			<element name="TypeTelecom" type="kith:CS" minOccurs="0"/>
+			<element name="TeleAddress" type="kith:URL"/>
+		</sequence>
+	</complexType>
+	<!-- Class: Identifikator -->
+	<complexType name="Ident">
+		<annotation>
+			<documentation>Identifikasjon og type identifikasjon. </documentation>
+		</annotation>
+		<sequence>
+			<element name="Id" type="string"/>
+			<element name="TypeId" type="kith:CV"/>
+		</sequence>
+	</complexType>
+</schema>
