@@ -1,0 +1,147 @@
+package no.pharmacy.refund;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+
+import org.junit.Test;
+
+import no.pharmacy.core.Money;
+import no.pharmacy.core.Practitioner;
+import no.pharmacy.medication.Medication;
+import no.pharmacy.order.MedicationOrder;
+import no.pharmacy.order.PurchaseOrder;
+
+public class RefundCalculationTest {
+
+    private static final Money MAX_COPAY_PER_PRESCRIPTION = Money.inCents(52000);
+    private static int sequence;
+
+    @Test
+    public void onlyPriceUpToTrinnPriceIsCovered() {
+        Medication medication1 = new Medication();
+        medication1.setTrinnPrice(Money.inCents(10000));
+        medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(2000));
+
+        assertThat(medication1.getUncoveredAmount())
+            .isEqualTo(medication1.getRetailPrice().minus(medication1.getTrinnPrice()));
+    }
+
+    @Test
+    public void medicationsCostingLessThanTrinnPriceAreFullyCovered() {
+        Medication medication = new Medication();
+        medication.setTrinnPrice(Money.inCents(20000));
+        medication.setRetailPrice(medication.getTrinnPrice().plusCents(-3000));
+        assertThat(medication.getUncoveredAmount())
+            .isEqualTo(Money.zero());
+    }
+
+    @Test
+    public void shouldCalculateCompleteRefund() throws Exception {
+        PurchaseOrder order = new PurchaseOrder();
+
+        Practitioner doctor1 = sampleDoctor();
+        Practitioner doctor2 = sampleDoctor();
+
+        LocalDate firstDate = LocalDate.now().minusDays(100);
+        LocalDate secondDate = firstDate.plusDays(7);
+
+        Medication medication1 = new Medication();
+        medication1.setTrinnPrice(Money.inCents(10000));
+        medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(2000));
+
+        Medication medication2 = new Medication();
+        medication2.setTrinnPrice(Money.inCents(20000));
+        medication2.setRetailPrice(medication2.getTrinnPrice().plusCents(-3000));
+
+        MedicationOrder order1 = sampleMedicationOrder(doctor1, firstDate, medication1);
+        MedicationOrder order2 = sampleMedicationOrder(doctor1, firstDate, medication2);
+        MedicationOrder order3 = sampleMedicationOrder(doctor1, secondDate, medication1);
+        MedicationOrder order4 = sampleMedicationOrder(doctor2, firstDate, medication1);
+
+        order.addAll(order1, order2, order3, order4);
+
+        assertThat(order.getRefundGroups()).extracting(g -> g.getMedicationOrders())
+            .contains(Arrays.asList(order1, order2))
+            .contains(Arrays.asList(order3))
+            .contains(Arrays.asList(order4));
+
+        assertThat(order.getUncoveredTotal()).isEqualTo(medication1.getUncoveredAmount().times(3));
+        assertThat(order.getCoveredTotal())
+            .isEqualTo(medication1.getCoveredAmount().times(3).plus(medication2.getCoveredAmount()));
+        assertThat(order.getPatientTotal())
+            .isEqualTo(medication1.getCoveredAmount().times(2).percent(39).plus(MAX_COPAY_PER_PRESCRIPTION));
+    }
+
+    @Test
+    public void shouldCalculateRefundGroup() throws Exception {
+        PurchaseOrder order = new PurchaseOrder();
+
+        Practitioner doctor1 = sampleDoctor();
+
+        LocalDate firstDate = LocalDate.now().minusDays(100);
+
+        Medication medication1 = new Medication();
+        medication1.setTrinnPrice(Money.inCents(100000));
+        medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(-2000));
+
+        Medication medication2 = new Medication();
+        medication2.setTrinnPrice(Money.inCents(20000));
+        medication2.setRetailPrice(medication2.getTrinnPrice().plusCents(-3000));
+
+        MedicationOrder order1 = sampleMedicationOrder(doctor1, firstDate, medication1);
+        MedicationOrder order2 = sampleMedicationOrder(doctor1, firstDate, medication2);
+
+        order.addAll(order1, order2);
+
+        assertThat(order.getRefundGroups()).extracting(g -> g.getMedicationOrders())
+            .containsOnly(Arrays.asList(order1, order2));
+
+        assertThat(order.getRefundGroups().iterator().next().getPatientAmount())
+            .isEqualTo(MAX_COPAY_PER_PRESCRIPTION);
+        assertThat(order.getPatientTotal()).isEqualTo(MAX_COPAY_PER_PRESCRIPTION);
+        assertThat(order.getUncoveredTotal()).isEqualTo(Money.zero());
+        assertThat(order.getRefundTotal())
+            .isEqualTo(medication1.getRetailPrice().plus(medication2.getRetailPrice()).minus(MAX_COPAY_PER_PRESCRIPTION));
+    }
+
+    @Test
+    public void shouldCalculateRefundGroup2() throws Exception {
+        PurchaseOrder order = new PurchaseOrder();
+
+        Practitioner doctor1 = sampleDoctor();
+
+        LocalDate firstDate = LocalDate.now().minusDays(100);
+
+        Medication medication1 = new Medication();
+        medication1.setTrinnPrice(Money.inCents(10000));
+        medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(-2000));
+
+        MedicationOrder order1 = sampleMedicationOrder(doctor1, firstDate, medication1);
+        order.addAll(order1);
+
+        assertThat(order.getRefundGroups().iterator().next().getPatientAmount())
+            .isEqualTo(medication1.getRetailPrice().percent(39));
+    }
+
+
+    private static Practitioner sampleDoctor() {
+        Practitioner practitioner = new Practitioner();
+        practitioner.setIdentifier(randomId());
+        return practitioner;
+    }
+
+    private static long randomId() {
+        return sequence++;
+    }
+
+    private static MedicationOrder sampleMedicationOrder(Practitioner prescriber, LocalDate dateWritten, Medication medication) {
+        MedicationOrder medicationOrder = new MedicationOrder();
+        medicationOrder.setPrescriber(prescriber);
+        medicationOrder.setDateWritten(dateWritten);
+        medicationOrder.setMedication(medication);
+        return medicationOrder;
+    }
+
+}
