@@ -1,0 +1,52 @@
+@startuml
+
+title Kjeden tester sitt POS
+
+actor Tester
+node Kjede as "Kjede POS" #pink
+interface FarmasøytApp <<opsjon>> #lime
+
+Tester -> Kjede
+Tester -> FarmasøytApp
+
+cloud Difa {
+    node Reseptur #lime
+    node Resepthistorikk #lime
+    node Farmasøytisk #lime
+
+    database Legemidler #lime
+    database Resepter #lime
+    database Journal #lime
+
+    Reseptur -down-> Resepter
+    Reseptur -down-> Legemidler
+    Resepthistorikk -down-> Resepter
+    Farmasøytisk -down-> Journal
+}
+
+cloud DifaRapport {
+    node Rapport #silver
+    database RapportDB #silver
+
+    Rapport -down-> RapportDB
+}
+
+
+Resepter -right-> RapportDB: Anonymisering
+
+FarmasøytApp -down-> Reseptur
+Kjede -down-> Reseptur
+Kjede -down-> Resepthistorikk
+Kjede -down-> Farmasøytisk
+
+package Teststillas {
+    node RF
+    node HELFO
+    node KJ
+}
+
+Reseptur -> Teststillas
+Teststillas -up-> Legemidler
+
+Tester -> Teststillas
+@enduml

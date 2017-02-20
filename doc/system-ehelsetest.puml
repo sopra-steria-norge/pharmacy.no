@@ -1,0 +1,55 @@
+
+@startuml
+
+title e-Helse test
+
+actor Tester
+interface FarmasøytApp <<opsjon>> #gray
+
+cloud Difa {
+    node TestGUI #lime
+    node LegemiddelSync #silver
+    node Reseptur #pink
+    node Resepthistorikk #lime
+    node Farmasøytisk #lime
+
+    database Legemidler #lime
+    database Resepter #lime
+    database Journal #lime
+
+    Reseptur -down-> Resepter
+    Reseptur -down-> Legemidler
+    Resepthistorikk -down-> Resepter
+    Farmasøytisk -down-> Journal
+}
+
+cloud DifaRapport {
+    node Rapport #silver
+    database RapportDB #silver
+
+    Rapport -down-> RapportDB
+}
+
+LegemiddelSync -down-> Legemidler
+
+Resepter -right-> RapportDB: Anonymisering
+
+Tester -down-> TestGUI
+FarmasøytApp -down-> Reseptur
+TestGUI -down-> Reseptur
+TestGUI -down-> Resepthistorikk
+TestGUI -down-> Farmasøytisk
+
+
+cloud NHN as "Norsk helsenett"
+
+package eHelse {
+    node RF
+    node HELFO
+    node KJ
+}
+
+Reseptur -> NHN
+NHN -down-> eHelse
+Tester -down-> eHelse
+@enduml

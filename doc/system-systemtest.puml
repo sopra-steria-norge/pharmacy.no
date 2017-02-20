@@ -1,0 +1,52 @@
+@startuml
+
+title Systemtest
+
+actor Tester
+interface FarmasøytApp <<opsjon>> #lime
+
+
+cloud Difa {
+    node TestGUI #lime
+    node Reseptur #lime
+    node Resepthistorikk #lime
+    node Farmasøytisk #lime
+
+    database Legemidler #lime
+    database Resepter #lime
+    database Journal #lime
+
+    Reseptur -down-> Resepter
+    Reseptur -down-> Legemidler
+    Resepthistorikk -down-> Resepter
+    Farmasøytisk -down-> Journal
+}
+
+cloud DifaRapport {
+    node Rapport #silver
+    database RapportDB #silver
+
+    Rapport -down-> RapportDB
+}
+
+
+Resepter -right-> RapportDB: Anonymisering
+
+Tester -> TestGUI
+Tester -> FarmasøytApp
+FarmasøytApp -down-> Reseptur
+TestGUI -down-> Reseptur
+TestGUI -down-> Resepthistorikk
+TestGUI -down-> Farmasøytisk
+
+package Teststillas {
+    node RF
+    node HELFO
+    node KJ
+}
+
+Reseptur -> Teststillas
+Teststillas -up-> Legemidler
+
+Tester -> Teststillas
+@enduml

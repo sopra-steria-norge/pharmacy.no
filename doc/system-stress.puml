@@ -1,0 +1,49 @@
+
+@startuml
+
+title Stresstestmiljø
+
+node TestRunner #yellow
+
+interface FarmasøytApp <<opsjon>> #lime
+
+cloud Difa {
+    node LegemiddelSync #silver
+    node Reseptur #pink
+    node Resepthistorikk #lime
+    node Farmasøytisk #lime
+
+    database Legemidler #lime
+    database Resepter #pink
+    database Journal #lime
+
+    Reseptur -down-> Resepter
+    Reseptur -down-> Legemidler
+    Resepthistorikk -down-> Resepter
+    Farmasøytisk -down-> Journal
+}
+
+cloud DifaRapport {
+    node Rapport #lime
+    database RapportDB #lime
+
+    Rapport -down-> RapportDB
+}
+
+
+Resepter -right-> RapportDB: Anonymisering
+
+FarmasøytApp -down-> Reseptur
+TestRunner -down-> Reseptur
+TestRunner -down-> Resepthistorikk
+TestRunner -down-> Farmasøytisk
+
+
+package Teststillas {
+    node RF <<simulator>>
+    node HELFO <<simulator>>
+}
+
+TestRunner -down-> Teststillas
+Reseptur -down-> Teststillas
+@enduml

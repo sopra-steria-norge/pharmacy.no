@@ -1,0 +1,65 @@
+
+@startuml
+
+title Systemarkitektur
+
+node Kjede #yellow
+node FHI
+node data.norge.no
+
+interface FarmasøytApp <<opsjon>> #lime
+
+cloud Difa {
+    node LegemiddelSync #lime
+    node Reseptur #lime
+    node Resepthistorikk #lime
+    node Farmasøytisk #lime
+
+    database Legemidler <<SQL Server>> #lime
+    database Resepter <<SQL Server>> #lime
+    database Journal <<SQL Server>> #lime
+
+    Reseptur -down-> Resepter
+    Reseptur -down-> Legemidler
+    Resepthistorikk -down-> Resepter
+    Farmasøytisk -down-> Journal
+}
+
+cloud DifaRapport {
+    node Rapport #lime
+    database RapportDB <<SQL Server>> #lime
+
+    Rapport -down-> RapportDB
+}
+
+node FarmaLogg #Aquamarine
+LegemiddelSync <-right- FarmaLogg
+LegemiddelSync -down-> Legemidler
+
+Resepter -right-> RapportDB: Anonymisering
+
+cloud NAN as "Norsk Apoteknett" #Aquamarine
+cloud Internet
+
+Kjede -down-> NAN
+FarmasøytApp -down-> NAN
+NAN -down-> Reseptur
+NAN -down-> Resepthistorikk
+NAN -down-> Farmasøytisk
+
+Kjede -down-> Internet
+FHI -down-> Internet
+data.norge.no -down-> Internet
+Internet -down-> Rapport
+
+cloud NHN as "Norsk helsenett"
+
+package eHelse {
+    node RF
+    node HELFO
+    node KJ
+}
+
+Reseptur -> NHN
+NHN -down-> eHelse
+@enduml

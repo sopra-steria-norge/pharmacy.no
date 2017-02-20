@@ -1,0 +1,73 @@
+
+@startuml
+
+title Produksjonsnoder
+
+node Kjede #yellow
+node FHI
+node data.norge.no
+
+interface FarmasøytApp <<opsjon>> #lime
+
+cloud Difa {
+    cloud Fet {
+        package DifaNodesFet {
+            node DifaNode1
+            node DifaNode2
+            node DifaNode3
+            node DifaNode4        
+        }
+        node LegemiddelSync
+        database difaDB1
+        DifaNodesFet -down-> difaDB1
+    }
+    cloud Ulven {
+        package DifaNodesUlven {
+            node DifaNode1B
+            node DifaNode2B
+            node DifaNode3B
+            node DifaNode4B
+        }
+        database difaDB2
+        DifaNodesUlven -down-> difaDB1
+    }
+    difaDB1 -> difaDB2: replikering
+
+    cloud DifaRapport {
+        node Rapport
+        database RapportDB
+        Rapport -down-> RapportDB
+    }
+}
+
+
+node FarmaLogg #Aquamarine
+LegemiddelSync <-right- FarmaLogg
+LegemiddelSync -down-> difaDB1
+
+difaDB2 -right-> RapportDB: Anonymisering
+
+cloud NAN as "Norsk Apoteknett" #Aquamarine
+cloud Internet
+
+Kjede -down-> NAN
+FarmasøytApp -down-> NAN
+NAN -down-> Difa
+
+Kjede -down-> Internet
+FHI -down-> Internet
+data.norge.no -down-> Internet
+Internet -down-> Rapport
+
+cloud NHN as "Norsk helsenett"
+
+package eHelse {
+    node RF
+    node HELFO
+    node KJ
+}
+
+DifaNodesFet -down-> NHN
+DifaNodesUlven -down-> NHN
+NHN -down-> eHelse
+@enduml
