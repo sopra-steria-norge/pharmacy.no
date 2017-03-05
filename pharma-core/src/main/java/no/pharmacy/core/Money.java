@@ -1,5 +1,7 @@
 package no.pharmacy.core;
 
+import java.math.BigDecimal;
+
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(of = "cents")
@@ -47,6 +49,14 @@ public class Money {
 
     public Money percent(int amount) {
         return new Money(cents*100/amount);
+    }
+
+    public static Money from(BigDecimal decimal) {
+        return decimal != null ? new Money(decimal.movePointRight(2).intValue()) : null;
+    }
+
+    public BigDecimal toBigDecimal() {
+        return new BigDecimal(cents / 100.0);
     }
 
 }

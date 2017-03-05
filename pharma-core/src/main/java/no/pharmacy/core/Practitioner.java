@@ -1,15 +1,19 @@
 package no.pharmacy.core;
 
+import lombok.Getter;
+import lombok.Setter;
+import no.pharmacy.order.Reference;
+
 public class Practitioner {
 
+    @Getter @Setter
     private long identifier;
 
-    public long getIdentifier() {
-        return identifier;
-    }
+    @Getter @Setter
+    private String name;
 
-    public void setIdentifier(long identifier) {
-        this.identifier = identifier;
+    public Reference getReference() {
+        return new Reference(String.valueOf(identifier), name);
     }
 
 }

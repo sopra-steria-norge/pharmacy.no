@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Reseptekspedering | pharmacy.no</title>
+</head>
+<body>
+
+	<script id="medicationOrderTemplate" type="template">
+	<div>
+		<h3 class='prescribedMedication'></h3>
+
+		<ol>
+			<li>Forskrevet av: <span class='prescriber'></span></li>
+			<li>Forskrevet dato: <span class='dateWritten'></span></li>
+		</ol>
+
+		<h4>Alternative legemidler</h4>
+
+		<ol class='alternativeMedications'></ol>
+	</div>
+	</script>
+
+
+	<form method="post">
+		<h2 id='patient'>Pasient: </h2>
+	
+		<div id="medicationOrders"></div>
+	</form>
+
+
+</body>
+</html>

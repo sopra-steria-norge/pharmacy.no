@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Reseptursøk | pharmacy.no</title>
+</head>
+<body>
+
+	<form>
+		<label>
+			Fødselsnummer
+			<input type="text" name="nationalId" placeholder="Fødselsnummer" />
+		</label>
+		<button>Search</button>
+	</form>
+
+	<form method="post">
+		<div id="results"></div>
+		
+		<button>Ekspeder</button>
+	</form>
+
+
+</body>
+</html>

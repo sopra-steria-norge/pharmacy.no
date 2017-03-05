@@ -124,6 +124,7 @@ public class RefundCalculationTest {
     private static Practitioner sampleDoctor() {
         Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier(randomId());
+        practitioner.setName("Random J Doctor");
         return practitioner;
     }
 
@@ -133,7 +134,7 @@ public class RefundCalculationTest {
 
     private static MedicationOrder sampleMedicationOrder(Practitioner prescriber, LocalDate dateWritten, Medication medication) {
         MedicationOrder medicationOrder = new MedicationOrder();
-        medicationOrder.setPrescriber(prescriber);
+        medicationOrder.setPrescriber(prescriber.getReference());
         medicationOrder.setDateWritten(dateWritten);
         medicationOrder.setMedication(medication);
         return medicationOrder;
