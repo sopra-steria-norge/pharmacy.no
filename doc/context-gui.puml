@@ -1,0 +1,39 @@
+@startuml
+
+actor Pasient
+actor Apotektekniker
+actor Farmasøyt
+actor Lege
+
+package Kjede {
+    node POS #lime
+    node ERP #lime
+}
+
+node DifaGUI #limegreen
+node Difa #limegreen
+
+node RF #pink
+node EPJ #yellow
+node HELFO #yellow
+
+
+Pasient <-down-> Lege
+Lege -right-> EPJ: Resept
+EPJ -right-> RF: Resept
+Pasient <-right-> Apotektekniker
+Apotektekniker -down-> DifaGUI
+Apotektekniker -down-> POS
+Farmasøyt -down-> DifaGUI
+
+Difa <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
+Difa <-down-> HELFO: M18, M22, M23
+
+DifaGUI -down-> Difa
+DifaGUI -down-> ERP: Priser og beholdning
+ERP <-left- POS
+DifaGUI -down-> POS: Betaling
+POS -down-> Difa: Utlevering
+
+
+@enduml

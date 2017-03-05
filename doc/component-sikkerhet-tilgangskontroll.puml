@@ -1,0 +1,44 @@
+@startuml
+
+box "Kjede"
+    actor Bruker
+    actor Kjedesystem
+    actor Directory
+end box
+
+box "Difa"
+    participant DifaTjeneste
+    participant Tilgangskontroll
+    database HPR as "HPR-DB"
+end box
+
+participant HDIR
+
+HDIR -> HPR: Oppdatert\nhelsepersonellregister
+...
+Bruker -> Kjedesystem: Utfør operasjon
+Bruker <-- Kjedesystem: Krever pålogging
+Bruker -> Directory: Logg på
+Bruker <-- Directory
+Bruker -> Kjedesystem: Utfør operasjon
+activate Kjedesystem
+    Kjedesystem -> DifaTjeneste: Tjenestekall med access token
+    activate DifaTjeneste
+    note left of DifaTjeneste: token er en signert JSON payload
+        DifaTjeneste -> Tilgangskontroll: Autoriser bruker
+        activate Tilgangskontroll
+        Tilgangskontroll -> Directory: <<cached>> Hent kjedesertifikat
+        Tilgangskontroll -> Tilgangskontroll: Verifiser token signatur
+        Tilgangskontroll -> Tilgangskontroll: Hent HPR nr fra token (+ roller)
+        Tilgangskontroll -> HPR: HPR nummer
+        Tilgangskontroll <-- HPR: Autorisasjon (eks "farmasøyt")
+        Tilgangskontroll -> Tilgangskontroll: Avgjør tilgang
+        DifaTjeneste <-- Tilgangskontroll
+        deactivate Tilgangskontroll
+    DifaTjeneste -> DifaTjeneste: utfør operasjon
+    Kjedesystem <-- DifaTjeneste
+    deactivate DifaTjeneste
+Bruker <-- Kjedesystem
+deactivate Kjedesystem
+
+@enduml

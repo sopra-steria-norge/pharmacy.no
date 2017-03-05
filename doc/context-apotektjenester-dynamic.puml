@@ -1,0 +1,34 @@
+@startuml
+
+title Inhalasjonsveiledning
+
+actor Apotektekniker
+participant POS
+participant Difa
+participant HELFO
+
+
+group Dialog med Kjede POS
+Apotektekniker -> POS: Velger Inhalasjonsveiledning
+Apotektekniker <-- POS: Redirect
+end group
+group Dialog med Difa
+Apotektekniker -> Difa: Vis Personsøk skjema
+Apotektekniker -> Difa: Angi person (fødselsnummer eller navn + fødselsdato)
+Apotektekniker <-- Difa: Vis instrukser for behandlingen
+Apotektekniker -> Difa: Angi informasjon om behandlingen (eks: antall repetisjoner)
+Apotektekniker -> Difa: Fullfør behandling
+activate Difa
+Difa -> Difa: Journalføre behandling
+Difa -> Difa: Beregne refusjon og egenandel
+Difa -> HELFO: Refusjonskrav
+Apotektekniker <-- Difa: Redirect med varenummer og egenandel
+deactivate Difa
+end group
+group Dialog med Kjede POS
+Apotektekniker -> POS: Legg til egenandel i handlekurv
+Apotektekniker <-> POS: Vis oppgjørsgrunnlag
+Apotektekniker <-> POS: Fullfør salg
+end group
+
+

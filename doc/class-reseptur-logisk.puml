@@ -1,0 +1,46 @@
+@startuml
+
+class Patient
+
+class MedicationOrderList
+
+class MedicationOrder {
+    productName OR
+    packagingId OR
+    atc + dosage
+}
+
+class MedicationOrderWarning {
+    interactionWarning
+    newMedication
+    changedDosage
+    highDosage
+    doubleOrder
+    polypharmacy
+}
+
+class Medication
+
+class Practitioner
+
+class MedicationDispense {
+    quantity
+    scannedPackaging
+    scannedLabel    
+}
+
+class MedicationDispenseAction
+
+Patient -down- MedicationOrderList
+MedicationOrderList -right- "*" MedicationOrder
+MedicationOrder -up- Practitioner
+MedicationOrder -down- MedicationOrderWarning
+MedicationOrder -right- MedicationDispense
+MedicationDispense -down- MedicationDispenseAction
+MedicationOrderWarning -right- MedicationDispenseAction
+
+MedicationOrder -up- "*" Medication: alternatives
+MedicationDispense -up- Medication
+MedicationDispense -up- Practitioner
+
+@enduml

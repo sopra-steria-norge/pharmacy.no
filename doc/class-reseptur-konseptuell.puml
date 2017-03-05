@@ -1,0 +1,44 @@
+@startuml
+
+class Pasient
+
+class ReseptListe
+
+class Resept {
+    produktnavn ELLER
+    pakning OR
+    virkestoffMedStyrke
+}
+
+class ReseptVarsel {
+    interaksjonsvarsel
+    nyttLegemiddel
+    endretDosering
+    høyDosering
+    polyfarmasi
+    dobbelforskrivning
+}
+
+class Legemiddel
+
+class Helseperson
+
+class Reseptutlevering
+
+class ReseptutleveringAksjon
+
+Pasient -down- ReseptListe
+ReseptListe -right- "*" Resept
+Resept -up- Helseperson
+Resept -down- ReseptVarsel
+Resept -right- Reseptutlevering
+Reseptutlevering -down- ReseptutleveringAksjon
+ReseptVarsel -right- ReseptutleveringAksjon
+
+Resept -up- "*" Legemiddel: alternativer
+Reseptutlevering -up- Legemiddel
+Reseptutlevering -up- Helseperson
+
+hide empty members
+hide methods
+@enduml

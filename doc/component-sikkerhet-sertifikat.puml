@@ -1,0 +1,44 @@
+@startuml
+
+box "Apotek"
+    actor Apoteksjef
+    actor Farmasøyt
+end box
+
+actor Buypass
+
+box "Difa"
+    participant DifaGUI
+    database db
+    database HSM
+end box
+
+participant eHelse
+
+== registrere serifikat ==
+DifaGUI -> Apoteksjef: Varsel om nytt sertifikatbehov
+Buypass -> Apoteksjef: Sertifikat, nøkkel, passord
+Apoteksjef -> DifaGUI: Registrere sertifikat, passord
+activate DifaGUI
+DifaGUI -> HSM: Sertifikat
+DifaGUI -> db: Sertifikatpassord
+Apoteksjef <-- DifaGUI
+deactivate DifaGUI
+...
+
+== Bruke sertifikat ==
+Farmasøyt -> DifaGUI: Registrer utlevering
+activate DifaGUI
+DifaGUI -> DifaGUI: Generere M10
+DifaGUI -> DifaGUI: Signere M10
+activate DifaGUI
+DifaGUI -> db: Hent passord
+DifaGUI -> HSM: M10 hash + passord
+DifaGUI <-- HSM: Signatur
+DifaGUI --> DifaGUI
+deactivate DifaGUI
+DifaGUI -> eHelse: Signert Utleveringsmelding (M10)
+Farmasøyt <-- DifaGUI
+deactivate DifaGUI
+
+@enduml

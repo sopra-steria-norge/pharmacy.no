@@ -1,0 +1,30 @@
+@startuml
+
+actor ApotekA as "Kjede A"
+actor ApotekB as "Kjede B"
+
+node POS #lime
+node ERP #lime
+node Difa #limegreen
+node RF #pink
+node Farmalogg #yellow
+node SLV #yellow
+node HELFO #yellow
+node Nettapotek #lime
+node Multidose #lime
+node FarmaPro <<bro>> #pink
+
+ApotekA -down-> POS
+POS -down-> Difa
+POS -left-> ERP
+Nettapotek -down-> Difa
+Multidose -down-> Difa
+ApotekB -down-> FarmaPro
+FarmaPro -down-> Difa
+Difa <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
+Difa <-right- Farmalogg
+Farmalogg <-down- SLV: FEST
+Difa <-down-> HELFO: M18, M22, M23
+
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+
+actor Pasient
+
+box "Kjede"
+    participant POS
+    participant Økonomisystem
+end box
+
+box "Difa"
+    participant "Difa"
+end box
+
+participant HELFO
+
+POS -> Difa: Register utlevering med strekkoder
+activate Difa
+...
+Difa -> HELFO: Send refusjonskrav (M18)
+POS <-- Difa: OK/feilkoder
+deactivate Difa
+POS -> Økonomisystem: Registrer fordring
+
+== Økonomisystem holder seg periodisk oppdatert med status på fordringer ==
+Økonomisystem -> Difa: Status på fordringer
+Økonomisystem <-- Difa: Ikke bekreftet
+...
+HELFO -> Difa: Oppgjørsresultat (M22)
+Økonomisystem -> Difa: Status på fordringer
+Økonomisystem <-- Difa: Bekreftet
+...
+HELFO -> Difa: Utbetalingsmelding (M23)
+Økonomisystem -> Difa: Status på fordringer
+Økonomisystem <-- Difa: Betalt
+...
+
+@enduml

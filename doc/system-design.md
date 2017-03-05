@@ -1,6 +1,10 @@
 
 ## Overordnet systemskisse
 
+Her er jo litt tekst da.
+
+Og jeg kan skrive litt mer.
+
 ![Systemkart](system.png)
 
 
