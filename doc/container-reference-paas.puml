@@ -1,0 +1,52 @@
+@startuml
+
+cloud External
+
+cloud Datasenter {
+    cloud HAProxy
+    External -down-> HAProxy
+
+    cloud Applikasjonsnoder {
+        node Docker3 {
+            node JVM3 {
+                component Jetty3 {
+                    component App3 as "applikasjon"
+                }
+            }
+        }
+        node Docker2 {
+            node JVM2 {
+                component Jetty2 {
+                    component App2 as "applikasjon"
+                }
+            }
+        }
+        node Docker1 {
+            node JVM1 {
+                component Jetty1 {
+                    component App1 as "applikasjon"
+                }
+            }
+        }
+
+        HAProxy -down-> Jetty1
+        HAProxy -down-> Jetty2
+        HAProxy -down-> Jetty3
+    }
+
+    database PostgreSQL
+    App3 -down-> PostgreSQL
+    App2 -down-> PostgreSQL
+    App1 -down-> PostgreSQL
+
+    database WarmStandby
+    PostgreSQL -left-> WarmStandby: WAL
+}
+node Kubernetes
+
+Kubernetes -up-> Docker1
+Kubernetes -up-> Docker2
+Kubernetes -up-> Docker3
+
+
+@enduml

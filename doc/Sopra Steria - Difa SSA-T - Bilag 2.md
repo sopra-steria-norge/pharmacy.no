@@ -20,6 +20,12 @@ En utkast til en fullstendig produkt backlog ligger vedlagt.
 
 ## Begrepsmodell
 
+Følgende figur illustrerer de viktigste begrepene i DIFA og hvordan de henger sammen. I grensesnittet mellom kjedesystemene og bransjesystemet ser vi for oss at disse begrepene har engelske navn med utgangspunkt i HL7-standarder. (Se systemdesign for detaljer)
+
+Et viktig poeng med DIFA er at man dokumenterer aksjonene som ble tatt basert på farmasøytiske varsler. Modellen må også synliggjøre de legemidlene som resepten kan utleveres for (byttegruppe mm).
+
+Det mest uventede begrepet i modellen har vi i mangel på et bedre navn kallt "ReseptBunke". Alle resepter forskrevet av samme lege på samme dato inngår i samme "bunke". Reseptformidleren behandler dem under ett for en egenandelsperiode og DIFA må være bevisst på at en resept under ekspedering i en bunke kan skape krøll med egenandelen andre resepter i bunken. (Blåreseptforskriften § 8)
+
 ![Begrepsmodell](images/class-reseptur-konseptuell.png)
 
 ## Funksjonell flyt reseptur
@@ -49,9 +55,9 @@ En utkast til en fullstendig produkt backlog ligger vedlagt.
 * Nødekspedering: Farmasøyt oppføres som rekvirent?
 * Pasient ekspederer resept via nettapotek (fullstendig scenario)
 * Multidose-apotek ekspederer legemidler i bruk for pasient (fullstendig scenario)
-* Pasient returnerer vare for kredittering (fullstendig scenario)
+* Pasient returnerer vare for kredittering: M10 og M18 med negative beløp og antall skal generes. Egenandel på M10 for perioden må reduseres.
 * Apotektekniker benytter Difa GUI for resepthåndtering (fullstendig scenario)
-* Vetrinærresept
+* Vetrinærresept - lagringstid. Sterk identifisert person kun ved A/B resept. Papirresept (system innenfor langsiktig målbilde)
 * Legen sender eksepederingsanmodning til et spesifikt apotek
 
 
@@ -75,8 +81,8 @@ En utkast til en fullstendig produkt backlog ligger vedlagt.
     n. Arbeidspris (Rundskriv 7/2008 fra Legemiddelverket (pkt. 6)) - gjelder LAR?
     o. Andre refusjonsinstanser enn NAV (jernbaneverket)
     p. Yrkesskade ?? paragraf 5-25, brystproteser
-    q. H-resept - betales av helseforetakene ("men kan brukes utenfor sykehus")
-    r. 
+    q. H-resept - betales av helseforetakene ("men kan brukes utenfor sykehus") - separat M18 hele
+    r. Verneplikt - dekke egentandel
 3. Pasienten kan nå motta legemidlene og forlate apoteket
 4. HELFO sender oppgjørsresultat når kravet er validert (typisk noen få minutter)
     * Unntak: Dersom HELFO avviser kravet kan apotekmedarbeider korrigere kravet og sende på nytt
@@ -107,6 +113,17 @@ En utkast til en fullstendig produkt backlog ligger vedlagt.
 
 ## Rapporter
 
+Alle rapporteringsgrensesnitt må renses for personlig identifiserbar informasjon. Personopplysningsloven § 27 og pasientjournalloven § 18 forutsetter at pasienten skal ha anledning til å rette og slette personopplysninger. En konsekvens av dette er at alle kopier av personopplysningene må rettes eller slettes. Dette blir umulig i praksis dersom informasjonen har inngått i rapporteringsgrunnlag.
+
+1. Difa overfører periodisk grunnlag der personopplysninger er fjernet til rapporteringsdatabase
+2. System som bruker rapporterte data henter ned rapporter etter eget behov
+    * Systemet autentiseres med en oauth2 bearer token fra kjedes AD (eller tilsvarende)
+    * Systemet autoriseres basert på systemets rolle (tildelt fra kjede)
+    * Systemet kan spesifisere at kun data etter et gitt tidspunkt skal returneres
+3. Difa sender rapporter på email periodisk til mottakere som har behov for dette
+
+Rapportene vil være på maskinlesbare formater.
+
 * Folkehelseinstituttet, Rapport
 * Folkehelseinstituttet, Rapport
 * Mattilsynet, Rapport
@@ -124,6 +141,24 @@ En utkast til en fullstendig produkt backlog ligger vedlagt.
 
 ## Krav til tjenesten Difa
 
+### Pasientjournal
+
+Både resepthistorikk og journal for farmasøytiske tjenester er underlagt Pasientjournallovens § 3.Saklig virkeområde: Loven gjelder all behandling av helseopplysninger som er nødvendig for å yte, administrere eller kvalitetssikre helsehjelp til enkeltpersoner. [Merk imidlertid Pasientjournalforskriften § 2.(Unntak for apotek)]
+
+Disse journalene inneholder også personlig identifiserbar informasjon og vil dermed være underlagt Personvernforordningen (som erstatter ditto lov, forskrift og direktiv).
+
+Disse to regelsettene er i stor grad overlappende og innebærer en del funksjonalitet og aktiviteter som vil inngå i prosjektplanen:
+
+* All tilgang til journalene skal loggføres (pasientjournalloven § 16.Forbud mot urettmessig tilegnelse av helseopplysninger)
+* Når en bruker slår opp pasientopplysninger skal DIFA kreve at brukeren registrerer årsaken til oppslaget samt legitimasjon for den som forespurte oppslaget om relevant
+* Bruker med relevant autorisasjon skal ettergå tilgangslogg
+* Pasienter må kunne få utlevert medisiner uten å bli registrert (pasientjournalloven § 17. Rett til å motsette seg behandling av helseopplysninger)
+* Bruker med relevant autorisasjon kan ta ut all informasjon om en pasient på pasientens forespørsel (pasientjournalloven § 18. Informasjon og innsyn)
+* Bruker med relevant autorisasjon kan rette og sperre informasjon om en pasient på pasientens forespørsel (personopplysningsloven § 27. Retting av mangelfulle personopplysninger)
+* Som en del av målbilde bør DIFA avlevere informasjon om en pasient til helsenorge.no slik at pasienten kan være selvbetjent på innsyn (pasientjournalloven § 18.Informasjon og innsyn)
+
+
+
 ### Versjonshåndtering
 
 (NB: Reseptformidleren) - foreslå endring
@@ -132,16 +167,12 @@ En utkast til en fullstendig produkt backlog ligger vedlagt.
 
 ### Etterlevelse av lover og regler
 
-Spesielt viktig er pasientjournalloven. Pasientjournalforskriften § 10.(Personvern) sier videre "Dokumentasjon skal behandles i samsvar med reglene i og i medhold av personopplysningsloven". I tillegg bestemmer helsepersonelloven brukernes forpliktelser og apotekloven legger rammer for hvilken informasjon apoteker har hjemmel for å oppbevare og benytte.
 
 Dette gir opphav i følgende omfang:
 
-* Tilgangslogg (pasientjournalloven): Vil bli implementert i form av rapporteringsfunksjonalitet
 * Tilgangsstyring (helsepersonelloven § 48): Apotekkjedene vil være ansvarlig for sikker og korrekt *identifisering* av bruker opp og angivelse av HPR nr. Bransjeløsning vil være ansvarlig for rettighetskontroll, spesielt opp mot Helsepersonalregisteret.
-* Sikker oppbevaring av data (apotekloven, personopplysningsloven): Oppbevaring i EU (personopplysningsloven § 29). Sikkerhetstiltak ihht personopplysningsloven § 13. Opplysning vil når mulig lagres i kryptert form. Alle datalagre vil være beskyttet med autentiseringmekanismer og systempassord vil oppbevares ihttp Normen faktaark 31. Kryptografiske nøkler vil lagres i kryptert form med en opsjon for Hardware Security Module (HSM)
-* Innsyn, korreksjon og sletting av pasientdata (pasientrettighetsloven kapittel 5) vil implementes via eksport til helsenorge.no.
+* Sikker oppbevaring av data (apotekloven, personopplysningsloven): Oppbevaring i EU (personopplysningsloven § 29). Sikkerhetstiltak ihht personopplysningsloven § 13. Opplysning vil når mulig lagres i kryptert form (OWASP ASVS 7.29). Alle datalagre vil være beskyttet med autentiseringmekanismer og systempassord vil oppbevares ihttp Normen faktaark 31. Kryptografiske nøkler vil lagres i kryptert form med en opsjon for Hardware Security Module (HSM)
 
-Forskrift om pasientjournal, § 2.(Unntak for apotek)! Helsejournalloven paragraf 9
 
 ### Vedlikehold og oppdatering:
 
@@ -225,6 +256,21 @@ Målepunkt per apotek eller for et kontaktpunkt.
 
 
 ## Aktiviteter
+
+Basert på leverandørens erfaring fra Helsedirektoratets Fastlegeprosjekt vil vi innføre sterke prosjektmessige føringer for å hyppige produksjonssettinger, høy kvalitet og enkle løsninger.
+
+Prosjektets målsetning er *ukentlige produksjonsetting*. Det er da snakk om tekniske produksjonssettinger. Funksjonelle leveranser vil gjerne foregå med en lavere frekvens.
+
+For å oppnå ukentlige produksjonssettinger, foreslår vi følgende prinsipper:
+
+* Produksjonsett raskest mulig
+* Velg de enkle løsningene; utsett unødvendige avgjørelser
+* Endring er helt naturlig
+* Automatiser det som kan automatiseres
+* Fokuser på kvalitet
+
+Disse prinsippene vil være nyttige for å prioritere hensyn underveis i prosjektet.
+
 
 ### Oppfølgning
 
@@ -331,6 +377,11 @@ Miljøene i denne beskrivelsen utgjør Bilag 1 for SSA-D avtalen for Difa. Ytter
 
 ![Produksjonsmiljø](images/system-prod.png)
 
+### Platform-as-a-Service (PaaS konsept)
+
+![Produksjonsmiljø](images/container-reference-paas.png)
+
+
 ### Testmiljøer
 
 ![System og utviklingstest](images/container-test.png)
@@ -349,7 +400,9 @@ Miljøene i denne beskrivelsen utgjør Bilag 1 for SSA-D avtalen for Difa. Ytter
 
 ![Brukergrensesnitt som benytter kjedesystem](images/container-gui-kjede-API.png)
 
-NB: Kjedesystemet må også returnere lagerplassering dersom Difa skal vise det.
+### Brukergrensesnitt - opsjon: GUI som benytter kjedesystem
+
+![GUI for kjede uten opsjon](images/container-gui-kjede-noAPI.png)
 
 
 ## Component (Plattform & Teknologi)
@@ -378,5 +431,3 @@ NB: Kjedesystemet må også returnere lagerplassering dersom Difa skal vise det.
 
 
 SWAGGER.IO for dok og test
-
-Ukentlig produksjonssetting etter malen til Helsedir for Fastlegeordningen

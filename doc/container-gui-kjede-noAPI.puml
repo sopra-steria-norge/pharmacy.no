@@ -1,0 +1,56 @@
+@startuml
+
+title Difa GUI i "toskjermmodus"
+
+actor Apotektekniker
+actor Farmasøyt
+box "Kjede"
+    participant POS #silver
+    participant Varesystem #silver
+end box
+box " Difa"
+  participant DifaGUI
+participant Difa
+end box
+
+Apotektekniker -> POS: Velger hent resept
+Apotektekniker <-- POS: Redirect
+group Dialog med Difa
+Apotektekniker -> DifaGUI: Vis Personsøk skjema
+Apotektekniker -> DifaGUI: Angi person (fødselsnummer eller navn + fødselsdato)
+Apotektekniker <-- DifaGUI: Vis resepter
+Apotektekniker -> DifaGUI: Velg resept
+activate DifaGUI
+DifaGUI-> Difa: Hent resept 
+Difa -> Difa: Hent varer i byttegruppe
+Difa -> Difa: Påfør informasjon og varsler
+DifaGUI <-- Difa
+note over Varesystem : Brukerens kjede har ikke integrasjon fra Difa GUI
+DifaGUI-> Varesystem: <strike>Pris og beholdning
+Apotektekniker <--DifaGUI: <color red>Varsler, byttealternativer <b>uten</b> priser, beholdning
+deactivate DifaGUI
+Apotektekniker -> DifaGUI: <color red>Velg legemiddel, <b>angi pris
+Apotektekniker <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
+note right of Apotektekniker: Difa GUI åpner nettlesers print-dialog
+Apotektekniker -> Apotektekniker: Skriv reseptetikett
+Apotektekniker -> DifaGUI: Skriver inn GTIN og etikettnummer
+note right of Apotektekniker: Eller strekkodescanner i tastaturmodus
+DifaGUI -> Difa: Teknisk kontroll
+Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasikontroll"
+Farmasøyt -> DifaGUI: Vis resepter klar til farmasøytisk kontroll
+Farmasøyt -> DifaGUI: Utfør farmasikontroll
+Apotektekniker <- Farmasøyt: "Vær så god"
+Apotektekniker -> DifaGUI: Utlever
+activate DifaGUI
+note over Varesystem : Brukerens kjede har ikke integrasjon fra Difa GUI
+DifaGUI -> POS: <strike>Sett reseptkurv i kasse (erstatte)
+Apotektekniker <-- DifaGUI: Vis signaturpad
+deactivate DifaGUI
+note right of Apotektekniker: Last opp fil fra signatur pad eller bruk f.eks.\nhttps://github.com/szimek/signature_pad
+Apotektekniker -> DifaGUI: <color red>Registrer pasient signatur og bekreft betaling
+activate DifaGUI
+DifaGUI -> Difa: <color red>Fullfør utlevering
+Apotektekniker <-- DifaGUI
+deactivate DifaGUI
+
+@enduml

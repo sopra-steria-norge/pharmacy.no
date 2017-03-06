@@ -10,6 +10,11 @@ class Resept {
     virkestoffMedStyrke
 }
 
+class ReseptBunke {
+    forskrivningsdato
+    egenandelsperioder
+}
+
 class ReseptVarsel {
     interaksjonsvarsel
     nyttLegemiddel
@@ -25,19 +30,24 @@ class Helseperson
 
 class Reseptutlevering
 
-class ReseptutleveringAksjon
+class ReseptutleveringAksjon {
+    kontaktet_lege j/n
+    informert pasient j/n
+    notat
+}
 
 Pasient -down- ReseptListe
 ReseptListe -right- "*" Resept
-Resept -up- Helseperson
-Resept -down- ReseptVarsel
+ReseptBunke -up- Helseperson: lege
+Resept "*" -up- ReseptBunke
+Resept -down- "*" ReseptVarsel
 Resept -right- Reseptutlevering
 Reseptutlevering -down- ReseptutleveringAksjon
 ReseptVarsel -right- ReseptutleveringAksjon
 
 Resept -up- "*" Legemiddel: alternativer
 Reseptutlevering -up- Legemiddel
-Reseptutlevering -up- Helseperson
+Reseptutlevering -up- Helseperson: farmasøyt
 
 hide empty members
 hide methods
