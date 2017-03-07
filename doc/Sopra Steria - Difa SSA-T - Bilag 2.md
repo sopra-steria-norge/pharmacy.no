@@ -222,7 +222,7 @@ Målepunkt per apotek eller for et kontaktpunkt.
 
 #### Steg 4a: FarmaPro bro + enkelte kjeder på ny POS
 
-#### Steg 3b, 4b: Enkelte kjeder på ny POS
+#### Steg 3b, 4b: Enkelte kjeder på ny POS (tilhører SSA-V)
 
 #### Steg 5: Alle kjeder på ny POS
 
