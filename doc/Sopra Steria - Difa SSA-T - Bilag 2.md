@@ -111,6 +111,22 @@ Det mest uventede begrepet i modellen har vi i mangel på et bedre navn kallt "R
 8. Systemet registrerer refusjonskrav mot HELFO
     * Refusjonskravet kan være avhengig av detaljer om tjenesten. For eksempel, fra LAR: Overvåket inntak av flytende metadon har en sats på 36,75 kr, mens buprenorfin tabletter har 98 kr
 
+## Pasientjournal
+
+Både resepthistorikk og journal for farmasøytiske tjenester er underlagt Pasientjournallovens § 3.Saklig virkeområde: "Loven gjelder all behandling av helseopplysninger som er nødvendig for å yte, administrere eller kvalitetssikre helsehjelp til enkeltpersoner." [Merk imidlertid Pasientjournalforskriften § 2.(Unntak for apotek)]
+
+Disse journalene inneholder også personlig identifiserbar informasjon og vil dermed være underlagt Personvernforordningen (som erstatter ditto lov, forskrift og direktiv).
+
+Disse to regelsettene er i stor grad overlappende og innebærer en del funksjonalitet og aktiviteter som vil inngå i prosjektplanen:
+
+* All tilgang til journalene skal loggføres (pasientjournalloven § 16.Forbud mot urettmessig tilegnelse av helseopplysninger)
+* Når en bruker slår opp pasientopplysninger skal DIFA kreve at brukeren registrerer årsaken til oppslaget samt legitimasjon for den som forespurte oppslaget om relevant
+* Bruker med relevant autorisasjon skal ettergå tilgangslogg
+* Pasienter må kunne få utlevert medisiner uten å bli registrert (pasientjournalloven § 17. Rett til å motsette seg behandling av helseopplysninger)
+* Bruker med relevant autorisasjon kan ta ut all informasjon om en pasient på pasientens forespørsel (pasientjournalloven § 18. Informasjon og innsyn)
+* Bruker med relevant autorisasjon kan rette og sperre informasjon om en pasient på pasientens forespørsel (personopplysningsloven § 27. Retting av mangelfulle personopplysninger)
+* Som en del av målbilde bør DIFA avlevere informasjon om en pasient til helsenorge.no slik at pasienten kan være selvbetjent på innsyn (pasientjournalloven § 18.Informasjon og innsyn)
+
 ## Rapporter
 
 Alle rapporteringsgrensesnitt må renses for personlig identifiserbar informasjon. Personopplysningsloven § 27 og pasientjournalloven § 18 forutsetter at pasienten skal ha anledning til å rette og slette personopplysninger. En konsekvens av dette er at alle kopier av personopplysningene må rettes eller slettes. Dette blir umulig i praksis dersom informasjonen har inngått i rapporteringsgrunnlag.
@@ -141,21 +157,7 @@ Rapportene vil være på maskinlesbare formater.
 
 ## Krav til tjenesten Difa
 
-### Pasientjournal
 
-Både resepthistorikk og journal for farmasøytiske tjenester er underlagt Pasientjournallovens § 3.Saklig virkeområde: Loven gjelder all behandling av helseopplysninger som er nødvendig for å yte, administrere eller kvalitetssikre helsehjelp til enkeltpersoner. [Merk imidlertid Pasientjournalforskriften § 2.(Unntak for apotek)]
-
-Disse journalene inneholder også personlig identifiserbar informasjon og vil dermed være underlagt Personvernforordningen (som erstatter ditto lov, forskrift og direktiv).
-
-Disse to regelsettene er i stor grad overlappende og innebærer en del funksjonalitet og aktiviteter som vil inngå i prosjektplanen:
-
-* All tilgang til journalene skal loggføres (pasientjournalloven § 16.Forbud mot urettmessig tilegnelse av helseopplysninger)
-* Når en bruker slår opp pasientopplysninger skal DIFA kreve at brukeren registrerer årsaken til oppslaget samt legitimasjon for den som forespurte oppslaget om relevant
-* Bruker med relevant autorisasjon skal ettergå tilgangslogg
-* Pasienter må kunne få utlevert medisiner uten å bli registrert (pasientjournalloven § 17. Rett til å motsette seg behandling av helseopplysninger)
-* Bruker med relevant autorisasjon kan ta ut all informasjon om en pasient på pasientens forespørsel (pasientjournalloven § 18. Informasjon og innsyn)
-* Bruker med relevant autorisasjon kan rette og sperre informasjon om en pasient på pasientens forespørsel (personopplysningsloven § 27. Retting av mangelfulle personopplysninger)
-* Som en del av målbilde bør DIFA avlevere informasjon om en pasient til helsenorge.no slik at pasienten kan være selvbetjent på innsyn (pasientjournalloven § 18.Informasjon og innsyn)
 
 ### Testbarhet
 
@@ -181,7 +183,10 @@ Dette gir opphav i følgende omfang:
 * Systemet må kunne oppdatere lister over produkter som er godkjent for refusjon
 * Ved versjonendringer skal Difa så langt det er mulig støtte bakoverkompabilitet.
 * Dersom kommende endringer i Reseptformidleren krever ikke-bakoverkompatible endringer i Difa vil Difa gjøre det mulig å utføre endringer i kjedesystemene _før_ endringene trer i kraft i Reseptformidlere for å gi kjedene fleksibilitet
+* Systemadministrator og systemeier skal kunne se på statistikk over alle tjenestekall per tjeneste og aggregert på tjenesteområder. Statistikken skal inneholde bruksfrekvens og responstidstatistikk. Statistikk skal kunne vises med oppløsning på månedsnivå og dagsnivå.
 
+
+OWASP ASVS
 
 ## Utfordrende områder
 
@@ -228,16 +233,16 @@ Hvert funksjonelle omfang har en utviklingsfase med tilhørende spesifiseringsak
 
 #### Steg 1: Testbart API
 
-Det testbare API'et vil la apotekene teste sine POS systemer mot et API i et simulert, ikke-personsensitivt miljø der Reseptformidleren og HELFO er erstattet med simulatorer.
+Det testbare API'et vil la apotekene teste sine POS systemer mot et API i et simulert, ikke-personsensitivt miljø der Reseptformidleren og HELFO er erstattet med simulatorer. API'et vil også leveres med et enkelt GUI som vil inkludere integrasjon med kjedenes brukersystemer (Active Directory).
 
 Ved å levere et versjon som ikke behandler personsensitiv informasjon i produksjonsmiljøet først vil vi sette opp et produksjonsklart miljø uten risiko på brudd på regelverk.
 
 
 #### Steg 2: Farmasøytiske tjenester
 
-Med farmasøytiske tjenester kan apotekene registrere medisinstart, LAR og inhaleringsveiledning, kreve refusjon fra HELFO, følge opp refusjonskrav og oppfylle minimumskrav i pasientjournalloven og personvernforordningen. Løsningen vil inkludere et brukergrensesnitt for å registrere farmasøytiske tjenester.
+Med farmasøytiske tjenester kan apotekene registrere medisinstart, LAR og inhaleringsveiledning, kreve refusjon fra HELFO, følge opp refusjonskrav og oppfylle minimumskrav i pasientjournalloven og personvernforordningen. Løsningen vil inkludere et brukergrensesnitt for å registrere farmasøytiske tjenester som autentiseres med kjedes brukersystemer.
 
-Versjonen vil inkludere viktige sikkerhetsmekanismer som vil understøtte resepturflyten: Sertifikathåndtering i kommunikasjonen mot HELFO (M18) og nødvendige sikkerhetsmekanismer for å understøtte dette (HSM). Versjonen vil også inkludere integrasjon med kjedenes brukersystemer (Active Directory).
+Versjonen vil inkludere viktige sikkerhetsmekanismer som vil understøtte resepturflyten: Sertifikathåndtering i kommunikasjonen mot HELFO (M18) og nødvendige sikkerhetsmekanismer for å understøtte dette (HSM).
 
 Denne leveransen er ment til å tas i bruk av apotekene. Dette er en leveranse med lav risiko: Dersom noe ikke skal være av tilstrekkelig kvalitet kan apotekene benytte eksisterende løsninger for å registrere og kreve refusjon for relevante farmasøytiske tjenester. Det vil antageligvis være hensiktmessig å ta i bruk kun én farmasøytisk tjeneste den første måneden etter leveranse.
 
@@ -313,17 +318,60 @@ For å oppnå ukentlige produksjonssettinger, foreslår vi følgende prinsipper:
 Disse prinsippene vil være nyttige for å prioritere hensyn rundt planlegging, krav, arkitektur, utvikling, testing og leveranser underveis i prosjektet.
 
 
-### Oppfølgning
+### Prosjektets eksterne takt
 
-* Bygg med Jenkins (eller TFS?), 80%+ enhetstestdekning
-* Kildekodekontroll med Git
-* Issue tracking i TFS
+Vi forventer at det funksjonelle omfanget til prosjektet kommer til å være omforent ved prosjektets start. De mest sentrale oppgavene kommer også til å være de facto detaljspesifisert gjennom grensesnittbeskrivelser fra eHelse og lovmessige bestemmelser. Prosjektet vil derfor starte å ferdigstille funksjonalitet i et miljø som gradvis vil bli mer produksjonsklart med ukentlig frekvens.
 
-### Strukturerte, dialogbaserte møteplasser
+Hver uke vil prosjektet avholde en times minidemo der Apotekforeningen og alle prosjektmedlemmer forventes å være til stede. Hver måned, med start etter én måned, vil det tilsvarende avholdes en mer formell demo der apotekkjedene også er invitert til å stille.
 
-* Samlokalisering med domeneeksperter (eks-ESPIRE)
-* Hyppig mini-demo (med Difa AS) og demo (med apotek)
-* Workshop for utarbeidelse av testbeskrivelser med utvikler, tester og funksjonell ekspert
+Første akseptansetest av delleveranse 0.1 vil forventes klar etter 3 måneder. Denne løsningen vil ikke inneholde reele data, men vil kunne benyttes av apotekene til å teste sin integrasjon. Delleveranse 0.2, 0.3 og 1.0 vil forventes med litt høyere frekvens enn kvartalsvis. Funksjonalitet som inngår i leveransene vil produksjonssettes fortløpende med cirka ukentlig frekvens. Uferdig funksjonalitet vil være skrudd av i disse produksjonssettingene.
+
+Akseptansetest vil foregå med representanter for kjedene (?) og direktoratet for e-Helse.
+
+Oppsummert:
+* Ukentlige interne demoer
+* Ukentlige produksjonssettinger
+* Månedlige demoer med kjedene
+* Leveranser med akseptansetesting kvartalsvis eller hyppigere
+
+
+### Prosjektets interne takt
+
+Prosjektets aktiviteter vil være strukturert etter en sortert product backlog. Backloggen vil foreligge i en stabil versjon ved avtaleinngåelse. Leverandørens funksjonell ansvarlig, leverandørens arkitekt og kundens produkteiere vil prioritere og endringshåndtere backloggen. Det forventes kun uvesentlige endringer i omfanget av SSA-T avtalen.
+
+Oppgavene på backlogg skal være fortrinnsvis være på cirka 1-2 utvikleruker i omfang.
+
+Utviklingsteamet vil levere fra backlogg fortløpende. Utviklerne på teamet vil jobbe parvis og vil under stand-up møtet om morgenen eventuelt plukke en ny oppgave blant de høyest sorterte oppgavene på backlogg. Utviklerparet vil sette av tid med funksjonell ekspert og tester på teamet for å utforme en testbeskrivelse for oppgaven. Testbeskrivelsen skal vurderes av kunden ihht til bestemmelsene i Bilag 6.
+
+Utviklerne vil fortløpende utvikle på oppgaven. Hver endring vil automatisk testes i et verktøy for kontinuerlig bygg hver endring vil settes i automatisk drift på et testmiljø som etableres i løpet av første måned. I løpet av første leveranse vil leverandøren etablere automatiske statiske kontroller av koden.
+
+Når utviklerne har fullført oppgaven vil de kontrollere den mot testbeskrivelsen i samarbeid med en tester. Funksjonaliteten vil overleveres på neste ukentlige demomøte med kunden. Kunden skal vurdere korrekthet ihht til bestemmelsene i Bilag 6.
+
+Oppsummert:
+* Prosjektets omfang er definert i form av en product backlogg
+* Kundens produkteiere, leverandørens funksjonelt ansvarlige og leverandørens arkitekt forvalter produkt backlogg
+* Utviklere jobber i par
+* Utviklere velger oppgaver fra øverste del av product backlogg
+* Utviklere, tester og funksjonell ekspert utarbeider testbeskrivelse når en oppgave påbegynnes
+* Alle endringer testes og driftsettes automatisk
+* 2-4 ferdige oppgaver overleveres til kunden ukentlig
+
+### Produkt backlogg elementer
+
+Produkt backlogg vil forvaltes i TFS.
+
+Oppgavene på produkt backlogg skal dekke alle aktiviteter som skal til for at oppgaven skal kunne medføre at funksjonalitet kan benyttes av kjedesystem eller apotekbruker i neste leveranse. Avhengig av oppgaven kan det innebære:
+
+* Utarbeide eller oppdatere testbeskrivelser som kan benyttes av kjedene eller direktoratet for eHelse
+* Oppdater testbrukergrensesnitt til å kunne teste funksjonaliteten
+* Oppdater testsimulator for å kunne teste funksjonaliteten
+* Oppdatere API dokumentasjon i Swagger
+* Utvikle automatiske tester for funksjonaliteten med minst 80% testdekning
+* Utvikle selve funksjonalitene
+* Utvikle relevant unntakshåndtering for funksjonaliteten
+* Utvikle databasescript for å understøtte eventuell nye lagringsbehov
+* Utvikle integrasjon med eksterne parter for å understøtte funksjonaliteten
+
 
 ### Testbarhet bygget inn
 
@@ -373,7 +421,11 @@ Strukturen i systemdesignet er lagt opp etter 4C prinsippet fra Simon Browns bok
 
 ### Leverandørens foreståelse av arkitekturprinsippene
 
-* Fleksibilitet: DIFA er et API som eksponeres til apotekene. API-et vi ha som hovedprinsipp at det er få påkrevde tjenestekall og disse behandle komplett informasjon. For 
+* Fleksibilitet: DIFA er et API som eksponeres til apotekene. API-et vi ha som hovedprinsipp at det er få påkrevde tjenestekall og disse behandle komplett informasjon. I tillegg vil DIFA leverer hjelpetjenester som kjedesystemene kan velge å kalle der det passer for arbeidsflyten de implementerer. Fleksibiliteten er imidlertid begrenset til mulighetsrommet i eResept
+* Tjenesteorientering: DIFA vil definere et grensesnitt dokumentert med Swagger UI. Alle tjenester vil være underlagt målinger av kallfrekvens og responstid.
+* Samhandling. DIFA vil legge til grunn internasjonale standarder for navngiving og struktur i API, spesielt HL7 standarder. DIFA vil ta førerrollen med å definere stabile meldingsformater som bransjen kan forholde seg til og som understøtter myndighetskrav
+* Kvalitet. DIFA vil validere refusjoner og aksjoner på farmasøytiske varsler. Avviste refusjonskrav vil registreres som B-feil i DIFA forvaltning.
+* Brukervennlighet og effektivitet. DIFA skal ikke investere i et avansert brukergrensesnitt. I stedet vil kravet om fleksbilitet understøtte kjedenes evne til å levere brukervennlige og effektive løsninger.
 
 
 ## Systemlandskap og integrasjoner (4C - Context)
