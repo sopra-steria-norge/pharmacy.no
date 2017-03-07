@@ -427,6 +427,7 @@ Miljøene i denne beskrivelsen utgjør Bilag 1 for SSA-D avtalen for Difa. Ytter
 
 ## Class informasjonsmodell ("Informasjonsarkitektur")
 
+![Begrepsmodell](images/class-reseptur-logisk.png)
 
 
 

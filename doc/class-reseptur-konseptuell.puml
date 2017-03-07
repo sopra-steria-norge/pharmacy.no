@@ -19,7 +19,7 @@ class ReseptVarsel {
     interaksjonsvarsel
     nyttLegemiddel
     endretDosering
-    hÃ¸yDosering
+    høyDosering
     polyfarmasi
     dobbelforskrivning
 }
@@ -47,7 +47,7 @@ ReseptVarsel -right- ReseptutleveringAksjon
 
 Resept -up- "*" Legemiddel: alternativer
 Reseptutlevering -up- Legemiddel
-Reseptutlevering -up- Helseperson: farmasÃ¸yt
+Reseptutlevering -up- Helseperson: farmasøyt
 
 hide empty members
 hide methods
