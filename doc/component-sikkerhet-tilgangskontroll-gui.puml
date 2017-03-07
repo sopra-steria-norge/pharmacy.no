@@ -1,0 +1,44 @@
+@startuml
+
+box "Kjede"
+    actor Bruker
+    participant Kjedesystem
+    participant Directory
+end box
+
+box "Difa"
+    participant DifaGUI
+    participant Tilgangskontroll
+    database HPR as "HPR-DB"
+end box
+
+participant HDIR
+
+HDIR -> HPR: Oppdatert\nhelsepersonellregister
+...
+Bruker -> Kjedesystem: Velg DIFA operasjon fra meny
+Bruker <-- Kjedesystem: Redirect
+Bruker -> DifaGUI: Utfør operasjon
+Bruker <-- DifaGUI: Krever pålogging - redirect
+Bruker -> Directory: Logg på
+Bruker <-- Directory: Access token
+Bruker -> DifaGUI: Access token
+activate DifaGUI
+    DifaGUI -> Tilgangskontroll: Autoriser bruker
+    activate Tilgangskontroll
+        Tilgangskontroll -> Directory: Access token
+        Tilgangskontroll <-- Directory: JWT    
+        note left of DifaGUI: token er en signert JSON payload
+        Tilgangskontroll -> Directory: <<cached>> Hent kjedesertifikat
+        Tilgangskontroll -> Tilgangskontroll: Verifiser token signatur
+        Tilgangskontroll -> Tilgangskontroll: Hent HPR nr fra token (+ roller)
+        Tilgangskontroll -> HPR: HPR nummer
+        Tilgangskontroll <-- HPR: Autorisasjon (eks "farmasøyt")
+        Tilgangskontroll -> Tilgangskontroll: Avgjør tilgang
+        DifaGUI <-- Tilgangskontroll
+        deactivate Tilgangskontroll
+    DifaGUI -> DifaGUI: utfør operasjon
+    Bruker <-- DifaGUI
+    deactivate DifaGUI
+
+@enduml

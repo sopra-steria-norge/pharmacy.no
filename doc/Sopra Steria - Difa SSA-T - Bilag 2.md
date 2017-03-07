@@ -1,4 +1,4 @@
-
+    
 # Innledning
 
 Løsningsbeskrivelsen av Difa er delt inn i fire områder:
@@ -157,6 +157,7 @@ Disse to regelsettene er i stor grad overlappende og innebærer en del funksjona
 * Bruker med relevant autorisasjon kan rette og sperre informasjon om en pasient på pasientens forespørsel (personopplysningsloven § 27. Retting av mangelfulle personopplysninger)
 * Som en del av målbilde bør DIFA avlevere informasjon om en pasient til helsenorge.no slik at pasienten kan være selvbetjent på innsyn (pasientjournalloven § 18.Informasjon og innsyn)
 
+### Testbarhet
 
 
 ### Versjonshåndtering
@@ -183,6 +184,8 @@ Dette gir opphav i følgende omfang:
 
 
 ## Utfordrende områder
+
+### Sertifikathåndtering
 
 ### Beregning av interaksjoner basert på meldinger fra reseptformidler
 
@@ -214,19 +217,53 @@ Målepunkt per apotek eller for et kontaktpunkt.
 
 ### Konvertering fra FarmaPro til DIFA
 
-#### Steg 1: Farmasøytiske tjenester
+I konkurransegrunnlaget har kunden beskrevet en milepælsplan som starter med dagens reseptur-funksjonalitet som versjon 1.0 og inkluderer ytterligere tjenester i versjon 2.0. Leverandøren frykter at denne planen vil eksponere prosjektet for stor risiko ved første viktige leveranse. Derfor foreslår vi i stedet at prosjektet går opp leveranseapparatet med en leveranse som har lavere forretningsmessig risiko. Vi foreslår i stedet å legge inn medisinstart, legemiddelassistert rehabilitering og inhaleringsveiledning som en prøveleveranse som beviser levedyktigheten til prosjektmetoden og plattformen. En total prosjektplan kan være som følger (numre angir cirka uketall).
 
-#### Steg 2: Nettapotek eller multidose
+Aktivitetene markert med lysegrønt inngår ikke i omfanget i SSA-T men leveres som en del av SSA-V. Det er allikevel inkludert for å gi et bedre totalbilde.   
 
-#### Steg 3a: FarmaPro bro
+![Leveranseoversikt](images/gantt-transisjonsplan.png)
 
-#### Steg 4a: FarmaPro bro + enkelte kjeder på ny POS
+Hvert funksjonelle omfang har en utviklingsfase med tilhørende spesifiseringsaktiviteter. Godkjenningsperioden utgjør første del av produksjonsperiodene. Leverandøren foreslår følgende funksjonelle leveranser. Prosjektet vil foreta en teknisk produksjonsetting med cirka ukentlig frekvens, men funksjonalitet vil godkjennes når et funksjonelt område er komplett.
 
-#### Steg 3b, 4b: Enkelte kjeder på ny POS (tilhører SSA-V)
 
-#### Steg 5: Alle kjeder på ny POS
+#### Steg 1: Testbart API
 
-#### Steg 6: POS, nettapotek, multidose
+Det testbare API'et vil la apotekene teste sine POS systemer mot et API i et simulert, ikke-personsensitivt miljø der Reseptformidleren og HELFO er erstattet med simulatorer.
+
+Ved å levere et versjon som ikke behandler personsensitiv informasjon i produksjonsmiljøet først vil vi sette opp et produksjonsklart miljø uten risiko på brudd på regelverk.
+
+
+#### Steg 2: Farmasøytiske tjenester
+
+Med farmasøytiske tjenester kan apotekene registrere medisinstart, LAR og inhaleringsveiledning, kreve refusjon fra HELFO, følge opp refusjonskrav og oppfylle minimumskrav i pasientjournalloven og personvernforordningen. Løsningen vil inkludere et brukergrensesnitt for å registrere farmasøytiske tjenester.
+
+Versjonen vil inkludere viktige sikkerhetsmekanismer som vil understøtte resepturflyten: Sertifikathåndtering i kommunikasjonen mot HELFO (M18) og nødvendige sikkerhetsmekanismer for å understøtte dette (HSM). Versjonen vil også inkludere integrasjon med kjedenes brukersystemer (Active Directory).
+
+Denne leveransen er ment til å tas i bruk av apotekene. Dette er en leveranse med lav risiko: Dersom noe ikke skal være av tilstrekkelig kvalitet kan apotekene benytte eksisterende løsninger for å registrere og kreve refusjon for relevante farmasøytiske tjenester. Det vil antageligvis være hensiktmessig å ta i bruk kun én farmasøytisk tjeneste den første måneden etter leveranse.
+
+
+#### Steg 3: Resepthistorikk
+
+Versjonen vil inkludere å sette opp datamigrering fra FarmaPro til sentralt resepthistorikk, inkludert et GUI for å gjøre oppslag i resepthistorikk. Versjonen vil inkludere en minimumsløsning for å oppfylle pasientjournalloven, spesielt tilgangslogging og pasientinnsyn. I denne versjonen vil spesielt pasientinnsyn være støtte med det minimum som loven krever.
+
+Leveransen vil også inkludere de mest kritiske rapporteringsfunksjonene, spesielt bransjestatistikken.
+
+
+#### Steg 4: Reseptur API
+
+Denne versjonen vil utvide API'et for reseptur med integrasjon mot HELFO og Reseptformidleren og inkludere et enkelt GUI for demo, test og akseptanse av løsningen.
+
+Denne versjonen fullfører versjon 1.0 av omfanget i løsningsbeskrivelsen, samt farmasøytiske tjenester.
+
+
+#### Steg 5: Reseptur fullstendig (avtalefestet i SSA-V-avtalen)
+
+Denne leveransen vil inkludere rapporter som ikke allerede er levert, samt forbedringer for å etterleve pasientjournalloven. Spesielt foreslår leverandøren at pasientinnsyn ivaretas gjennom et samarbeid med helsenorge.no.
+
+#### Steg 6: Nettapotek (avtalefestet i SSA-V-avtalen)
+
+#### Steg 7: Multidoseapotek (avtalefestet i SSA-V-avtalen)
+
 
 ### Teamsammensetning - kunde
 
@@ -244,15 +281,19 @@ Målepunkt per apotek eller for et kontaktpunkt.
 | Funksjonell ekspert    | NN (Espire)               | Bistår funksjonelt ansvarlig med avklaringer |
 | Løsningsarkitekt       | Johannes B (Sopra Steria) | Omformer behov til utviklingsaktiviteter     |
 | Senior utvikler        | NN (Sopra Steria/Espire)  | Bistår løsningsarkitekt med oppfølgning, byggmester      |
-| Utvikler               | NN (Espire)               | Beskriver og implementerer testbeskriver     |
-| Utvikler               | NN (Sopra Steria)         | Beskriver og implementerer testbeskriver, sikkerhetchampion     |
+| Utvikler               | NN (Espire)               | Beskriver og implementerer testbeskrivelser     |
+| Utvikler               | NN (Sopra Steria)         | Beskriver og implementerer testbeskrivelser, sikkerhetchampion     |
 | Juniorutvikler         | NN (Espire)               | Løser oppgaver med naiv entusiasme   |
 | Juniorutvikler         | NN (Sopra Steria)         | Løser oppgaver med naiv entusiasme   |
-| Testleder              | NN (Espire?)              | Koordinerer med kjeder, e-Helse. Prosessansvarlig for testbeskriver |
+| Testleder              | NN (Espire?)              | Koordinerer med kjeder, e-Helse. Prosessansvarlig for testbeskrivelser |
 | Tester                 | NN (Espire)               | Bistår utvikler med utforming av testbeskrivelser, utforskende testing |
 | Tester                 | NN (Espire)               | Bistår utvikler med utforming av testbeskrivelser, utforskende testing |
 | Prosjektleder          | Rikard E (Sopra Steria)   | Vet hva som skjer, hvem som må involveres mer og følger opp alle |
-  
+
+Teamet vil inkludere noen deltidsroller ("hatter") som enkeltpersoner vil utføre i tillegg til sine primære roller:
+
+* Security Champion: Engasjert i personvern- og sikkerhetsmessige problemstillinger og inspirere teamet rundt OWASP, statisk kodeanalyse, dynamisk kodeanalyse osv.
+* Byggmester: Engasjert i å gjøre bygg, utrulling og overvåking smidigere og tryggere
 
 
 ## Aktiviteter
@@ -269,7 +310,7 @@ For å oppnå ukentlige produksjonssettinger, foreslår vi følgende prinsipper:
 * Automatiser det som kan automatiseres
 * Fokuser på kvalitet
 
-Disse prinsippene vil være nyttige for å prioritere hensyn underveis i prosjektet.
+Disse prinsippene vil være nyttige for å prioritere hensyn rundt planlegging, krav, arkitektur, utvikling, testing og leveranser underveis i prosjektet.
 
 
 ### Oppfølgning
@@ -328,6 +369,11 @@ Strukturen i systemdesignet er lagt opp etter 4C prinsippet fra Simon Browns bok
 * Samhandling og interoperabilitet. Bransjeløsningen skal samhandle effektivt med apotekenes egne, myndigheters og andre relevante virksomheters IT-løsninger. Bransjeløsningen skal understøtte interoperabilitet på organisatorisk, semantisk og teknisk nivå.
 * Kvalitet. Teknisk og faglig kvalitet skal bygges inn i bransjeløsningens prosesser og funksjonalitet. Bransjeløsningen skal bygges på en måte som sikrer at data som eies av bransjeløsningen, data som registreres i bransjeløsningen, og data som brukes i bransjeløsningen valideres tidlig og er av høy kvalitet. 
 * Brukervennlighet og effektivitet. Bransjeløsningen skal være intuitiv og lede de ansatte gjennom prosessene på en effektiv måte. Brukervennlighet innebærer at bransjeløsningen skal oppleves som enkel å bruke, gjøre apotekansatte i stand til å utnytte sin kompetanse optimalt, og ikke oppleves som en hindring i arbeidet.
+
+
+### Leverandørens foreståelse av arkitekturprinsippene
+
+* Fleksibilitet: DIFA er et API som eksponeres til apotekene. API-et vi ha som hovedprinsipp at det er få påkrevde tjenestekall og disse behandle komplett informasjon. For 
 
 
 ## Systemlandskap og integrasjoner (4C - Context)
@@ -413,7 +459,9 @@ Miljøene i denne beskrivelsen utgjør Bilag 1 for SSA-D avtalen for Difa. Ytter
 
 #### Tilgangskontroll
 
-![Tilgangskontroll](images/component-sikkerhet-tilgangskontroll.png)
+![Tilgangskontroll (API)](images/component-sikkerhet-tilgangskontroll-api.png)
+
+![Tilgangskontroll (GUI)](images/component-sikkerhet-tilgangskontroll-gui.png)
 
 #### Tilgangslogg
 

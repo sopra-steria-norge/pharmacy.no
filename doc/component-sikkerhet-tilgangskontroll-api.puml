@@ -2,8 +2,8 @@
 
 box "Kjede"
     actor Bruker
-    actor Kjedesystem
-    actor Directory
+    participant Kjedesystem
+    participant Directory
 end box
 
 box "Difa"
