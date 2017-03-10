@@ -1,11 +1,14 @@
 @startuml
 
 actor Pasient
-actor Apotektekniker
 actor Farmasøyt
 
 node DifaGUI #limegreen
-node Regnskap <<kjede>> #lime
+
+package Kjedesystemer {
+    node POS #lime
+    node Regnskap #lime
+}
 
 node Difa #limegreen
 
@@ -13,11 +16,12 @@ node helsenorge.no #yellow
 node HELFO #yellow
 node HPR #yellow
 
-Pasient <-> Apotektekniker
-Apotektekniker -down-> DifaGUI
+Pasient <-> Farmasøyt
 Farmasøyt -down-> DifaGUI
 
 DifaGUI -down-> Difa
+Farmasøyt -down-> POS: Alternativ
+POS -down-> Difa
 Regnskap -down-> Difa: Refusjonstatus
 
 Difa -down-> helsenorge.no: Journal

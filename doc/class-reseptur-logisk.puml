@@ -10,6 +10,11 @@ class MedicationOrder {
     atc + dosage
 }
 
+class MedicationOrderIssue {
+    dateWritten
+    copayPeriods
+}
+
 class MedicationOrderWarning {
     interactionWarning
     newMedication
@@ -29,7 +34,11 @@ class MedicationDispense {
     scannedLabel    
 }
 
-class MedicationDispenseAction
+class MedicationDispenseAction {
+    conferedWithDoctor: practitioner
+    informedPatient : y/n
+    notes
+}
 
 Patient -down- MedicationOrderList
 MedicationOrderList -right- "*" MedicationOrder
@@ -43,4 +52,6 @@ MedicationOrder -up- "*" Medication: alternatives
 MedicationDispense -up- Medication
 MedicationDispense -up- Practitioner
 
+hide empty members
+hide methods
 @enduml

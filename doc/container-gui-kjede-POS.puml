@@ -1,0 +1,74 @@
+@startuml
+
+title Kjede POS bruker DIFA API
+
+actor Apotektekniker
+actor Farmasøyt
+box "Kjede"
+    participant POS
+    participant Varesystem
+    participant Reseptur
+end box
+box " Difa"
+    participant Difa
+    database DB
+end box
+participant eHelse
+
+Apotektekniker -> POS: Velger hent resept
+Apotektekniker <-- POS: Redirect
+group Dialog med Difa
+Apotektekniker -> Reseptur: Vis Personsøk skjema
+Apotektekniker -> Reseptur ++: Angi person (fødselsnummer eller navn + fødselsdato)
+Reseptur -> Difa: Hent reseptliste
+Difa -> eHelse: M9.1
+Difa <-- eHelse: M9.2
+Difa -> Difa: Påfør informasjon og varsler
+Reseptur <-- Difa: Reseptliste med interaksjonsvarsler
+Apotektekniker <-- Reseptur --: Vis resepter
+Apotektekniker -> Reseptur ++: Ekspeder resept
+Reseptur-> Difa: Hent resept 
+Difa -> eHelse: M9.3
+Difa <-- eHelse: M9.4
+Difa -> Difa: Påfør informasjon og varsler
+Difa -> Difa: Hent varer i byttegruppe
+Difa -> DB: Lagre resept under ekspedering
+Reseptur <-- Difa
+Reseptur-> Varesystem: Pris og beholdning for\nalle aktuelle legemidler\nfor apotek
+Reseptur<-- Varesystem
+Apotektekniker <--Reseptur --: Varsler, byttealternativer med priser, beholdning
+Apotektekniker -> Reseptur ++: Velg legemiddel
+Reseptur -> Difa: Oppdater vare
+note over Reseptur: Her vil også intervensjoner registreres
+Difa -> Difa: Beregne refusjon
+Difa -> DB
+Reseptur <-- Difa: Oppdatert refusjon, egenandel, mellomlegg
+Apotektekniker <-- Reseptur --: Vis oppdatert pris
+Apotektekniker -> Reseptur ++: Oppdater reseptetikett
+Reseptur -> Difa: Oppdatert reseptetikett
+Difa -> DB
+Reseptur <-- Difa: Oppdatert reseptetikett
+Apotektekniker <-- Reseptur --
+Apotektekniker -> Reseptur: Skriv reseptetikett
+Apotektekniker -> Reseptur: Scan strekkode på etikett og pakning
+Reseptur -> Difa: Teknisk kontroll
+Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasikontroll"
+Farmasøyt -> Difa: Hent resepter klar til farmasøytisk kontroll
+Difa -> DB
+Farmasøyt -> Difa: Utfør farmasikontroll
+Difa -> DB
+Apotektekniker <- Farmasøyt: "Vær så god"
+Apotektekniker -> Reseptur ++: Start utlevering
+Reseptur -> Difa: Valider reseptekspedering
+Reseptur -> POS: Sett reseptkurv i kasse
+Apotektekniker <-- Reseptur --
+Apotektekniker -> POS ++: Registrer signatur og betaling
+POS -> Reseptur ++: Fullfør utlevering
+Reseptur -> Difa: Fullfør utlevering
+Difa -> eHelse: M10
+Difa -> DB
+Reseptur <-- Difa
+POS <-- Reseptur --
+Apotektekniker <-- POS --
+
+@enduml

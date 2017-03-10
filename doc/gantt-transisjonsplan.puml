@@ -1,6 +1,7 @@
 @startuml
 [Testbart reseptur API] lasts 8 days
-[Produksjon 0.1] starts at [Testbart reseptur API]'s end and is colored in cyan
+[Akseptanse 0.1] lasts 2 days and starts at [Testbart reseptur API]'s end and is colored in Orange
+[Produksjon 0.1] starts at [Akseptanse 0.1]'s end and is colored in cyan
 [Farmasøytiske tjenester] lasts 12 days
 [Akseptanse 0.2] lasts 2 days and starts at [Farmasøytiske tjenester]'s end and is colored in Orange
 [Produksjon 0.2] starts at [Akseptanse 0.2]'s end and is colored in cyan

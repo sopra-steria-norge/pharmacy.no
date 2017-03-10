@@ -32,8 +32,7 @@ Difa <-down-> HELFO: M18, M22, M23
 DifaGUI -down-> Difa
 DifaGUI -down-> ERP: Priser og beholdning
 ERP <-left- POS
-DifaGUI -down-> POS: Betaling
-POS -down-> Difa: Utlevering
+POS -down-> Difa: Reseptkurv
 
 
 @enduml

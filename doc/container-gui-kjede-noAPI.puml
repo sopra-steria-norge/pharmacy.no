@@ -1,6 +1,6 @@
 @startuml
 
-title Difa GUI i "toskjermmodus"
+title Difa i testmodus uten kjedetilkobling
 
 actor Apotektekniker
 actor Farmasøyt

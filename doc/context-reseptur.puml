@@ -5,10 +5,12 @@ actor Apotektekniker
 actor Farmasøyt
 actor Lege
 
-node POS #lime
-node ERP #lime
-node Nettapotek #lime
-node Multidose #lime
+package Kjedesystemer {
+    node POS #lime
+    node ERP #lime
+    node Nettapotek #lime
+    node Multidose #lime
+}
 node Difa #limegreen
 
 node RF #pink
@@ -24,6 +26,7 @@ EPJ -right-> RF: Resept
 Pasient <-right-> Apotektekniker
 Apotektekniker -down-> POS
 Farmasøyt -down-> POS
+Farmasøyt -down-> Difa: Farmasøytkontroll
 
 POS -down-> Difa
 POS -left-> ERP

@@ -1,8 +1,10 @@
-
 @startuml
 
-title Systemarkitektur
+title DIFA som Software-as-a-Service (SaaS) tjeneste
 
+node Apotek1 #yellow
+node Apotek2 #yellow
+node ApotekN #yellow
 node Kjede #yellow
 node FHI
 node data.norge.no
@@ -10,16 +12,23 @@ node data.norge.no
 interface FarmasøytApp <<opsjon>> #lime
 
 cloud Difa {
-    node LegemiddelSync #lime
-    node Reseptur #lime
-    node Resepthistorikk #lime
-    node Farmasøytisk #lime
+    cloud NAN as "Point of delivery"
+    
+    node LegemiddelSync <<Java>> #lime
+    node HPRSync <<Java>> #lime
+    node Reseptur <<Java>> #lime
+    node Resepthistorikk <<Java>> #lime
+    node Farmasøytisk <<Java>> #lime
 
-    database Legemidler <<SQL Server>> #lime
-    database Resepter <<SQL Server>> #lime
-    database Journal <<SQL Server>> #lime
+    database Legemidler <<PostgreSQL>> #lime
+    database Resepter <<PostgreSQL>> #lime
+    database Journal <<PostgreSQL>> #lime
+    database HPR <<PostgreSQL>> #lime
+    
+    node KeyVault #lime
 
     Reseptur -down-> Resepter
+    Reseptur -down-> KeyVault
     Reseptur -down-> Legemidler
     Resepthistorikk -down-> Resepter
     Farmasøytisk -down-> Journal
@@ -36,11 +45,18 @@ node FarmaLogg #Aquamarine
 LegemiddelSync <-right- FarmaLogg
 LegemiddelSync -down-> Legemidler
 
+node Helsedir #Aquamarine
+HPRSync <-right- Helsedir
+HPRSync -down-> HPR
+
+
 Resepter -right-> RapportDB: Anonymisering
 
-cloud NAN as "Norsk Apoteknett" #Aquamarine
 cloud Internet
 
+Apotek1 -down-> Kjede
+Apotek2 -down-> Kjede
+ApotekN -down-> Kjede
 Kjede -down-> NAN
 FarmasøytApp -down-> NAN
 NAN -down-> Reseptur
@@ -52,12 +68,12 @@ FHI -down-> Internet
 data.norge.no -down-> Internet
 Internet -down-> Rapport
 
-cloud NHN as "Norsk helsenett"
+cloud NHN as "Norsk helsenett" #Aquamarine
 
 package eHelse {
     node RF
     node HELFO
-    node KJ
+    node helsenorge.no
 }
 
 Reseptur -> NHN

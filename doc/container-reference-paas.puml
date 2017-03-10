@@ -6,22 +6,22 @@ cloud Datasenter {
     cloud HAProxy
     External -down-> HAProxy
 
-    cloud Applikasjonsnoder {
-        node Docker3 {
+    cloud Applikasjonsnoder #lime {
+        node Docker3 #FEFECE {
             node JVM3 {
                 component Jetty3 {
                     component App3 as "applikasjon"
                 }
             }
         }
-        node Docker2 {
+        node Docker2 #FEFECE {
             node JVM2 {
                 component Jetty2 {
                     component App2 as "applikasjon"
                 }
             }
         }
-        node Docker1 {
+        node Docker1 #FEFECE {
             node JVM1 {
                 component Jetty1 {
                     component App1 as "applikasjon"
@@ -33,20 +33,30 @@ cloud Datasenter {
         HAProxy -down-> Jetty2
         HAProxy -down-> Jetty3
     }
+    
+    note top of Applikasjonsnoder: Driftes av forvaltningsteam
 
-    database PostgreSQL
-    App3 -down-> PostgreSQL
-    App2 -down-> PostgreSQL
-    App1 -down-> PostgreSQL
+    package Database {
+        database PostgreSQL
+        database WarmStandby
+    }
+    Jetty3 -down-> PostgreSQL
+    Jetty2 -down-> PostgreSQL
+    Jetty1 -down-> PostgreSQL
 
-    database WarmStandby
     PostgreSQL -left-> WarmStandby: WAL
+    
+    node CryptoVault
+    App1 -down-> CryptoVault
+    App2 -down-> CryptoVault
+    App3 -down-> CryptoVault
 }
 node Kubernetes
 
-Kubernetes -up-> Docker1
-Kubernetes -up-> Docker2
-Kubernetes -up-> Docker3
+Kubernetes -down-> Docker1
+Kubernetes -down-> Docker2
+Kubernetes -down-> Docker3
 
+note top of Datasenter: Driftes av driftsteam
 
 @enduml
