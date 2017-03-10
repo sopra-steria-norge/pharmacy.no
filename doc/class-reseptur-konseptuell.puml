@@ -15,6 +15,9 @@ class ReseptBunke {
     egenandelsperioder
 }
 
+class ReseptKurv {
+}
+
 class ReseptVarsel {
     interaksjonsvarsel
     nyttLegemiddel
@@ -28,9 +31,9 @@ class Legemiddel
 
 class Helseperson
 
-class Reseptutlevering
+class ReseptUtlevering
 
-class ReseptutleveringAksjon {
+class ReseptUtleveringAksjon {
     kontaktet_lege j/n
     informert pasient j/n
     notat
@@ -41,13 +44,15 @@ ReseptListe -right- "*" Resept
 ReseptBunke -up- Helseperson: lege
 Resept "*" -up- ReseptBunke
 Resept -down- "*" ReseptVarsel
-Resept -right- Reseptutlevering
-Reseptutlevering -down- ReseptutleveringAksjon
-ReseptVarsel -right- ReseptutleveringAksjon
+Resept -right- ReseptUtlevering
+ReseptUtlevering -down- ReseptUtleveringAksjon
+ReseptVarsel -right- ReseptUtleveringAksjon
 
 Resept -up- "*" Legemiddel: alternativer
-Reseptutlevering -up- Legemiddel
-Reseptutlevering -up- Helseperson: farmasøyt
+ReseptUtlevering -up- Legemiddel
+ReseptKurv -up- Helseperson: farmasøyt
+
+ReseptKurv -down- "*" ReseptUtlevering
 
 hide empty members
 hide methods

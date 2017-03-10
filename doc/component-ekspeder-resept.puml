@@ -1,0 +1,56 @@
+@startuml
+
+participant POS
+box "Difa App Server"
+    participant AuthorizationFilter
+    boundary MedicalDispenseController
+    entity MedicalOrderRepo
+    entity MedicalDispenseRepo
+    participant RFGateway
+end box
+box "Difa Database"
+    database RX
+    database HPR <<kopi>>
+    database Farmalogg <<kopi>>
+end box
+box "Difa"
+    participant HSM
+end box
+participant RF
+
+POS -> AuthorizationFilter ++: Ekspeder resept
+    AuthorizationFilter -> AuthorizationFilter ++: Autoriser bruker
+        AuthorizationFilter -> AuthorizationFilter: Validate JWT (autentisering)
+        AuthorizationFilter -> HPR: Verifiser at bruker er autorisert farmasøyt
+    AuthorizationFilter <-- AuthorizationFilter --
+    AuthorizationFilter -> MedicalDispenseController ++: Ekspeder resept
+        alt Reseptliste ikke lagret lokalt
+            MedicalDispenseController -> RFGateway ++: Hent reseptliste
+                RFGateway -> HSM: Signer request
+                RFGateway -> RF ++: Hent reseptliste (M9.1)
+                RFGateway <-- RF --: Reseptliste (M9.2)
+            MedicalDispenseController <-- RFGateway --
+            MedicalDispenseController -> MedicalOrderRepo ++: Lagre reseptliste
+                MedicalOrderRepo -> RX: Lagre reseptliste
+            MedicalDispenseController <-- MedicalOrderRepo --
+        else
+            MedicalDispenseController -> MedicalOrderRepo ++: Hent reseptliste
+                MedicalOrderRepo -> RX: Hent reseptliste
+            MedicalDispenseController <-- MedicalOrderRepo --
+        end alt
+        MedicalDispenseController -> RFGateway ++: Ekspeder resept
+            RFGateway -> HSM: Signer request
+            RFGateway -> RF ++: Ekspeder resept (M9.3)
+            RFGateway <-- RF --: (M9.4)
+        MedicalDispenseController <-- RFGateway --
+        MedicalDispenseController -> HPR: Hent rekvisisjonsrett
+        MedicalDispenseController -> Farmalogg: Medikament-informasjon
+        MedicalDispenseController <-- Farmalogg: Bivirkninger, interaksjoner, trinnpris,\nbyttegruppe med legemiddeldetaljer
+        MedicalDispenseController -> MedicalDispenseController: Bruk reseptliste til å generere varsler
+        MedicalDispenseController -> MedicalDispenseRepo ++: Lagre resept under ekspedering
+            MedicalDispenseRepo -> RX: Lagre resept under ekspedering
+        MedicalDispenseController <-- MedicalDispenseRepo --
+    AuthorizationFilter <-- MedicalDispenseController --
+POS <-- AuthorizationFilter --: Reseptliste med alternativer,\nbivirkninger, varsler
+
+@enduml

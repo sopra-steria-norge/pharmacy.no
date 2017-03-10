@@ -44,10 +44,10 @@ Apotektekniker <- Farmasøyt: "Vær så god"
 Apotektekniker -> DifaGUI: Utlever
 Apotektekniker -> POS: Importer reseptkurver
 activate POS
-POS -> Difa: <color red>Hent reseptkurver for bruker
-Apotektekniker <-- POS: Vis reseptkurver
+POS -> Difa: <color red>List reseptkurver tilhørende apotekteknikeren
+Apotektekniker <-- POS: Reseptkurvliste
 deactivate POS
-Apotektekniker -> POS: Velg en eller flere reseptkurver
+Apotektekniker -> POS: Plukk en eller flere reseptkurver
 activate POS
 POS -> Difa: <color red>Hent reseptkurv
 Apotektekniker <-- POS: Vis oppdatert "handlekurv"

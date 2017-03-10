@@ -3,7 +3,7 @@
 box "Kjede"
     actor Bruker
     participant Kjedesystem
-    participant Directory
+    participant IDP as "Identity Provider"
 end box
 
 box "Difa"
@@ -20,16 +20,16 @@ Bruker -> Kjedesystem: Velg DIFA operasjon fra meny
 Bruker <-- Kjedesystem: Redirect
 Bruker -> DifaGUI: Utfør operasjon
 Bruker <-- DifaGUI: Krever pålogging - redirect
-Bruker -> Directory: Logg på
-Bruker <-- Directory: Access token
+Bruker -> IDP: Logg på
+Bruker <-- IDP: Access token
 Bruker -> DifaGUI: Access token
 activate DifaGUI
     DifaGUI -> Tilgangskontroll: Autoriser bruker
     activate Tilgangskontroll
-        Tilgangskontroll -> Directory: Access token
-        Tilgangskontroll <-- Directory: JWT    
+        Tilgangskontroll -> IDP: Access token
+        Tilgangskontroll <-- IDP: JWT    
         note left of DifaGUI: token er en signert JSON payload
-        Tilgangskontroll -> Directory: <<cached>> Hent kjedesertifikat
+        Tilgangskontroll -> IDP: <<cached>> Hent kjedesertifikat
         Tilgangskontroll -> Tilgangskontroll: Verifiser token signatur
         Tilgangskontroll -> Tilgangskontroll: Hent HPR nr fra token (+ roller)
         Tilgangskontroll -> HPR: HPR nummer

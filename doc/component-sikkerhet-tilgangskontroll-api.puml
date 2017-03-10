@@ -3,7 +3,7 @@
 box "Kjede"
     actor Bruker
     participant Kjedesystem
-    participant Directory
+    participant IDP as "Identity Provider"
 end box
 
 box "Difa"
@@ -18,8 +18,8 @@ HDIR -> HPR: Oppdatert\nhelsepersonellregister
 ...
 Bruker -> Kjedesystem: Utfør operasjon
 Bruker <-- Kjedesystem: Krever pålogging
-Bruker -> Directory: Logg på
-Bruker <-- Directory
+Bruker -> IDP: Logg på
+Bruker <-- IDP
 Bruker -> Kjedesystem: Utfør operasjon
 activate Kjedesystem
     Kjedesystem -> DifaTjeneste: Tjenestekall med access token
@@ -27,7 +27,7 @@ activate Kjedesystem
     note left of DifaTjeneste: token er en signert JSON payload
         DifaTjeneste -> Tilgangskontroll: Autoriser bruker
         activate Tilgangskontroll
-        Tilgangskontroll -> Directory: <<cached>> Hent kjedesertifikat
+        Tilgangskontroll -> IDP: <<cached>> Hent kjedesertifikat
         Tilgangskontroll -> Tilgangskontroll: Verifiser token signatur
         Tilgangskontroll -> Tilgangskontroll: Hent HPR nr fra token (+ roller)
         Tilgangskontroll -> HPR: HPR nummer
