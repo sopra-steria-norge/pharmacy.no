@@ -1,6 +1,6 @@
 @startuml
 
-title Difa i testmodus uten kjedetilkobling
+title Difa i testmodus uten kjedetilkobling (test)
 
 actor Apotektekniker
 actor Farmasøyt

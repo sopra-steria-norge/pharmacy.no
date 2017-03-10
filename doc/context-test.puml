@@ -1,0 +1,42 @@
+@startuml
+
+title Difa med testgrensesnitt
+
+actor Pasient #silver
+actor Tester
+
+package Kjede {
+    node POS #lime
+    node ERP #silver
+}
+
+node DifaGUI #limegreen
+node Difa #limegreen
+
+node RF <<simulator>> #pink
+node Farmalogg #silver
+node HELFO <<simulator>> #pink
+node HDIR #silver
+node helsenorge.no #silver
+
+
+Tester -down-> RF: Resept
+Tester -down-> HELFO
+Pasient <-right-> Tester
+Tester -down-> DifaGUI: Ekspeder
+Tester -down-> POS: Motta betaling
+Tester -down-> DifaGUI: Farmasøytkontroll
+
+Difa <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
+Difa <-right-> HELFO: M18, M22, M23
+Difa <.down. HDIR: HPR db
+Difa .down.> helsenorge.no: Journal
+
+DifaGUI -down-> Difa
+DifaGUI .down.> ERP: Priser og beholdning
+ERP <.left. POS
+POS -down-> Difa: Reseptkurv, utlever
+Difa <.down. Farmalogg
+
+
+@enduml

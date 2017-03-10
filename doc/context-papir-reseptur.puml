@@ -18,16 +18,16 @@ deactivate Difa
 
 POS -> Difa: Registrer papir resept på legemiddel, pasient, rekvirent
 activate Difa
+Difa -> HPR: Hent rekvisisjonsrett for forskriver
 Difa -> RF: Hent resepter for person
 Difa <-- RF: Reseptliste (historisk)
-Difa -> HPR: Hent rekvisisjonsrett
 Difa -> Farmalogg: Medikament-informasjon
 Difa <-- Farmalogg: Bivirkninger, interaksjoner, trinnpris,\nbyttegruppe med legemiddeldetaljer
 Difa -> Difa: Bruk historikk til å generere varsler
 POS <-- Difa: Reseptliste med alternativer,\nbivirkninger, varsler
 deactivate Difa
 
-group Valgfrie operasjoner
+group Utføres av POS etter behov
 POS -> Difa: Beregne refusjon basert på varevalg
 POS -> Difa: Forfalskningskontroll
 end group

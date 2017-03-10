@@ -32,7 +32,7 @@ Difa -> Difa: Bruk historikk til å generere varsler
 POS <-- Difa: Reseptliste med alternativer,\nbivirkninger, varsler
 deactivate Difa
 
-group Valgfrie operasjoner
+group Utføres av POS etter behov
 POS -> Difa: Beregne refusjon basert på varevalg
 POS -> Difa: Forfalskningskontroll
 end group

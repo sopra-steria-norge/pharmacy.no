@@ -1,0 +1,58 @@
+@startuml
+
+class Pasient
+
+class Helseperson
+
+
+package "Farmasøytiske tjenester" {
+    package Gjennomføring {
+    
+        class Besøk as "FarmasøytiskTjenesteLeveranse" {
+            dato
+            refusjon
+        }
+        
+        class Svar
+    
+        Besøk -down- Svar
+    }
+    
+    Pasient -down- Besøk
+    Helseperson -- Besøk
+
+    package Tjenestedefinisjon {
+    
+        class Tjeneste as "FarmasøytiskTjeneste"
+        
+        class Steg {
+            veiledning
+        }
+        
+        class Spørsmål
+        
+        enum SpørsmålType {
+            ANTALL
+            TIDSENHET
+            TEKST
+            VALG
+        }
+        
+        class Alternativ as "SvarAlternativer"
+    
+        Tjeneste *-down- Steg
+        Steg *-down- Spørsmål
+        Spørsmål *-down- Alternativ
+        Spørsmål -right- SpørsmålType
+    }
+    
+    Tjeneste <-right- Besøk
+    Spørsmål <-right- Svar
+    Alternativ <-right- Svar
+}
+
+
+hide empty members
+hide methods
+
+@enduml

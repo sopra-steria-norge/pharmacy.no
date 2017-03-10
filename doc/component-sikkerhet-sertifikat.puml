@@ -15,7 +15,7 @@ end box
 
 participant eHelse
 
-== registrere serifikat ==
+== registrere sertifikat ==
 DifaGUI -> Apoteksjef: Varsel om nytt sertifikatbehov
 Buypass -> Apoteksjef: Sertifikat, nøkkel, passord
 Apoteksjef -> DifaGUI: Registrere sertifikat, passord

@@ -345,20 +345,20 @@ Leverandøren har vurdert et samlokalisert team i Oslo og å benytte utenlandske
 Vår vurdering er at både testteamet og det funksjonelle teamet vil være avhengig av kunnskap om norsk lovverk og helsestandarder og således ikke kan forventes å levere godt fra utlandet. Utviklingsteamet kan vært delvis plassert i utlandet, men dette vil kreve mye arbeidskrevende oversettelse og reformulering av norske lovverk og standarder og ville dermed kreve mer bemanning både i Norge og Spania for å levere samme omgang. Ettersom utviklingsteamet utgjør under halve bemanningen er besparelsene ikke betydelige. Behovet for oversettelse vil også øke risikoen for feil. Leverandøren anser det derfor som minst risikabelt og billigst å levere prosjektet med kun ressurser i Oslo.
 
 
-| Rolle                  | Ansvar    |
-|------------------------|-----------|
-| Funksjonell ansvarlig  | Leverandørens farmasifaglig ansvarlige       |
-| Funksjonell ekspert    | Bistår funksjonelt ansvarlig med avklaringer |
-| Løsningsarkitekt       | Omformer behov til utviklingsaktiviteter     |
-| Senior utvikler        | Bistår løsningsarkitekt med oppfølgning, byggmester      |
-| Utvikler               | Beskriver og implementerer testbeskrivelser     |
-| Utvikler               | Beskriver og implementerer testbeskrivelser, sikkerhetchampion     |
-| Juniorutvikler         | Løser oppgaver med naiv entusiasme   |
-| Juniorutvikler         | Løser oppgaver med naiv entusiasme   |
-| Testleder              | Koordinerer med kjeder, e-Helse. Prosessansvarlig for testbeskrivelser |
-| Tester                 | Bistår utvikler med utforming av testbeskrivelser, utforskende testing |
-| Tester                 | Bistår utvikler med utforming av testbeskrivelser, utforskende testing |
-| Prosjektleder          | Vet hva som skjer, hvem som må involveres mer og følger opp alle |
+| Rolle                      | Ansvar                                                   |
+|----------------------------|----------------------------------------------------------|
+| Funksjonell ansvarlig      | Leverandørens farmasifaglig ansvarlige       |
+| Funksjonell ekspert        | Bistår funksjonelt ansvarlig med avklaringer |
+| Løsningsarkitekt           | Omformer behov til utviklingsaktiviteter     |
+| Senior utvikler            | Bistår løsningsarkitekt med oppfølgning, byggmester      |
+| Utvikler                   | Beskriver og implementerer testbeskrivelser     |
+| Utvikler                   | Beskriver og implementerer testbeskrivelser, sikkerhetchampion     |
+| Juniorutvikler             | Løser oppgaver med naiv entusiasme   |
+| Juniorutvikler             | Løser oppgaver med naiv entusiasme   |
+| Testleder                  | Koordinerer med kjeder, e-Helse. Prosessansvarlig for testbeskrivelser |
+| Tester                     | Bistår utvikler med utforming av testbeskrivelser, utforskende testing |
+| Tester                     | Bistår utvikler med utforming av testbeskrivelser, utforskende testing |
+| Prosjektleder              | Vet hva som skjer, hvem som må involveres mer og følger opp alle |
 
 Teamet vil inkludere noen deltidsroller ("hatter") som enkeltpersoner vil utføre i tillegg til sine primære roller:
 
@@ -418,7 +418,7 @@ Retrospektiver har fokus på forbedringer og har som formål å avdekke forbedri
 Oppgavene i prosjektet vil styres i TFS. Hver uke i prosjektet vil representeres med en Iteration Path i TFS. Hver release vil representeres som en Area Path. Prosjekt vil rapporter faktisk fremdrift til produksjonsetting hver uke opp mot timeantall. En rapport kan se ut som følger:
 
 
-| Uke              | Ukeslutt       | Fullført        | Timer     | Oppgaver      | Feilrettinger |
+| Uke              | Ukeslutt       | Avsluttet        | Timer     | Oppgaver      | Feilrettinger |
 |------------------|----------------|-----------------|-----------|---------------|---------------|
 | Difa\2017Q3\w36  | 8/9            | Ja              | 434       | 2             |               |
 | Difa\2017Q3\w37  | 15/9           | Ja              | 454       | 3             | 8             |
@@ -624,7 +624,9 @@ Figuren tar kun høyde for normalflyten for reseptur og for eksempel ekspedering
 
 ![Kontekst for reseptur og refusjon](images/context-reseptur.png)
 
-![Kontekst ved bruk av GUI-opsjon](images/context-gui.png)
+![Kontekst under testing](images/context-test.png)
+
+![Kontekst ved bruk av GUI (opsjon)](images/context-gui.png)
 
 Noen kjeder kan ønske å benytte brukergrensesnitt for reseptur levert som en del av DIFA. I dette tilfelle vil apotektekniker benytte dette systemet for å forberede resepten og POS for å motta betaling og signatur for resepten. POS vil varsle DIFA om at betalingen er komplett slik at DIFA kan formidle utleveringen til Reseptformidleren og sende Refusjonskrav til HELFO.
 
@@ -710,6 +712,8 @@ Miljøene i denne beskrivelsen utgjør Bilag 3 for SSA-D avtalen for Difa. Ytter
 
 Difa vil leveres på OpenShift - en docker-basert cloud infrastruktur. OpenShift håndterer laget mellom virtuelle maskiner (VMWare) og Docker-containere. Utviklingsprosjektet vil levere docker images. Applikasjonsdrift (DevOps) vil være ansvarlig for å oppgradere og skalere docker-containere på hardware som er levert innen driftsavtalen. Ytterligere konsekvenser av driftsplattformen er beskrevet i SSA-D-avtalen.
 
+Figuren viser systemet beskrevet på en Java-plattform, men det er fortsatt ikke besluttet om vi skal benytte Java eller .NET core. Skissen vil se tilsvarende ut på .NET.
+
 ![Produksjonsmiljø](images/container-reference-paas.png)
 
 ### Testmiljøer
@@ -757,7 +761,7 @@ Dette kapittelet beskriver overordnet API struktur mellom kjedes systemer og DIF
 
 ### Implementasjon av et typisk scenario: Nedlastning av resepter
 
-![GUI for kjede uten opsjon](images/component-ekspeder-resept.png)
+![Nedlastning av resepter](images/component-ekspeder-resept.png)
 
 ### Sikkerhetsarkitektur
 
@@ -797,9 +801,7 @@ Det er kun mulig å delvis benytte HL7 ettersom det ikke fullt ut støtter norsk
 
 ![Begrepsmodell](images/class-reseptur-logisk.png)
 
-
-
-Her vil det komme en tilsvarende modell for farmasøytiske tjenester.
+![Farmasøytiske tjenester](images/class-farmasøytisk-konseptuell.png)
 
 
 

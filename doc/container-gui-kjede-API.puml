@@ -1,6 +1,6 @@
 @startuml
 
-title Difa leser fra kjedenes varesystem
+title Difa leser fra kjedenes varesystem (opsjon)
 
 actor Apotektekniker
 actor Farmasøyt
