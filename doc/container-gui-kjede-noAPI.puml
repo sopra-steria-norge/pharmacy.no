@@ -30,6 +30,9 @@ DifaGUI-> Varesystem: <strike>Pris og beholdning
 Apotektekniker <--DifaGUI: <color red>Varsler, byttealternativer <b>uten</b> priser, beholdning
 deactivate DifaGUI
 Apotektekniker -> DifaGUI: <color red>Velg legemiddel, <b>angi pris
+
+newpage
+
 Apotektekniker <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
 note right of Apotektekniker: Difa GUI åpner nettlesers print-dialog
 Apotektekniker -> Apotektekniker: Skriv reseptetikett

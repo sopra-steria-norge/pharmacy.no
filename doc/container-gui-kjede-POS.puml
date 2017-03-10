@@ -44,6 +44,7 @@ Difa -> Difa: Beregne refusjon
 Difa -> DB
 Reseptur <-- Difa: Oppdatert refusjon, egenandel, mellomlegg
 Apotektekniker <-- Reseptur --: Vis oppdatert pris
+newpage
 Apotektekniker -> Reseptur ++: Oppdater reseptetikett
 Reseptur -> Difa: Oppdatert reseptetikett
 Difa -> DB

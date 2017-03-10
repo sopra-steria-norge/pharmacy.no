@@ -737,15 +737,21 @@ Vi foreslår at Farmasøyt benytter DIFA GUI til å foreta farmasøytkontroll. D
 
 Dette kapittelet beskriver overordnet API struktur mellom kjedes systemer og DIFA. Som en del av leveranse 0.1 vil leverandøren detaljspesifisere API og levere en fungerende testversjon som kjedene kan bruke i sin testing i god tid før DIFA 1.0 leveres.
 
-![Grensegang mellom kjedene og DIFA](images/container-gui-kjede-pos.png)
+![Grensegang mellom kjedene og DIFA 1 av 2](images/container-gui-kjede-pos.png)
+
+![Grensegang mellom kjedene og DIFA 2 av 2](images/container-gui-kjede-pos_001.png)
 
 ### Brukergrensesnitt - opsjon: GUI som benytter kjedesystem
 
-![Brukergrensesnitt som benytter kjedesystem](images/container-gui-kjede-API.png)
+![Brukergrensesnitt som benytter kjedesystem 1 av 2](images/container-gui-kjede-API.png)
+
+![Brukergrensesnitt som benytter kjedesystem 2 av 2](images/container-gui-kjede-API_001.png)
 
 ### Brukergrensesnitt: Inkludert "toskjerms GUI"
 
-![GUI for kjede uten opsjon](images/container-gui-kjede-noAPI.png)
+![GUI for kjede uten opsjon 1 av 2](images/container-gui-kjede-noAPI.png)
+
+![GUI for kjede uten opsjon 2 av 2](images/container-gui-kjede-noAPI.png)
 
 ### Reference architecture
 
