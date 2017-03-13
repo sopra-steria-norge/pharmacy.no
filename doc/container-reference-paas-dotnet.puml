@@ -1,0 +1,62 @@
+@startuml
+
+cloud External
+
+cloud Datasenter {
+    cloud HAProxy
+    External -down-> HAProxy
+
+    cloud Applikasjonsnoder #lime {
+        node Docker3 #FEFECE {
+            node dotnetcore3 {
+                component aspnetcore3 {
+                    component App3 as "applikasjon"
+                }
+            }
+        }
+        node Docker2 #FEFECE {
+            node dotnetcore2 {
+                component aspnetcore2 {
+                    component App2 as "applikasjon"
+                }
+            }
+        }
+        node Docker1 #FEFECE {
+            node dotnetcore1 {
+                component aspnetcore1 {
+                    component App1 as "applikasjon"
+                }
+            }
+        }
+
+        HAProxy -down-> aspnetcore1
+        HAProxy -down-> aspnetcore2
+        HAProxy -down-> aspnetcore3
+    }
+    
+    note top of Applikasjonsnoder: Driftes av forvaltningsteam
+
+    package Database {
+        database SQLServer
+        database WarmStandby
+    }
+    aspnetcore3 -down-> SQLServer
+    aspnetcore2 -down-> SQLServer
+    aspnetcore1 -down-> SQLServer
+
+    SQLServer -left-> WarmStandby
+    
+    node CryptoVault
+    App1 -down-> CryptoVault
+    App2 -down-> CryptoVault
+    App3 -down-> CryptoVault
+}
+node Kubernetes
+
+Kubernetes -down-> Docker1
+Kubernetes -down-> Docker2
+Kubernetes -down-> Docker3
+
+note top of Datasenter: Driftes av driftsteam
+
+@enduml

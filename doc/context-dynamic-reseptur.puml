@@ -1,6 +1,7 @@
 @startuml
 
-participant POS
+actor Apotektekniker
+actor Farmasøyt
 box "Difa tjenesten"
     participant Difa
     database HPR
@@ -11,42 +12,45 @@ database RF
 participant HELFO
 
 activate Difa
-POS -> Difa: Find person basert på kriterier
+Apotektekniker -> Difa: Find person basert på kriterier
 Difa -> Personregisteret
-POS <-- Difa: Liste med personer
+Apotektekniker <-- Difa: Liste med personer
 deactivate Difa
 
-POS -> Difa: Hent resepter for person
+Apotektekniker -> Difa: Hent resepter for person
 activate Difa
 Difa -> RF: Hent resepter for person
-POS <-- Difa: Reseptliste
+Apotektekniker <-- Difa: Reseptliste
 deactivate Difa
 
-POS -> Difa: Ekspeder resept
+Apotektekniker -> Difa: Ekspeder resept
 activate Difa
 Difa -> RF: Ekspeder resept
 Difa -> HPR: Hent rekvisisjonsrett
 Difa -> Farmalogg: Medikament-informasjon
 Difa <-- Farmalogg: Bivirkninger, interaksjoner, trinnpris,\nbyttegruppe med legemiddeldetaljer
 Difa -> Difa: Bruk historikk til å generere varsler
-POS <-- Difa: Reseptliste med alternativer,\nbivirkninger, varsler
+Apotektekniker <-- Difa: Reseptliste med alternativer,\nbivirkninger, varsler
 deactivate Difa
 
-group Utføres av POS etter behov
-POS -> Difa: Beregne refusjon basert på varevalg
-POS -> Difa: Forfalskningskontroll
+group Utføres av Apotektekniker etter behov
+Apotektekniker -> Difa: Beregne refusjon basert på varevalg
+Apotektekniker -> Difa: Forfalskningskontroll
+Apotektekniker -> Difa: Verifiser utlevering
+end group
+
+group Kan skje på andre tidspunkt
+Farmasøyt -> Difa: Hent resepter klar til farmasøytkontroll
+Farmasøyt -> Difa: Utfør farmasøytkontroll
 end group
 
 
-POS -> Difa: Registrer utlevering med varevalg, strekkoder,\noppdatert etikett,\nfarmasøyts aksjon for alle varsler,\nunderskrift
-Note right of POS: Her kunne Difa tilby en mobil app for farmasøyt for farmasikontroll
+Apotektekniker -> Difa: Registrer utlevering med varevalg, strekkoder,\noppdatert etikett,\nfarmasøyts aksjon for alle varsler,\nunderskrift
 activate Difa
 Difa -> Difa: Verifiser rekvirent, varsler, strekkoder
 Difa -> RF: Utleveringsmelding
 Difa -> HELFO: Send refusjonskrav
-POS <-- Difa: OK/feilkoder
+Apotektekniker <-- Difa: OK/feilkoder
 deactivate Difa
-
-
 
 @enduml
