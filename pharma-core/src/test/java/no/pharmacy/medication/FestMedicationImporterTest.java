@@ -50,6 +50,8 @@ public class FestMedicationImporterTest {
                 );
 
         Medication medication = importer.readMedicationPackage(M30.el("KatLegemiddelpakning", oppfLegemiddelPakning)).get(0);
+        assertThat(medication)
+            .hasNoNullFieldsOrPropertiesExcept("trinnPrice", "retailPrice");
 
         assertThat(medication.getDisplay())
             .isEqualTo("Calcigran Forte Tyggetab 1000 mg/800 IE");

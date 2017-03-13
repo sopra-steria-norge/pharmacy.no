@@ -1,4 +1,4 @@
-package no.pharmacy.test;
+package no.pharmacy.medication;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,9 +16,6 @@ import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcConnectionPool;
 
 import no.pharmacy.infrastructure.IOUtil;
-import no.pharmacy.medication.FestMedicationImporter;
-import no.pharmacy.medication.JdbcMedicationRepository;
-import no.pharmacy.medication.Medication;
 
 public class DownloadMedicationsFromFest {
 
@@ -50,6 +47,7 @@ public class DownloadMedicationsFromFest {
         if (festDoc == null) {
             throw new IllegalArgumentException();
         }
+
         saveFest(festDoc, conn);
     }
 
@@ -68,7 +66,6 @@ public class DownloadMedicationsFromFest {
     public static void main(String[] args) throws Exception {
         String url = "jdbc:h2:file:" + new File("target/db/medications").getAbsolutePath();
         JdbcConnectionPool dataSource = JdbcConnectionPool.create(url, "sa", "");
-
 
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);

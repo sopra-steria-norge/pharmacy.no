@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.eaxy.Xml;
 import org.junit.Test;
 
 import no.pharmacy.test.FakeMedicationSource;
@@ -44,6 +45,7 @@ public class MedicationPersistenceTest {
     private Medication sampleMedication() {
         Medication medication = new FakeMedicationSource().pickOne();
         medication.setExchangeGroupId(UUID.randomUUID().toString());
+        medication.setXml(Xml.el("testElement", "Hello world").toXML());
         return medication;
     }
 

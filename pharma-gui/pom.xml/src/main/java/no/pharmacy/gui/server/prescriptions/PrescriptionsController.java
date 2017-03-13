@@ -15,7 +15,7 @@ import org.eaxy.Element;
 import org.eaxy.Xml;
 
 import no.pharmacy.order.MedicationOrder;
-import no.pharmacy.order.MedicationDispenseCollection;
+import no.pharmacy.order.DispenseOrder;
 import no.pharmacy.order.MedicationDispenseRepository;
 
 public class PrescriptionsController extends HttpServlet {
@@ -42,10 +42,11 @@ public class PrescriptionsController extends HttpServlet {
             List<MedicationOrder> orders = prescriptionsSource.prescriptionsForPerson(nationalId);
             for (MedicationOrder order : orders) {
                 results.add(Xml.el("div",
-                        Xml.el("input")
-                            .type("checkbox").name("prescriptionId").val(order.getIdentifier()),
-                        //Xml.el("a", order.getPrescriber().getDisplay()).attr("href", "/practitioner/" + order.getPrescriber().getReference()),
-                        Xml.el("span", order.getMedication().getDisplay())));
+                        Xml.el("label",
+                            Xml.el("input")
+                                .type("checkbox").name("prescriptionId").val(order.getIdentifier()),
+                            //Xml.el("a", order.getPrescriber().getDisplay()).attr("href", "/practitioner/" + order.getPrescriber().getReference()),
+                            Xml.el("span", order.getMedication().getDisplay()))));
             }
         }
 
@@ -56,7 +57,7 @@ public class PrescriptionsController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        MedicationDispenseCollection collection = new MedicationDispenseCollection();
+        DispenseOrder collection = new DispenseOrder();
         collection.setIdentifier(UUID.randomUUID().toString());
 
         for (String id : req.getParameterValues("prescriptionId")) {

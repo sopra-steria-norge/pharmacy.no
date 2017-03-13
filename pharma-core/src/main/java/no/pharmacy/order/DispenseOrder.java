@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
-public class MedicationDispenseCollection {
+public class DispenseOrder {
 
     @Getter @Setter
     private String identifier;

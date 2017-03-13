@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,6 +87,7 @@ public class JdbcMedicationRepository implements MedicationRepository, Medicatio
         medication.setTrinnPrice(Money.from(rs.getBigDecimal("trinn_price")));
         medication.setRetailPrice(Money.from(rs.getBigDecimal("retail_price")));
         medication.setExchangeGroupId(rs.getString("exchange_group_id"));
+        medication.setXml(rs.getString("xml"));
         return medication;
     }
 
@@ -97,7 +97,7 @@ public class JdbcMedicationRepository implements MedicationRepository, Medicatio
             stmt.executeUpdate();
         }
 
-        try (PreparedStatement stmt = conn.prepareStatement("insert into medications (product_id, display, trinn_price, retail_price, exchange_group_id) values (?, ?, ?, ?, ?)")) {
+        try (PreparedStatement stmt = conn.prepareStatement("insert into medications (product_id, display, trinn_price, retail_price, exchange_group_id, xml) values (?, ?, ?, ?, ?, ?)")) {
             stmt.setString(1, medication.getProductId());
             stmt.setString(2, medication.getDisplay());
             Money trinnPrice = medication.getTrinnPrice();
@@ -105,6 +105,7 @@ public class JdbcMedicationRepository implements MedicationRepository, Medicatio
             Money retailPrice = medication.getRetailPrice();
             stmt.setBigDecimal(4, retailPrice != null ? retailPrice.toBigDecimal() : null);
             stmt.setString(5, medication.getExchangeGroupId());
+            stmt.setString(6, medication.getXml());
             stmt.executeUpdate();
         }
     }
@@ -113,6 +114,22 @@ public class JdbcMedicationRepository implements MedicationRepository, Medicatio
     public Optional<Medication> getMedication(String productId) {
         try (Connection conn = dataSource.getConnection()) {
             return findByProductId(productId, conn);
+        } catch (SQLException e) {
+            throw ExceptionUtil.softenException(e);
+        }
+    }
+
+    public boolean isEmpty() {
+        try (Connection conn = dataSource.getConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement("select count(*) from medications")) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1) == 0;
+                    } else {
+                        throw new IllegalStateException();
+                    }
+                }
+            }
         } catch (SQLException e) {
             throw ExceptionUtil.softenException(e);
         }

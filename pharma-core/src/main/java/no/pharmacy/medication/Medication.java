@@ -22,6 +22,9 @@ public class Medication {
     @Getter @Setter
     private String exchangeGroupId;
 
+    @Getter @Setter
+    private String xml;
+
     public Medication(String productId, String name, int trinnPriceInCents, int retailPriceInCents) {
         this.productId = productId;
         this.display = name;
