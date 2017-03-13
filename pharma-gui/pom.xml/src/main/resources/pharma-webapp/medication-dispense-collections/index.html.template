@@ -1,7 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Reseptekspedering | pharmacy.no</title>
+	<title>Reseptekspedering | pharmacy.no</title>
+	<style>
+		.medicationPrice { display: none; }
+		.medicationDescription { display: none; }
+	</style>
+<script
+  src="https://code.jquery.com/jquery-3.1.1.js"
+  integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+  crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -9,14 +17,29 @@
 	<div>
 		<h3 class='prescribedMedication'></h3>
 
-		<ol>
+		<ul>
 			<li>Forskrevet av: <span class='prescriber'></span></li>
 			<li>Forskrevet dato: <span class='dateWritten'></span></li>
-		</ol>
+		</ul>
 
 		<h4>Alternative legemidler</h4>
 
 		<ol class='alternativeMedications'></ol>
+
+		<label>
+			Reservasjon:
+			<select>
+				<option></option>
+				<option>Legereservasjon</option>
+				<option>Pasientreservasjon</option>
+				<option>Apotekresevasjon</option>
+			</select>
+		</label>
+
+		<h4>Kanseller</h4>
+		<ul>
+			<li><label><input type='radio' name='productId'/>Kanseller</label></li>
+		</ul>
 	</div>
 	</script>
 
@@ -25,8 +48,35 @@
 		<h2 id='patient'>Pasient: </h2>
 	
 		<div id="medicationOrders"></div>
+		
+		<h2>Pris</h2>
+		
+		<ul>
+			<li><strong>Refusjon:</strong> <span id='coveredAmount'></span></li>
+			<li><strong>Egenandel:</strong> <span id='copay'></span></li>
+			<li><strong>Mellomlegg pasient:</strong> <span id='uncoveredAmount'></span></li>
+			<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
+		</ul>
+		
+		<button>✓ Teknisk kontroll</button>
+		<button>✓ Farmasøytkontroll</button>
 	</form>
 
 
+<script>
+$(function() {
+	$("#medicationOrders").on('click', '.medicationDetails', function() {
+		$(".medicationDescription").hide();
+		$(this).closest('li').find('.medicationDescription').show();
+		return false;
+	});	
+	$("#medicationOrders").on('change', '.productSelect', function() {
+		$(".medicationPrice").hide();
+		$(".medicationDescription").hide();
+		$(this).closest('li').find('.medicationPrice').show();
+		return false;
+	});	
+});
+</script>
 </body>
 </html>
