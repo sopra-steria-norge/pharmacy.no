@@ -1,0 +1,33 @@
+@startuml
+
+node Client
+
+interface HTTP
+interface ExternalService
+
+cloud DIFA {
+    component Controller
+    note top of Controller: Exposes functionality to clients
+    
+    component Calculator
+    note top of Calculator: Encapsulates business rules
+
+    component Gateway
+    note bottom of Gateway: Encapsulates external\ncommunication
+    
+    component Repository
+    note left of Repository: Encapsulates database\ncommunication
+    
+    database Database
+}
+
+Client .down.> HTTP
+HTTP -down- Controller
+
+Controller -left-> Calculator
+Controller -right-> Gateway
+Gateway .right.> ExternalService
+Controller -down-> Repository
+Repository -down-> Database
+
+@enduml

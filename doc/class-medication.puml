@@ -1,0 +1,60 @@
+@startuml
+
+package Medication {
+    ' Legemiddel
+    class Medication {
+        productName
+        producer
+    }
+
+    ' Virkestoff
+    class Substance
+
+    ' Legemiddeldose
+    class SubstanceDosage {
+        amount
+        unit: mg
+    }
+
+    ' Legemiddeldosering
+    class MedicationDosage {
+        amount
+        unit : mg
+    }
+
+    ' Legemiddelform
+    class MedicationForm {
+        
+    }
+
+    ' Legemiddelpakning
+    class MedicationPackaging {
+        productIdentifier
+        amount
+        unit : count, grams, ml
+    }
+
+    ' Byttegruppe
+    class SubstitutionGroup
+
+    SubstanceDosage "*" -up-> Substance
+    Medication "*" -up- "1..*" Substance
+    MedicationForm "1..*" -up- Medication
+    MedicationDosage "1..*" - MedicationForm
+    MedicationDosage -up- SubstanceDosage
+    MedicationPackaging "1..*" -up- MedicationDosage
+    MedicationPackaging "1.*" - "0..1" SubstitutionGroup    
+}
+
+' Resept
+class MedicationOrder
+
+MedicationOrder -right-> SubstanceDosage
+MedicationOrder -right-> MedicationDosage
+MedicationOrder -right-> MedicationPackaging
+
+
+
+hide empty members
+hide methods
+@enduml

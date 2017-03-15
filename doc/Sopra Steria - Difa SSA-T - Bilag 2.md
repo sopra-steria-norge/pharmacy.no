@@ -64,13 +64,13 @@ Leverandøren har valgt å gruppere funksjonaliteten i grovkornede funksjonelle 
 
 Detaljer som ikke er beskrevet rundt hvordan forretningsregler er implementert og meldinger er utfylt vil som en hovedregel bruke FarmaPro som kilde til hvordan de fungerer. e-Resept og reseptur har mange spesialregler og det er utenfor omfanget av løsningsbeskrivelsen å detaljere alle, men leverandøren vurderer FarmaPro som et godt svar på spørsmål om spesifikke forretningsregler.
 
-Omfang som ikke inngår i et funksjonelt område er beskrevet som krav til tjenesten. Dette inngår også i produkt backlog.
+Omfang som ikke inngår i et funksjonelt område er beskrevet som Krav til tjenesten Difa. Dette inngår også i produkt backlog.
 
-En utkast til en fullstendig produkt backlog ligger vedlagt.
+Et utkast til en fullstendig produkt backlog ligger vedlagt.
 
 ## Begrepsmodell
 
-Følgende figur illustrerer de viktigste begrepene i DIFA og hvordan de henger sammen. I grensesnittet mellom kjedesystemene og bransjesystemet ser leverandøren for oss at disse begrepene har engelske navn med utgangspunkt i HL7-standarder. (Se systemdesign for detaljer)
+Følgende figur illustrerer de viktigste begrepene i DIFA og hvordan de henger sammen. I grensesnittet mellom kjedesystemene og bransjesystemet ser leverandøren for seg at disse begrepene har engelske navn med utgangspunkt i HL7-standarder (se systemdesign for detaljer).
 
 Et viktig poeng med DIFA er at man dokumenterer aksjonene som ble tatt basert på farmasøytiske varsler. Modellen må også synliggjøre de legemidlene som resepten kan utleveres for (byttegruppe mm).
 
@@ -85,7 +85,7 @@ Det mest uventede begrepet i modellen har vi i mangel på et bedre navn kalt "Re
 Denne flyten illustrerer hvordan aktørene interagerer med systemet under reseptbehandling. Stegene som blir utført av apotektekniker kan også utføres av farmasøyt, men for å forenkle beskrivelsen skriver vi kun apotektekniker for disse stegene.
 
 1. Pasientens fastlege registrerer en resept i Reseptformidleren vha sin EPJ
-    * Variant: Lege utskriver resept til bruk i egen praksis (Forskrift om legemidler fra apotek, paragraf 5-2)
+    * Variant: Lege utskriver resept til bruk i egen praksis (Forskrift om legemidler fra apotek, § 5-2)
     * Variant: Legen utskriver i eget navn for å verne pasient.
     * Variant: Legen skriver ut resept på papir. Se separat flyt.
 2. Pasienten identifiserer seg på apotek og ber apotektekniker få resepten ekspedert
@@ -116,7 +116,7 @@ Denne flyten illustrerer hvordan aktørene interagerer med systemet under resept
 * Dersom DIFA eller Reseptformidleren ikke kan nåes fra apotekets POS kan apotektekniker behandle resept som nødresept
 * Utlevering på papirresept: Legemidlene på resepten som blir utlevert blir registrert av apotektekniker manuelt. Resepten kan om nødvendig registreres etter utlevering. Pasientens signatur kan registreres fra scannet dokument i stedet for signaturpad.
 * Nødekspedering: Farmasøyt oppføres som rekvirent?
-* Pasient returnerer vare for kredittering: M10 og M18 med negative beløp og antall skal generes. Egenandel på M10 for perioden må reduseres.
+* Pasient returnerer vare for kreditering: M10 og M18 med negative beløp og antall skal generes. Egenandel på M10 for perioden må reduseres.
 * Apotektekniker benytter Difa GUI for resepthåndtering (fullstendig scenario)
 * Veterinærresept - lagringstid. Sterk identifisert person kun ved A/B resept. Papirresept (system innenfor langsiktig målbilde)
 * Legen sender ekspederingsanmodning til et spesifikt apotek
@@ -127,15 +127,15 @@ Denne flyten illustrerer hvordan aktørene interagerer med systemet under resept
 
 ## Funksjonell flyt refusjon
 
-1. Apotektekniker registerer reseptlevering for en resept med refusjonshjemmel
+1. Apotektekniker registrerer reseptlevering for en resept med refusjonshjemmel
 2. Systemet beregner korrekt refusjon
     a. Systemet slår opp egenandelfritak for pasient fra NAV
     b. Pasienter uten fødselsnummer eller D-nummer, inkludert EØS borgere
     c. Pasienten kan ikke være død
-    d. Legemidler med forhåndsgodkjent refusjon (paragraf 2)
-    e. Individuell søknad (paragraf 3 - M3, M14, M15, M20)
-    f. Paragraf 4 (legemidler mot smittsomme sykdommer utlevert til personer som ikke er medlem i folketrygden)
-    g. Medisinsk forbruksmatriell (paragraf 5) ihht pris- og produktliste fra Helsedirektoratet
+    d. Legemidler med forhåndsgodkjent refusjon (§ 2)
+    e. Individuell søknad (§ 3 - M3, M14, M15, M20)
+    f. § 4 (legemidler mot smittsomme sykdommer utlevert til personer som ikke er medlem i folketrygden)
+    g. Medisinsk forbruksmatriell (§ 5) ihht pris- og produktliste fra Helsedirektoratet
     h. Prevensjonsmidler til jenter under 20 år
     i. Byttereservasjon til vare som er over trinnpris eller AUP
     j. Refusjon for preparater uten refusjonspris eller maks AUP
@@ -146,7 +146,7 @@ Denne flyten illustrerer hvordan aktørene interagerer med systemet under resept
     o. Andre refusjonsinstanser enn NAV (jernbaneverket)
     p. H-resept - betales av helseforetakene ("men kan brukes utenfor sykehus") - separat M18
     q. Verneplikt - egenandelsfritak
-    r. Yrkesskade ?? paragraf 5-25, brystproteser
+    r. Yrkesskade ?? § 5-25, brystproteser
 3. Pasienten kan nå motta legemidlene og forlate apoteket
 4. HELFO sender oppgjørsresultat når kravet er validert (typisk noen få minutter)
     * Unntak: Dersom HELFO avviser kravet kan apotekmedarbeider korrigere kravet og sende på nytt
@@ -181,7 +181,7 @@ Denne flyten illustrerer hvordan aktørene interagerer med systemet under resept
 
 ## Pasientjournal
 
-Både resepthistorikk og journal for farmasøytiske tjenester er underlagt pasientjournallovens § 3.Saklig virkeområde: "Loven gjelder all behandling av helseopplysninger som er nødvendig for å yte, administrere eller kvalitetssikre helsehjelp til enkeltpersoner." [Merk imidlertid Pasientjournalforskriften § 2.(Unntak for apotek)]
+Både resepthistorikk og journal for farmasøytiske tjenester er underlagt pasientjournallovens § 3.Saklig virkeområde: "Loven gjelder all behandling av helseopplysninger som er nødvendig for å yte, administrere eller kvalitetsikre helsehjelp til enkeltpersoner." [Merk imidlertid Pasientjournalforskriften § 2.(Unntak for apotek)]
 
 Disse journalene inneholder også personlig identifiserbar informasjon og vil dermed være underlagt Personvernforordningen (som erstatter ditto lov, forskrift og direktiv).
 
@@ -196,12 +196,12 @@ Disse to regelsettene er i stor grad overlappende og innebærer en del funksjona
 * Bruker med relevant autorisasjon kan ta ut all informasjon om en pasient på pasientens forespørsel (pasientjournalloven § 18. Informasjon og innsyn)
 * Bruker med relevant autorisasjon kan rette og sperre informasjon om en pasient på pasientens forespørsel (personopplysningsloven § 27. Retting av mangelfulle personopplysninger)
 * Pasientjournalen vil oppdage og forhindre at brukere forsøker å hente ut store mengder med data på kort tid ("resource governor")
-* Som en del av målbilde skal DIFA avlevere informasjon om en pasient til helsenorge.no slik at pasienten kan være selvbetjent på innsyn (pasientjournalloven § 18.Informasjon og innsyn)
+* Som en del av målbilde skal DIFA avlevere informasjon om en pasient til helsenorge.no slik at pasienten kan være selvbetjent på innsyn (pasientjournalloven § 18. Informasjon og innsyn)
 
 
 ## Rapporter
 
-Alle rapporteringsgrensesnitt må renses for personlig identifiserbar informasjon. Personopplysningsloven § 27 og pasientjournalloven § 18 forutsetter at pasienten skal ha anledning til å rette og slette personopplysninger. En konsekvens av dette er at alle kopier av personopplysningene må rettes eller slettes. Dette blir umulig i praksis dersom informasjonen har inngått i rapporteringsgrunnlag.
+Alle rapporteringsgrensesnitt må renses for personlig identifiserbar informasjon. Personopplysningsloven § 11 krever at personopplysninger ikke lagres lengre enn nødvendig. Siden rapporter vil eksporteres fra systemet må disse anonymiseres for å oppfylle lovkravet.
 
 Rapportene vil være basert på reseptutleveringer, men vil ikke inneholde kobling til person. I stedet vil fødselsnummer være erstattet med en sikker generert nøkkel. Nøkkelen vil ikke være et sekvensnummer ettersom dette vil fortelle noe om når den var generert. Der det ikke er påkrevd vil informasjon om hvilket apotek som foretok ekspederingen fjernes. Der det ikke er mulig vil apotek fortrinnsvis erstattes med fylke eller kommune/bydel.
 
@@ -286,7 +286,7 @@ DIFA løsningen oppbevarer store mengder pasientopplysninger og det er kritisk a
 Sikkerhetskravene i prosjektet tar utgangspunkt i Normen faktaark 38 og OWASP ASVS versjon 3.
 
 * Tilgangsstyring (helsepersonelloven § 48): Apotekkjedene vil være ansvarlig for sikker og korrekt *identifisering* av bruker opp og angivelse av HPR nr. Bransjeløsning vil være ansvarlig for rettighetskontroll, spesielt opp mot Helsepersonalregisteret.
-* Sikker kommunikasjon med eHelse: Systemet skal signere meldinger til HELFO og RF i henhold til Rammeverk for elektronisk meldingsutveksling i helsesvesenet
+* Sikker kommunikasjon med eHelse: Systemet skal signere meldinger til HELFO og RF i henhold til Rammeverk for elektronisk meldingsutveksling i helsevesenet
     * Systemet skal behandle private nøkler til virksomhetssertifikater uten at forretningstjenester har direkte tilgang til nøklene (OWASP ASV 7.11)
     * Systemet skal tillate trygg oppdatering av virksomhetssertifikater
 * Personopplysninger vil så langt det er mulig lagres i kryptert form. (OWASP ASVS 7.29). Sikker oppbevaring av data (apotekloven, personopplysningsloven): Oppbevaring i EU (personopplysningsloven § 29). Sikkerhetstiltak ihht personopplysningsloven § 13.
@@ -334,7 +334,7 @@ DIFA vil stille krav til kjedenes Identity Provider:
 * SLA overvåking: Systemadministrator og systemeier skal kunne se på statistikk over alle tjenestekall per tjeneste og aggregert på tjenesteområder. Statistikken skal inneholde bruksfrekvens og responstidstatistikk og understøtte krav om ytelse, skalerbarhet og oppetid. Statistikk skal kunne vises med oppløsning på månedsnivå og dagsnivå.
     * Dersom Leverandøren også leverer drift faller dette inn under driftsavtalen. Dersom drift skal leveres av en tredjepart vil driftsleverandør være ansvarlig for å produsere rapporter etter utviklingsleverandørens spesifikasjon
 * Ytelse og skalerbarhet: Applikasjonen skal kunne håndtere 500 http requester per sekund på topp. 95% av requestene der bruker må vente på svar skal respondere innen 0,5 sekunder.
-    * Kunden spesifisere 200.000 resepter om dagen. Av mangel på mer detaljert statistikk antar leverandøren konservativt at halvparten av dette er i løpet av en time. Det gir opphav til en toppbelastning på 30 resepter per sekund. Arkitekturen legger opp til cirka 12 http requester per sekund med opp til 10 sql queries per request.
+    * Kunden spesifisere 200.000 resepter om dagen. Av mangel på mer detaljert statistikk antar leverandøren konservativt at halvparten av dette er i løpet av en time. Det gir opphav til en toppbelastning på 30 resepter per sekund. Arkitekturen legger opp til cirka 12 http requester per sekund med opptil 10 sql queries per request.
 * Tjenesten skal ha 99,7% oppetid målt på månedsbasis med 30 minutter RPO. Opptid skal måles fra point-of-delivery for DIFA.
     * Nedetid på eHelse og andre nødvendige integrasjoner skal trekkes fra nedetidsberegningen
     * Dersom teknisk drift leveres av tredjepart skal nedetid på nettverk og servere trekkes fra nedetidsberegningen. Dersom leverandørens opsjon om drift innløses inngår nedetid på nettverk og servere som leverandøren er ansvarlig for i nedetidsberegningen
@@ -428,6 +428,8 @@ Versjonen vil inkludere viktige sikkerhetsmekanismer som vil understøtte resept
 
 Denne leveransen er ment til å tas i bruk av apotekene. Dette er en leveranse med lav risiko: Dersom noe ikke skal være av tilstrekkelig kvalitet kan apotekene benytte eksisterende prosedyrer for å registrere og kreve refusjon for relevante farmasøytiske tjenester. Det vil antageligvis være hensiktsmessig å ta i bruk kun én farmasøytisk tjeneste den første måneden etter leveranse og gradvis rulle inn andre tjenester.
 
+I denne leveransen vil løsningen måtte godkjennes av Direktoratet for e-Helse. Kunden er ansvarlig for å etablere korrekt dialog med direktoratet, mens leverandøren er ansvarlig for den operative oppfølgingen av akseptansetesten.
+
 
 #### Steg 3: Resepthistorikk
 
@@ -467,6 +469,8 @@ Kunden er ansvarlig for å godkjenne spesifikasjoner levert av leverandøren og 
 | Produkteier (apotek)   | Madjid S (Difa)    | Holder dialog med apotekene om behov og leveranser |
 
 ### Teamsammensetning - leverandør
+
+![Organisasjonskart](organisasjonskart.png)
 
 Leverandørens team vil bestå av:
 
@@ -508,9 +512,9 @@ Leverandøren forventer at det funksjonelle omfanget til prosjektet kommer til �
 
 Hver uke vil prosjektet avholde en times minidemo der Apotekforeningen og alle prosjektmedlemmer forventes å være til stede. Hver måned, med start etter én måned, vil det tilsvarende avholdes en mer formell demo der apotekkjedene også er invitert til å stille. Etter demonstrasjonen vil teamet og Apotekforeningen avholde en retrospektiv der man ser på hvordan prosessen kan forbedres.
 
-I etterkant av ekstern demo vil prosjektet også vurdere behovet for endringer i produkt backlogg. Både Kunde og Leverandør kan gi innspill til endringer i produkt backlogg. Bytte av oppgaver «like for like», det vil si en oppgave inn og en annen ut, kan gjøres så lenge oppgavene er ca like store, at det ikke i vesentlig grad påvirker avhengigheter mellom oppgaver og ellers ikke påfører Leverandøren ekstraarbeid. Endringer som påvirker omfang må endringshåndteres i henhold til kontraktens retningslinjer for dette. Uansett grunn til endringer i produkt backlogg må dette avtales og være en enighet om mellom Leverandør og Kunde, og dette må dokumenteres, sammen med de eventuelle konsekvenser endringen medfører.
+I etterkant av ekstern demo vil prosjektet også vurdere behovet for endringer i produkt backlogg. Både Kunde og Leverandør kan gi innspill til endringer i produkt backlogg. Bytte av oppgaver «like for like», det vil si en oppgave inn og en annen ut, kan gjøres så lenge oppgavene er cirka like store, at det ikke i vesentlig grad påvirker avhengigheter mellom oppgaver og ellers ikke påfører Leverandøren ekstraarbeid. Endringer som påvirker omfang må endringshåndteres i henhold til kontraktens retningslinjer for dette. Uansett grunn til endringer i produkt backlogg må dette avtales og være en enighet om mellom Leverandør og Kunde, og dette må dokumenteres, sammen med de eventuelle konsekvenser endringen medfører.
 
-Første akseptansetest av versjon 0.1 vil forventes klar etter 3 måneder. Denne løsningen vil ikke inneholde reele data, men vil kunne benyttes av apotekene til å teste sin integrasjon. Versjon 0.2, 0.3 og 1.0 vil forventes med litt høyere frekvens enn kvartalsvis. Funksjonalitet som inngår i leveransene vil produksjonsettes fortløpende med cirka ukentlig frekvens. Uferdig funksjonalitet vil være skrudd av i disse produksjonssettingene.
+Første akseptansetest av versjon 0.1 vil forventes klar etter 3 måneder. Denne løsningen vil ikke inneholde reelle data, men vil kunne benyttes av apotekene til å teste sin integrasjon. Versjon 0.2, 0.3 og 1.0 vil forventes med litt høyere frekvens enn kvartalsvis. Funksjonalitet som inngår i leveransene vil produksjonsettes fortløpende med cirka ukentlig frekvens. Uferdig funksjonalitet vil være skrudd av i disse produksjonssettingene.
 
 Akseptansetest vil foregå med representanter for kjedene (?) og direktoratet for e-Helse.
 
@@ -596,7 +600,7 @@ Oppgavene på produkt backlogg skal dekke alle *aktiviteter* som skal til for at
 
 ### Kanban
 
-Oppgavene vil flyte gjennom et kjede med arbeidsprosesser etter et Kanban prinsipp. Illustrasjonen under er lånt av Henrik Kniberg, og viser hvordan en Kanban-tavle kan se ut. I illustrasjonen under er oppgavene lapper på en tavle. Oppgavene flyttes fra venstre mot høyre. Hver kolonne (Next, Analysis, etc) representerer et steg i prosessen (stasjon på samlebåndet). Hvert steg innebærer en foredling av oppgaven, som tar den nærmere produksjon.
+Oppgavene vil flyte gjennom en kjede med arbeidsprosesser etter et Kanban prinsipp. Illustrasjonen under er lånt av Henrik Kniberg, og viser hvordan en Kanban-tavle kan se ut. I illustrasjonen under er oppgavene lapper på en tavle. Oppgavene flyttes fra venstre mot høyre. Hver kolonne (Next, Analysis, etc) representerer et steg i prosessen (stasjon på samlebåndet). Hvert steg innebærer en foredling av oppgaven, som tar den nærmere produksjon.
 
 Kanbans hovedmekanisme for å sikre en god flyt er å begrense antallet oppgaver som til enhver tid kan befinne seg samtidig på en stasjon. I Kanban-litteraturen kalles dette ofte for «Work In Progress Limit». Begrensningen per stasjon er angitt som røde tall på illustrasjonen under. Denne mekanismen tvinger frem at hindringer blir synlig og skaper samarbeid i teamet. For at dette skal fungere er det avgjørende at teamet respekterer og overholder denne begrensningen.
 
@@ -624,14 +628,14 @@ Når man utvikler systemer som er underlagt omfattende regler og med høye kvali
 
 Sett med "lean" perspektiv, motvirker parprogrammering klassiske "wastes" i prosjekter:
 
-* Fordi grensegang mellom utvikleres ansvarsområdet blir bedre kjent alle, vil redundant funksjonalitet reduseres
-* Fordi flere personer mestrer alle deler av systemet unngår man å vente på spesialistkompetanse
-* Fordi effektive arbeidsmetoder spres i teamet blir alle mer effektive
-* Fordi all kode blir sett av to sett med øyne reduseres antall feil
-* Fordi teammedlemmene jobber tetter blir det mindre behov for avklaring i overleveringer
-* Fordi teamet konsenterer seg om et mindre antall oppgaver er det færre oppgaver som er under arbeid samtidig
-* Fordi et par besitter mer kompetanse enn et individ er det mindre behov for overleveringer under utviklingen av en oppgave
-* Fordi alle får sjansen til å påvirke hverandre fanger vi opp kunnskapet hos alle i teamet
+* Fordi grensegang mellom utvikleres ansvarsområdet blir bedre kjent alle, vil *redundant funksjonalitet* reduseres
+* Fordi flere personer mestrer alle deler av systemet unngår man å *vente* på spesialistkompetanse
+* Fordi effektive arbeidsmetoder spres i teamet unngår man *ineffektivt arbeid*
+* Fordi all kode blir sett av to sett med øyne reduseres *antall feil*
+* Fordi teammedlemmene jobber tetter blir det mindre behov for *avklaring* i overleveringer
+* Fordi teamet konsentrerer seg om et mindre antall oppgaver reduserer man *samtidig pågående oppgaver*
+* Fordi et par besitter mer kompetanse enn et individ er det mindre behov for *overleveringer* under utviklingen av en oppgave
+* Fordi alle får sjansen til å påvirke hverandre unngår vi å *forkaste kunnskap i teamet*
 
 
 ### Testing
@@ -701,7 +705,7 @@ Se også kapittel om sikkerhetsgjennomganger.
 
 # Systemdesign
 
-Strukturen i systemdesignet er lagt opp etter 4C prinsippet fra Simon Browns bok "Software Architecture for Developer". Innfallsvinkelen beskriver systemet først fra en overordnet kontekst (første C - Context), til elementene som skal kjøre på en driftsplattform (andre C - container), til komponentene og tjenestene som realiserer funksjonaliteten (tredje C - components) til informasjonsmodellen som beskriver foretningskonseptene (siste C - classes). I vår bruk kan Context og Containers sees som uttømmende, mens Components viser prinsippene rundt referansearkitekturen med spesiell fokus på viktige aspekter rundt sikkerhet og kommunikasjon.
+Strukturen i systemdesignet er lagt opp etter 4C prinsippet fra Simon Browns bok "Software Architecture for Developer". Innfallsvinkelen beskriver systemet først fra en overordnet kontekst (første C - Context), til elementene som skal kjøre på en driftsplattform (andre C - container), til komponentene og tjenestene som realiserer funksjonaliteten (tredje C - components) til informasjonsmodellen som beskriver forretningskonseptene (siste C - classes). I vår bruk kan Context og Containers sees som uttømmende, mens Components viser prinsippene rundt referansearkitekturen med spesiell fokus på viktige aspekter rundt sikkerhet og kommunikasjon.
 
 
 
@@ -770,17 +774,17 @@ Kjeden kan velge om farmasøyt skal registrere tjenesten i et brukergrensesnitt 
 
 | Hvem                 | Hva                  | Hvordan                                     |
 |----------------------|----------------------|---------------------------------------------|
-| POS -> DIFA          | Resepturekspedering  | JSON POST basert API autentisert med oauth2 |
-| Nettapotek -> DIFA   | Resepturekspedering  | JSON POST basert API autentisert med oauth2 |
-| Multidose  -> DIFA   | Resepturekspedering  | JSON POST basert API autentisert med oauth2 |
-| ERP  -> DIFA         | Refusjonsstatus      | JSON GET basert API autentisert med oauth2 på applikasjonsnivå |
+| POS → DIFA           | Resepturekspedering  | JSON POST basert API autentisert med oauth2 |
+| Nettapotek → DIFA    | Resepturekspedering  | JSON POST basert API autentisert med oauth2 |
+| Multidose  → DIFA    | Resepturekspedering  | JSON POST basert API autentisert med oauth2 |
+| ERP  → DIFA          | Refusjonsstatus      | JSON GET basert API autentisert med oauth2 på applikasjonsnivå |
 | Reseptformidler      | Resepturekspedering  | M9.1, M9.2, M9.3, M9.4 med ebXML over SOAP  |
 | HELFO                | Refusjonskrav        | M18 ebXML over SMTP                         |
-| HELFO -> DIFA        | Refusjonsstatus      | M22, M23 ebXML over SMTP                    |
+| HELFO → DIFA         | Refusjonsstatus      | M22, M23 ebXML over SMTP                    |
 | eHelse               | Egenandelstatus      | DIFA henter status for egenandelfritak      |
 | FarmaLogg            | Legemidler           | DIFA henter. Løsningsforslag: HTTP GET XML  |
 | Helsedir             | Helsepersonell       | DIFA henter HPR personregister.hl7          |
-| helsenorge.no (fremtidig) | Pasientjournal  | DIFA leverer. To be decided                 |
+| helsenorge.no (fremtidig) | Pasientjournal  | DIFA leverer journalopplyninger. (Langsiktig målbilde) |
 
 Grensesnittene mot Reseptformidleren og HELFO er beskrevet på https://ehelse.no/e-resept-kjernejournal-og-helsenorgeno/e-resept, samt https://ehelse.no/ebxml-rammeverk-his-10372011
 
@@ -866,7 +870,7 @@ Dersom drift skal leveres av tredjepart så vil driftsleverandør være ansvarli
 
 Dette kapittelet viser hvordan systemet er sett for seg implementert. Kapittelet er delt i to deler: Først beskriver dokumentet den sentrale funksjonaliteten knyttet til reseptur. Så beskriver vi generelle gjennomgripende implementasjon av sikkerhet og tilgangskontroll.
 
-Funksjonaliteten knyttet til reseptur er beskrivet på tre måter: Den normale bruken der kjedens POS system eksponerer funksjonalitet gjennom DIFA API, brukergrensesnittopsjonen der resepturgrensesnittet i DIFA leser beholdning fra kjedens varesystem, og i brukergrensesnittet for test og demonstrasjon. Testbrukergrensesnittet vil fungere tilsvarende som brukergrensesnittopsjonen, men uten integrasjon med kjedens varesystem.
+Funksjonaliteten knyttet til reseptur er beskrevet på tre måter: Den normale bruken der kjedens POS system eksponerer funksjonalitet gjennom DIFA API, brukergrensesnittopsjonen der resepturgrensesnittet i DIFA leser beholdning fra kjedens varesystem, og i brukergrensesnittet for test og demonstrasjon. Testbrukergrensesnittet vil fungere tilsvarende som brukergrensesnittopsjonen, men uten integrasjon med kjedens varesystem.
 
 Leverandøren foreslår at Farmasøyt benytter DIFA GUI til å foreta farmasøytkontroll. DIFA vil implementere et høy og samtidig pragmatisk sikkerhetsnivå for farmasøytkontroll.
 
@@ -945,7 +949,9 @@ Det er kun mulig å delvis benytte HL7 ettersom det ikke fullt ut støtter norsk
 
 Det er viktig for modellene å skille informasjon som krever behandling under personvernregler fra informasjon som kan behandles mer fritt. Dette vil gjøres ved at informasjonselementer som skal inngå i rapportering og statistikk vil ha en "token" i stedet for fødselsnummer eller annen identifiserbar nøkkel for pasienten. Denne blir generert på en måte der det ikke er mulig å utlede alder, kjønn, bosted eller andre aspekter ved personen. (Figurene er ikke oppdatert til å vise dette enda)
 
-![Begrepsmodell](images/class-reseptur-logisk.png)
+![Resepturbegreper](images/class-reseptur-logisk.png)
+
+![Legemiddelbegreper](images/class-medication.png)
 
 ![Farmasøytiske tjenester](images/class-farmasøytisk-konseptuell.png)
 
@@ -957,7 +963,7 @@ Det er viktig for modellene å skille informasjon som krever behandling under pe
 
 Leverandøren er ikke ansvarlig for feil i apotekkjeders bruk av API der denne bruken strider mot dokumenterte API. Leverandøren er ikke ansvarlig for feil i apotekkjeders oppsett eller bruk av Identity Provider.
 
-## Generelt om fri programvare (jf avtalens punkt 10.7)
+## Generelt om fri programvare (jfr. avtalens punkt 10.7)
 
 Programvaren leveres som en tjeneste med et definert grensesnitt. Leverandøren er ansvarlig for korrekt bruk av lisenser i programvare som brukes i produksjon av tjenesten. Leverandøren er ansvarlig for rettsmangler ved fri programvare. Leverandøren vil som hovedregel kun benytte fri programvare som ikke har en gjensidighetsklausul. I praksis betyr dette at programvare ikke vil benyttes under GNU Public License (GPL) og Affero GPL.
 
