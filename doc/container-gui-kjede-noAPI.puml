@@ -39,9 +39,9 @@ Apotektekniker -> Apotektekniker: Skriv reseptetikett
 Apotektekniker -> DifaGUI: Skriver inn GTIN og etikettnummer
 note right of Apotektekniker: Eller strekkodescanner i tastaturmodus
 DifaGUI -> Difa: Teknisk kontroll
-Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasikontroll"
-Farmasøyt -> DifaGUI: Vis resepter klar til farmasøytisk kontroll
-Farmasøyt -> DifaGUI: Utfør farmasikontroll
+Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
+Farmasøyt -> DifaGUI: Vis resepter klar til farmasøytkontroll
+Farmasøyt -> DifaGUI: Utfør farmasøytkontroll
 Apotektekniker <- Farmasøyt: "Vær så god"
 Apotektekniker -> DifaGUI: Utlever
 activate DifaGUI

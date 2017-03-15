@@ -43,7 +43,7 @@ POS -> AuthorizationFilter ++: Ekspeder resept
             RFGateway -> RF ++: Ekspeder resept (M9.3)
             RFGateway <-- RF --: (M9.4)
         MedicalDispenseController <-- RFGateway --
-        MedicalDispenseController -> HPR: Hent rekvisisjonsrett
+        MedicalDispenseController -> HPR: Hent rekvisisjonsrett for forskriver
         MedicalDispenseController -> Farmalogg: Medikament-informasjon
         MedicalDispenseController <-- Farmalogg: Bivirkninger, interaksjoner, trinnpris,\nbyttegruppe med legemiddeldetaljer
         MedicalDispenseController -> MedicalDispenseController: Bruk reseptliste til å generere varsler

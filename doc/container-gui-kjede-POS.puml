@@ -53,10 +53,10 @@ Apotektekniker <-- Reseptur --
 Apotektekniker -> Reseptur: Skriv reseptetikett
 Apotektekniker -> Reseptur: Scan strekkode på etikett og pakning
 Reseptur -> Difa: Teknisk kontroll
-Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasikontroll"
-Farmasøyt -> Difa: Hent resepter klar til farmasøytisk kontroll
+Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
+Farmasøyt -> Difa: Hent resepter klar til farmasøytkontroll
 Difa -> DB
-Farmasøyt -> Difa: Utfør farmasikontroll
+Farmasøyt -> Difa: Utfør farmasøytkontroll
 Difa -> DB
 Apotektekniker <- Farmasøyt: "Vær så god"
 Apotektekniker -> Reseptur ++: Start utlevering
@@ -66,8 +66,9 @@ Apotektekniker <-- Reseptur --
 Apotektekniker -> POS ++: Registrer signatur og betaling
 POS -> Reseptur ++: Fullfør utlevering
 Reseptur -> Difa: Fullfør utlevering
-Difa -> eHelse: M10
 Difa -> DB
+Difa -> eHelse: M10
+Difa -> eHelse: M18
 Reseptur <-- Difa
 POS <-- Reseptur --
 Apotektekniker <-- POS --

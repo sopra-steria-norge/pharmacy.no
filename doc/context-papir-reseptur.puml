@@ -34,7 +34,7 @@ end group
 
 
 POS -> Difa: Registrer utlevering med varevalg, strekkoder,\noppdatert etikett,\nfarmasøyts aksjon for alle varsler,\nunderskrift, scannet dokumentasjon
-Note right of POS: Her kunne Difa tilby en mobil app for farmasøyt for farmasikontroll
+Note right of POS: Her kunne Difa tilby en mobil app for farmasøyt for farmasøytkontroll
 activate Difa
 Difa -> Difa: Verifiser rekvirent, varsler, strekkoder
 Difa -> RF: Utleveringsmelding
