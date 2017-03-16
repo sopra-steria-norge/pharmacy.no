@@ -44,9 +44,7 @@ DIFA vil levere følgende tjenester:
 Merk at alle oppslag på pasientinformasjon skal logges med årsak til oppslaget og eventuell legitimasjon for den som krevde oppslaget. Merk at all rapporteringsinformasjon vil ha fjernet koblinger til identifiserbare personer.
 
 
-
-
-## Avtalens omfang
+## Resultatmål
 
 Avtalen dekker leveranse av første versjon av DIFA som skal inneholde nødvendig funksjonalitet for å understøtte reseptbehandling i apoteker. Systemet DIFA skal i versjon 1.0 levere et API til apotekkjedene for håndtering av resepter, refusjon og utvalgte farmasøytiske tjenester. Leveransen innebærer tilstrekkelig ytelseskrav levert til et definert nettverksmessig point-of-delivery. Leveransen inneholder nødvendige test- og driftsmekanismer for å sikre at apotekkjedene kan ta i bruk tjenesten samt integrasjon med tjenester på Norsk helsenett som skal til for å realisere tjenesten.
 
@@ -355,6 +353,9 @@ DIFA vil stille krav til kjedenes Identity Provider:
 
 ### Sertifikathåndtering
 
+Se kapittelet om Sikkerhetsarkitektur. Denne løsningen må godkjennes av direktoratet for e-Helse. Det vil være vanskelig å se for seg at DIFA kan levere et forenklende API dersom e-Helse ikke godkjenner løsningen.
+
+
 ### Beregning av interaksjoner basert på meldinger fra Reseptformidleren
 
 For å forbedre pasientsikkerheten samtidig som man ivaretar personvernet ville det være en fordel om Reseptformidleren kunne endres til å inkludere legemiddelkode i Reseptlista (M9.2)
@@ -392,7 +393,7 @@ En total prosjektplan kan være som på følgende figur. Numre angir cirka uketa
 
 ![Leveranseoversikt](images/gantt-transisjonsplan.png)
 
-Hvert funksjonelle omfang har en utviklingsfase med tilhørende spesifiseringsaktiviteter. Godkjenningsperioden utgjør første del av produksjonsperiodene. Prosjektet vil foreta en teknisk produksjonsetting med cirka ukentlig frekvens, men funksjonalitet vil godkjennes når et funksjonelt område er komplett.
+Hvert versjon inkluderer spesifikasjon, utvikling og testaktiviteter knyttet til versjonen. Prosjektet vil foreta en teknisk produksjonsetting med cirka ukentlig frekvens, men funksjonalitet vil godkjennes når et funksjonelt område er komplett.
 
 DIFA versjon 1.0 vil leveres gjennom SSA-T som et utviklingsløp og en endelig akseptansetest og godkjenning. Ut over dette vil prosjektet leveres gjennom en smidig utviklingsmetodikk med funksjonelle akseptansetester underveis. Disse skal ikke anses for å være delleveranser under SSA-T. Leverandøren vil i sin testplan sette krav til Kundens medvirkning underveis i prosjektet.     
 
@@ -403,21 +404,21 @@ Det testbare API'et vil la apotekene teste sine POS systemer mot et API i et sim
 
 Ved å levere et versjon som ikke behandler personsensitiv informasjon i produksjonsmiljøet først vil prosjektet sette opp et produksjonsklart miljø uten risiko på brudd på regelverk.
 
-Omfang av leveransen:
+Omfang av versjonen:
 
-| Oppgave                                   |
-|-------------------------------------------|
+| Oppgave                                                                       |
+|-------------------------------------------------------------------------------|
 | Brukergrensesnitt for å legge opp en testresept og gjennomføre ekspedering    |
-| Innlastning av grunnregistre (helsepersonell og legemidler) |
-| Kommunikasjon med DIFA API                |
-| Utrulling av server                       |
-| Autentisering av DIFA GUI                 |
-| Nedlastning av resept (korrekt RF simulator) |
-| Signering av meldinger mot RF             |
-| Papirresept                               |
-| Beregning av enkle refusjonskrav          |
-| Farmasøytiske varsler                     |
-| Egenandelsgrenser, trinnpris, makspris    |
+| Innlastning av grunnregistre (helsepersonell og legemidler)                   |
+| Kommunikasjon med DIFA API                                                    |
+| Utrulling av server                                                           |
+| Autentisering av DIFA GUI                                                     |
+| Nedlastning av resept (korrekt RF simulator)                                  |
+| Signering av meldinger mot RF                                                 |
+| Papirresept                                                                   |
+| Beregning av enkle refusjonskrav                                              |
+| Farmasøytiske varsler                                                         |
+| Egenandelsgrenser, trinnpris, makspris                                        |
 
 
 #### Steg 2: Farmasøytiske tjenester
@@ -426,7 +427,7 @@ Med farmasøytiske tjenester kan apotekene registrere medisinstart, LAR og inhal
 
 Versjonen vil inkludere viktige sikkerhetsmekanismer som vil understøtte resepturflyten: Sertifikathåndtering i kommunikasjonen mot HELFO (M18) og nødvendige sikkerhetsmekanismer for å understøtte dette (HSM).
 
-Denne leveransen er ment til å tas i bruk av apotekene. Dette er en leveranse med lav risiko: Dersom noe ikke skal være av tilstrekkelig kvalitet kan apotekene benytte eksisterende prosedyrer for å registrere og kreve refusjon for relevante farmasøytiske tjenester. Det vil antageligvis være hensiktsmessig å ta i bruk kun én farmasøytisk tjeneste den første måneden etter leveranse og gradvis rulle inn andre tjenester.
+Denne leveransen er ment til å tas i bruk av apotekene. Dette er en versjon med lav risiko: Dersom noe ikke skal være av tilstrekkelig kvalitet kan apotekene benytte eksisterende prosedyrer for å registrere og kreve refusjon for relevante farmasøytiske tjenester. Det vil antageligvis være hensiktsmessig å ta i bruk kun én farmasøytisk tjeneste den første måneden etter versjon og gradvis rulle inn andre tjenester.
 
 I denne leveransen vil løsningen måtte godkjennes av Direktoratet for e-Helse. Kunden er ansvarlig for å etablere korrekt dialog med direktoratet, mens leverandøren er ansvarlig for den operative oppfølgingen av akseptansetesten.
 
@@ -437,12 +438,14 @@ Versjonen vil inkludere å sette opp datamigrering fra FarmaPro til sentralt res
 
 Datamigrering vil implementeres ved at FarmaPro versjon 5.20 nattlig laster opp en kryptert eksport av registre. DIFA importerer differansen ved å sammenligne eksporten fra hvert apotek med informasjonen DIFA allerede har fra apoteket. DIFA vil lese inn eksportfilene umiddelbart og slette disse etter fullført innlesning.
 
-Leveransen vil også inkludere de mest kritiske rapporteringsfunksjonene, spesielt bransjestatistikken.
+Versjonen vil også inkludere de mest kritiske rapporteringsfunksjonene, spesielt bransjestatistikken.
 
 
 #### Steg 4: Reseptur API
 
 Denne versjonen vil utvide API'et for reseptur med integrasjon mot HELFO og Reseptformidleren og inkludere et enkelt GUI for demo, test og akseptanse av løsningen.
+
+I denne leveransen vil løsningen måtte godkjennes av Direktoratet for e-Helse. Kunden er ansvarlig for å etablere korrekt dialog med direktoratet, mens leverandøren er ansvarlig for den operative oppfølgingen av akseptansetesten.
 
 Denne versjonen fullfører versjon 1.0 av omfanget i løsningsbeskrivelsen, samt farmasøytiske tjenester.
 
@@ -458,7 +461,7 @@ Denne leveransen vil inkludere rapporter som ikke allerede er levert, samt forbe
 
 ### Kundens ansvar og medvirkning (jf avtalens punkt 6.1)
 
-Kunden skal godkjenne alle testbeskrivelser og ferdigstilte oppgaver innen rimelig tid. Leverandøren vil utarbeide et grunnlag som kunden kan forholde seg til. Kunden skal delta på ukentlige avsjekkingsmøter samt på månedlige koordineringsmøter med apotekkjedene. Kunden må opprettholde dialog med apotekkjedene og myndigheter for å sikre nødvendige avklaringer og beslutninger som berører bransjen eller myndigheter.
+Kunden skal godkjenne alle akseptansekriterier og ferdigstilte oppgaver innen rimelig tid. Leverandøren vil utarbeide et grunnlag som kunden kan forholde seg til. Kunden skal delta på ukentlige avsjekkingsmøter samt på månedlige koordineringsmøter med apotekkjedene. Kunden må opprettholde dialog med apotekkjedene og myndigheter for å sikre nødvendige avklaringer og beslutninger som berører bransjen eller myndigheter.
 
 Kunden er ansvarlig for å godkjenne spesifikasjoner levert av leverandøren og for å godkjenne produksjonsettinger.
 
@@ -481,7 +484,7 @@ Leverandørens team vil bestå av:
 
 Leverandøren har vurdert et samlokalisert team i Oslo og å benytte utenlandske ressurser. For å unngå å utsette kunden for risiko har leverandøren vurdert en sekundærlokasjon innen EU på leverandørens delivery center i Spania.
 
-Leverandørens vurdering er at både testteamet og det funksjonelle teamet vil være avhengig av kunnskap om norsk lovverk og helsestandarder og således ikke kan forventes å levere godt fra utlandet. Utviklingsteamet kan vært delvis plassert i Spania, men dette vil kreve mye arbeidskrevende oversettelse og reformulering av norske lovverk og standarder og ville dermed kreve mer bemanning både i Norge og Spania for å levere samme omfang. Ettersom utviklingsteamet utgjør under halve bemanningen er besparelsene ikke betydelige. Behovet for oversettelse vil også øke risikoen for feil. Leverandøren anser det derfor som minst risikabelt og billigst å levere prosjektet med kun ressurser i Oslo.
+Leverandørens vurdering er at både testerne og de funksjonelle ekspertene vil være avhengig av kunnskap om norsk lovverk og helsestandarder og således ikke kan forventes å levere godt fra utlandet. Utviklingsteamet kan vært delvis plassert i Spania, men dette vil kreve mye arbeidskrevende oversettelse og reformulering av norske lovverk og standarder og ville dermed kreve mer bemanning både i Norge og Spania for å levere samme omfang. Ettersom utviklingsteamet utgjør under halve bemanningen er besparelsene ikke betydelige. Behovet for oversettelse vil også øke risikoen for feil. Leverandøren anser det derfor som minst risikabelt og billigst å levere prosjektet med kun ressurser i Oslo.
 
 Teamet vil inkludere noen deltidsroller ("hatter") som enkeltpersoner vil utføre i tillegg til sine primære roller:
 
@@ -510,7 +513,7 @@ Disse prinsippene vil være nyttige for å prioritere hensyn rundt planlegging, 
 
 Leverandøren forventer at det funksjonelle omfanget til prosjektet kommer til å være omforent ved prosjektets start. De mest sentrale oppgavene kommer også til å være de facto detaljspesifisert gjennom grensesnittbeskrivelser fra eHelse og lovmessige bestemmelser. Prosjektet vil derfor starte å ferdigstille funksjonalitet i et miljø som gradvis vil bli mer produksjonsklart med ukentlig frekvens.
 
-Hver uke vil prosjektet avholde en times minidemo der Apotekforeningen og alle prosjektmedlemmer forventes å være til stede. Hver måned, med start etter én måned, vil det tilsvarende avholdes en mer formell demo der apotekkjedene også er invitert til å stille. Etter demonstrasjonen vil teamet og Apotekforeningen avholde en retrospektiv der man ser på hvordan prosessen kan forbedres.
+Hver uke vil prosjektet avholde en kort minidemo der kunden og alle prosjektmedlemmer forventes å være til stede. Hver måned, med start etter én måned, vil det tilsvarende avholdes en mer formell demo der apotekkjedene også er invitert til å stille. Etter demonstrasjonen vil kunde og teamet avholde en retrospektiv der man ser på hvordan prosessen kan forbedres.
 
 I etterkant av ekstern demo vil prosjektet også vurdere behovet for endringer i produkt backlogg. Både Kunde og Leverandør kan gi innspill til endringer i produkt backlogg. Bytte av oppgaver «like for like», det vil si en oppgave inn og en annen ut, kan gjøres så lenge oppgavene er cirka like store, at det ikke i vesentlig grad påvirker avhengigheter mellom oppgaver og ellers ikke påfører Leverandøren ekstraarbeid. Endringer som påvirker omfang må endringshåndteres i henhold til kontraktens retningslinjer for dette. Uansett grunn til endringer i produkt backlogg må dette avtales og være en enighet om mellom Leverandør og Kunde, og dette må dokumenteres, sammen med de eventuelle konsekvenser endringen medfører.
 
