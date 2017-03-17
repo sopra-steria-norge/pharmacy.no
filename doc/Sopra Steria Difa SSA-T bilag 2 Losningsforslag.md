@@ -956,7 +956,7 @@ Det er viktig for modellene å skille informasjon som krever behandling under pe
 
 ![Legemiddelbegreper](images/class-medication.png)
 
-![Farmasøytiske tjenester](images/class-farmasøytisk-konseptuell.png)
+![Farmasøytiske tjenester (konseptuell)](images/class-farmasøytisk-konseptuell.png)
 
 
 
