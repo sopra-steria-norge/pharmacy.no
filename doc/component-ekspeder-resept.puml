@@ -1,19 +1,19 @@
 @startuml
 
 participant POS
-box "Difa App Server"
+box "DIFA App Server"
     participant AuthorizationFilter
     boundary MedicalDispenseController
     entity MedicalOrderRepo
     entity MedicalDispenseRepo
     participant RFGateway
 end box
-box "Difa Database"
+box "DIFA Database"
     database RX
     database HPR <<kopi>>
     database Farmalogg <<kopi>>
 end box
-box "Difa"
+box "DIFA"
     participant HSM
 end box
 participant RF
@@ -21,7 +21,7 @@ participant RF
 POS -> AuthorizationFilter ++: Ekspeder resept
     AuthorizationFilter -> AuthorizationFilter ++: Autoriser bruker
         AuthorizationFilter -> AuthorizationFilter: Validate JWT (autentisering)
-        AuthorizationFilter -> HPR: Verifiser at bruker er autorisert farmasÃ¸yt
+        AuthorizationFilter -> HPR: Verifiser at bruker er autorisert farmasøyt
     AuthorizationFilter <-- AuthorizationFilter --
     AuthorizationFilter -> MedicalDispenseController ++: Ekspeder resept
         alt Reseptliste ikke lagret lokalt
@@ -46,7 +46,7 @@ POS -> AuthorizationFilter ++: Ekspeder resept
         MedicalDispenseController -> HPR: Hent rekvisisjonsrett for forskriver
         MedicalDispenseController -> Farmalogg: Medikament-informasjon
         MedicalDispenseController <-- Farmalogg: Bivirkninger, interaksjoner, trinnpris,\nbyttegruppe med legemiddeldetaljer
-        MedicalDispenseController -> MedicalDispenseController: Bruk reseptliste til Ã¥ generere varsler
+        MedicalDispenseController -> MedicalDispenseController: Bruk reseptliste til å generere varsler
         MedicalDispenseController -> MedicalDispenseRepo ++: Lagre resept under ekspedering
             MedicalDispenseRepo -> RX: Lagre resept under ekspedering
         MedicalDispenseController <-- MedicalDispenseRepo --

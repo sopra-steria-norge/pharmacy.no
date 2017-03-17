@@ -9,7 +9,7 @@ interface FarmasøytApp <<opsjon>> #lime
 Tester -> Kjede
 Tester -> FarmasøytApp
 
-cloud Difa {
+cloud DIFA {
     node Reseptur #lime
     node Resepthistorikk #lime
     node Farmasøytisk #lime

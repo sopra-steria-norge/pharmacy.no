@@ -7,7 +7,7 @@ end box
 
 actor Buypass
 
-box "Difa"
+box "DIFA"
     participant DifaGUI
     database db
     database HSM

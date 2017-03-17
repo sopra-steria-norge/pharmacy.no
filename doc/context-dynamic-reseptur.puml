@@ -2,8 +2,8 @@
 
 actor Apotektekniker
 actor Farmasøyt
-box "Difa tjenesten"
-    participant Difa
+box "DIFA tjenesten"
+    participant DIFA
     database HPR
     database Farmalogg
 end box
@@ -11,46 +11,46 @@ database Personregisteret
 database RF
 participant HELFO
 
-activate Difa
-Apotektekniker -> Difa: Find person basert på kriterier
-Difa -> Personregisteret
-Apotektekniker <-- Difa: Liste med personer
-deactivate Difa
+activate DIFA
+Apotektekniker -> DIFA: Find person basert på kriterier
+DIFA -> Personregisteret
+Apotektekniker <-- DIFA: Liste med personer
+deactivate DIFA
 
-Apotektekniker -> Difa: Hent resepter for person
-activate Difa
-Difa -> RF: Hent resepter for person
-Apotektekniker <-- Difa: Reseptliste
-deactivate Difa
+Apotektekniker -> DIFA: Hent resepter for person
+activate DIFA
+DIFA -> RF: Hent resepter for person
+Apotektekniker <-- DIFA: Reseptliste
+deactivate DIFA
 
-Apotektekniker -> Difa: Ekspeder resept
-activate Difa
-Difa -> RF: Ekspeder resept
-Difa -> HPR: Hent rekvisisjonsrett
-Difa -> Farmalogg: Medikament-informasjon
-Difa <-- Farmalogg: Bivirkninger, interaksjoner, trinnpris,\nbyttegruppe med legemiddeldetaljer
-Difa -> Difa: Bruk historikk til å generere varsler
-Apotektekniker <-- Difa: Reseptliste med alternativer,\nbivirkninger, varsler
-deactivate Difa
+Apotektekniker -> DIFA: Ekspeder resept
+activate DIFA
+DIFA -> RF: Ekspeder resept
+DIFA -> HPR: Hent rekvisisjonsrett
+DIFA -> Farmalogg: Medikament-informasjon
+DIFA <-- Farmalogg: Bivirkninger, interaksjoner, trinnpris,\nbyttegruppe med legemiddeldetaljer
+DIFA -> DIFA: Bruk historikk til å generere varsler
+Apotektekniker <-- DIFA: Reseptliste med alternativer,\nbivirkninger, varsler
+deactivate DIFA
 
 group Utføres av Apotektekniker etter behov
-Apotektekniker -> Difa: Beregne refusjon basert på varevalg
-Apotektekniker -> Difa: Forfalskningskontroll
-Apotektekniker -> Difa: Verifiser utlevering
+Apotektekniker -> DIFA: Beregne refusjon basert på varevalg
+Apotektekniker -> DIFA: Forfalskningskontroll
+Apotektekniker -> DIFA: Verifiser utlevering
 end group
 
 group Kan skje på andre tidspunkt
-Farmasøyt -> Difa: Hent resepter klar til farmasøytkontroll
-Farmasøyt -> Difa: Utfør farmasøytkontroll
+Farmasøyt -> DIFA: Hent resepter klar til farmasøytkontroll
+Farmasøyt -> DIFA: Utfør farmasøytkontroll
 end group
 
 
-Apotektekniker -> Difa: Registrer utlevering med varevalg, strekkoder,\noppdatert etikett,\nfarmasøyts aksjon for alle varsler,\nunderskrift
-activate Difa
-Difa -> Difa: Verifiser rekvirent, varsler, strekkoder
-Difa -> RF: Utleveringsmelding
-Difa -> HELFO: Send refusjonskrav
-Apotektekniker <-- Difa: OK/feilkoder
-deactivate Difa
+Apotektekniker -> DIFA: Registrer utlevering med varevalg, strekkoder,\noppdatert etikett,\nfarmasøyts aksjon for alle varsler,\nunderskrift
+activate DIFA
+DIFA -> DIFA: Verifiser rekvirent, varsler, strekkoder
+DIFA -> RF: Utleveringsmelding
+DIFA -> HELFO: Send refusjonskrav
+Apotektekniker <-- DIFA: OK/feilkoder
+deactivate DIFA
 
 @enduml

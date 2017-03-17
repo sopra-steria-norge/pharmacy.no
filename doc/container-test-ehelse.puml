@@ -6,7 +6,7 @@ title e-Helse test
 actor Tester
 interface FarmasøytApp <<opsjon>> #gray
 
-cloud Difa {
+cloud DIFA {
     node TestGUI #lime
     node LegemiddelSync #silver
     node Reseptur #pink

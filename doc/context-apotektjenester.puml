@@ -10,7 +10,7 @@ package Kjedesystemer {
     node Regnskap #lime
 }
 
-node Difa #limegreen
+node DIFA #limegreen
 
 node helsenorge.no #yellow
 node HELFO #yellow
@@ -19,13 +19,13 @@ node HPR #yellow
 Pasient <-> Farmasøyt
 Farmasøyt -down-> DifaGUI
 
-DifaGUI -down-> Difa
+DifaGUI -down-> DIFA
 Farmasøyt -down-> POS: Alternativ
-POS -down-> Difa
-Regnskap -down-> Difa: Refusjonstatus
+POS -down-> DIFA
+Regnskap -down-> DIFA: Refusjonstatus
 
-Difa -down-> helsenorge.no: Journal
-Difa -down-> HELFO: Refusjon
-Difa -down-> HPR: Autorisasjon
+DIFA -down-> helsenorge.no: Journal
+DIFA -down-> HELFO: Refusjon
+DIFA -down-> HPR: Autorisasjon
 
 @enduml

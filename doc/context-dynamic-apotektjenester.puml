@@ -4,25 +4,25 @@ title Inhalasjonsveiledning
 
 actor Farmasøyt
 participant Kjedesystem
-participant Difa
+participant DIFA
 participant HELFO
 
 group Dialog med Kjede Kjedesystem
 Farmasøyt -> Kjedesystem: Velger Inhalasjonsveiledning
 Farmasøyt <-- Kjedesystem: Redirect
 end group
-group Dialog med Difa
-Farmasøyt -> Difa: Vis Personsøk skjema
-Farmasøyt -> Difa: Angi person (fødselsnummer eller navn + fødselsdato)
-Farmasøyt <-- Difa: Vis instrukser for behandlingen
-Farmasøyt -> Difa: Angi informasjon om behandlingen (eks: antall repetisjoner)
-Farmasøyt -> Difa: Fullfør behandling
-activate Difa
-Difa -> Difa: Journalføre behandling
-Difa -> Difa: Beregne refusjon og egenandel
-Difa -> HELFO: Refusjonskrav
-Farmasøyt <-- Difa: Redirect med varenummer og egenandel
-deactivate Difa
+group Dialog med DIFA
+Farmasøyt -> DIFA: Vis Personsøk skjema
+Farmasøyt -> DIFA: Angi person (fødselsnummer eller navn + fødselsdato)
+Farmasøyt <-- DIFA: Vis instrukser for behandlingen
+Farmasøyt -> DIFA: Angi informasjon om behandlingen (eks: antall repetisjoner)
+Farmasøyt -> DIFA: Fullfør behandling
+activate DIFA
+DIFA -> DIFA: Journalføre behandling
+DIFA -> DIFA: Beregne refusjon og egenandel
+DIFA -> HELFO: Refusjonskrav
+Farmasøyt <-- DIFA: Redirect med varenummer og egenandel
+deactivate DIFA
 end group
 group Dialog med Kjede Kjedesystem
 Farmasøyt -> Kjedesystem: Legg til egenandel i handlekurv

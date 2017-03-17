@@ -11,7 +11,7 @@ package Kjede {
 }
 
 node DifaGUI #limegreen
-node Difa #limegreen
+node DIFA #limegreen
 
 node RF #pink
 node Farmalogg #yellow
@@ -31,17 +31,17 @@ Apotektekniker -down-> DifaGUI: Ekspeder
 Apotektekniker -down-> POS: Motta betaling
 Farmasøyt -down-> DifaGUI: Farmasøytkontroll
 
-Difa <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
-Difa <-down-> HELFO: M18, M22, M23
-Difa <-down- HDIR: HPR db
-Difa -down-> helsenorge.no: Journal
+DIFA <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
+DIFA <-down-> HELFO: M18, M22, M23
+DIFA <-down- HDIR: HPR db
+DIFA -down-> helsenorge.no: Journal
 
 Farmalogg <-down- SLV: FEST
-DifaGUI -down-> Difa
+DifaGUI -down-> DIFA
 DifaGUI -down-> ERP: Priser og beholdning
 ERP <-left- POS
-POS -down-> Difa: Reseptkurv, utlever
-Difa <-right- Farmalogg
+POS -down-> DIFA: Reseptkurv, utlever
+DIFA <-right- Farmalogg
 
 
 @enduml

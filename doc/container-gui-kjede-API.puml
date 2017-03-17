@@ -1,6 +1,6 @@
 @startuml
 
-title Difa leser fra kjedenes varesystem (opsjon)
+title DIFA leser fra kjedenes varesystem (opsjon)
 
 actor Apotektekniker
 actor Farmasøyt
@@ -8,24 +8,24 @@ box "Kjede"
     participant POS
     participant Varesystem
 end box
-box " Difa"
-  participant DifaGUI
-participant Difa
+box "DIFA"
+    participant DifaGUI
+    participant DIFA
 end box
 
 Apotektekniker -> POS: Velger hent resept
 Apotektekniker <-- POS: Redirect
-group Dialog med Difa
+group Dialog med DIFA
 Apotektekniker -> DifaGUI: Vis Personsøk skjema
 Apotektekniker -> DifaGUI: Angi person (fødselsnummer eller navn + fødselsdato)
 Apotektekniker <-- DifaGUI: Vis resepter
 Apotektekniker -> DifaGUI: Velg resept
 activate DifaGUI
-DifaGUI-> Difa: Hent resept 
-Difa -> Difa: Hent varer i byttegruppe
-Difa -> Difa: Påfør informasjon og varsler
-DifaGUI <-- Difa
-note over Varesystem : Kjeden har ansvar for at varesystem\nimplementere API spesfisert av Difa
+DifaGUI-> DIFA: Hent resept 
+DIFA -> DIFA: Hent varer i byttegruppe
+DIFA -> DIFA: Påfør informasjon og varsler
+DifaGUI <-- DIFA
+note over Varesystem : Kjeden har ansvar for at varesystem\nimplementere API spesfisert av DIFA
 DifaGUI-> Varesystem: <color red>Pris og beholdning for\n<color red>alle aktuelle legemidler\n<color red>for apotek
 DifaGUI<-- Varesystem
 Apotektekniker <--DifaGUI: Varsler, byttealternativer med priser, beholdning
@@ -35,11 +35,11 @@ Apotektekniker <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
 
 newpage
 
-note right of Apotektekniker: Difa GUI åpner nettlesers print-dialog
+note right of Apotektekniker: DIFA GUI åpner nettlesers print-dialog
 Apotektekniker -> Apotektekniker: Skriv reseptetikett
 Apotektekniker -> DifaGUI: Scan strekkode på etikett og pakning
 note right of Apotektekniker: Strekkodescanner i tastaturmodus
-DifaGUI -> Difa: Teknisk kontroll
+DifaGUI -> DIFA: Teknisk kontroll
 Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
 Farmasøyt -> DifaGUI: Vis resepter klar til farmasøytkontroll
 Farmasøyt -> DifaGUI: Utfør farmasøytkontroll
@@ -47,17 +47,17 @@ Apotektekniker <- Farmasøyt: "Vær så god"
 Apotektekniker -> DifaGUI: Utlever
 Apotektekniker -> POS: Importer reseptkurver
 activate POS
-POS -> Difa: <color red>List reseptkurver tilhørende apotekteknikeren
+POS -> DIFA: <color red>List reseptkurver tilhørende apotekteknikeren
 Apotektekniker <-- POS: Reseptkurvliste
 deactivate POS
 Apotektekniker -> POS: Plukk en eller flere reseptkurver
 activate POS
-POS -> Difa: <color red>Hent reseptkurv
+POS -> DIFA: <color red>Hent reseptkurv
 Apotektekniker <-- POS: Vis oppdatert "handlekurv"
 deactivate POS
 Apotektekniker -> POS: <color red>Registrer signatur og betaling
 activate POS
-POS -> Difa: <color red>Fullfør utlevering
+POS -> DIFA: <color red>Fullfør utlevering
 Apotektekniker <-- POS
 deactivate POS
 

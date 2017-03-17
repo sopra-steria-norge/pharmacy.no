@@ -9,7 +9,7 @@ node data.norge.no
 
 interface FarmasøytApp <<opsjon>> #lime
 
-cloud Difa {
+cloud DIFA {
     node LegemiddelSync #lime
     node Reseptur #lime
     node Resepthistorikk #lime

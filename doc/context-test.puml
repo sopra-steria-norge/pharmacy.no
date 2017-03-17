@@ -1,6 +1,6 @@
 @startuml
 
-title Difa med testgrensesnitt
+title DIFA med testgrensesnitt
 
 actor Pasient #silver
 actor Tester
@@ -11,7 +11,7 @@ package Kjede {
 }
 
 node DifaGUI #limegreen
-node Difa #limegreen
+node DIFA #limegreen
 
 node RF <<simulator>> #pink
 node Farmalogg #silver
@@ -27,16 +27,16 @@ Tester -down-> DifaGUI: Ekspeder
 Tester -down-> POS: Motta betaling
 Tester -down-> DifaGUI: Farmasøytkontroll
 
-Difa <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
-Difa <-right-> HELFO: M18, M22, M23
-Difa <.down. HDIR: HPR db
-Difa .down.> helsenorge.no: Journal
+DIFA <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
+DIFA <-right-> HELFO: M18, M22, M23
+DIFA <.down. HDIR: HPR db
+DIFA .down.> helsenorge.no: Journal
 
-DifaGUI -down-> Difa
+DifaGUI -down-> DIFA
 DifaGUI .down.> ERP: Priser og beholdning
 ERP <.left. POS
-POS -down-> Difa: Reseptkurv, utlever
-Difa <.down. Farmalogg
+POS -down-> DIFA: Reseptkurv, utlever
+DIFA <.down. Farmalogg
 
 
 @enduml

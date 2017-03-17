@@ -9,7 +9,7 @@ node data.norge.no
 
 interface FarmasøytApp <<opsjon>> #lime
 
-cloud Difa {
+cloud DIFA {
     cloud Fet {
         package DifaNodesFet {
             node DifaNode1
@@ -52,7 +52,7 @@ cloud Internet
 
 Kjede -down-> NAN
 FarmasøytApp -down-> NAN
-NAN -down-> Difa
+NAN -down-> DIFA
 
 Kjede -down-> Internet
 FHI -down-> Internet

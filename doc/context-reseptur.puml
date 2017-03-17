@@ -11,7 +11,7 @@ package Kjedesystemer {
     node Nettapotek #lime
     node Multidose #lime
 }
-node Difa #limegreen
+node DIFA #limegreen
 
 node RF #pink
 node Farmalogg #yellow
@@ -26,18 +26,18 @@ EPJ -right-> RF: Resept
 Pasient <-right-> Apotektekniker
 Apotektekniker -down-> POS
 Farmasøyt -down-> POS
-Farmasøyt -down-> Difa: Farmasøytkontroll
+Farmasøyt -down-> DIFA: Farmasøytkontroll
 
-POS -down-> Difa
+POS -down-> DIFA
 POS -left-> ERP
-Nettapotek -down-> Difa
-Multidose -down-> Difa
-Difa <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
-Difa <-right- Farmalogg
+Nettapotek -down-> DIFA
+Multidose -down-> DIFA
+DIFA <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
+DIFA <-right- Farmalogg
 Farmalogg <-down- SLV: FEST
-Difa <-down-> HELFO: M18, M22, M23
-Difa <-down- HDIR: HPR db
-Difa -down-> helsenorge.no: Journal
+DIFA <-down-> HELFO: M18, M22, M23
+DIFA <-down- HDIR: HPR db
+DIFA -down-> helsenorge.no: Journal
 
 
 @enduml

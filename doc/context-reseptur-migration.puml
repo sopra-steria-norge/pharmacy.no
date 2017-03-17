@@ -5,7 +5,7 @@ actor ApotekB as "Kjede B"
 
 node POS #lime
 node ERP #lime
-node Difa #limegreen
+node DIFA #limegreen
 node RF #pink
 node Farmalogg #yellow
 node SLV #yellow
@@ -15,16 +15,16 @@ node Multidose #lime
 node FarmaPro <<bro>> #pink
 
 ApotekA -down-> POS
-POS -down-> Difa
+POS -down-> DIFA
 POS -left-> ERP
-Nettapotek -down-> Difa
-Multidose -down-> Difa
+Nettapotek -down-> DIFA
+Multidose -down-> DIFA
 ApotekB -down-> FarmaPro
-FarmaPro -down-> Difa
-Difa <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
-Difa <-right- Farmalogg
+FarmaPro -down-> DIFA
+DIFA <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
+DIFA <-right- Farmalogg
 Farmalogg <-down- SLV: FEST
-Difa <-down-> HELFO: M18, M22, M23
+DIFA <-down-> HELFO: M18, M22, M23
 
 
 @enduml

@@ -7,31 +7,31 @@ box "Kjede"
     participant Økonomisystem
 end box
 
-box "Difa"
-    participant "Difa"
+box "DIFA"
+    participant "DIFA"
 end box
 
 participant HELFO
 
-POS -> Difa: Register utlevering med strekkoder
-activate Difa
+POS -> DIFA: Register utlevering med strekkoder
+activate DIFA
 ...
-Difa -> HELFO: Send refusjonskrav (M18)
-POS <-- Difa: OK/feilkoder
-deactivate Difa
+DIFA -> HELFO: Send refusjonskrav (M18)
+POS <-- DIFA: OK/feilkoder
+deactivate DIFA
 POS -> Økonomisystem: Registrer fordring
 
 == Økonomisystem holder seg periodisk oppdatert med status på fordringer ==
-Økonomisystem -> Difa: Status på fordringer
-Økonomisystem <-- Difa: Ikke bekreftet
+Økonomisystem -> DIFA: Status på fordringer
+Økonomisystem <-- DIFA: Ikke bekreftet
 ...
-HELFO -> Difa: Oppgjørsresultat (M22)
-Økonomisystem -> Difa: Status på fordringer
-Økonomisystem <-- Difa: Bekreftet
+HELFO -> DIFA: Oppgjørsresultat (M22)
+Økonomisystem -> DIFA: Status på fordringer
+Økonomisystem <-- DIFA: Bekreftet
 ...
-HELFO -> Difa: Utbetalingsmelding (M23)
-Økonomisystem -> Difa: Status på fordringer
-Økonomisystem <-- Difa: Betalt
+HELFO -> DIFA: Utbetalingsmelding (M23)
+Økonomisystem -> DIFA: Status på fordringer
+Økonomisystem <-- DIFA: Betalt
 ...
 
 @enduml

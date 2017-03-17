@@ -11,7 +11,7 @@ node data.norge.no
 
 interface FarmasøytApp <<opsjon>> #lime
 
-cloud Difa {
+cloud DIFA {
     cloud NAN as "Point of delivery"
     
     node LegemiddelSync <<Java>> #lime

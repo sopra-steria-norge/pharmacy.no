@@ -5,23 +5,23 @@ title Tilgangslogg
 actor Bruker1
 actor Bruker2
 participant POS
-box "Difa"
-participant Difa
+box "DIFA"
+participant DIFA
 database Innsynslogg
 end box
 actor Revisor
 
 Bruker1 -> POS: Ekspeder resept
-POS -> Difa
-Difa -> Innsynslogg
+POS -> DIFA
+DIFA -> Innsynslogg
 Bruker1 <-- POS
 Bruker1 -> POS: Vis historikk
-POS -> Difa
-Difa -> Innsynslogg
+POS -> DIFA
+DIFA -> Innsynslogg
 Bruker1 <-- POS
 Bruker1 -> POS: Vis historikk
-POS -> Difa
-Difa -> Innsynslogg
+POS -> DIFA
+DIFA -> Innsynslogg
 Bruker2 <-- POS
 Revisor -> Innsynslogg: Aktivitet utført av helsepersonell
 Revisor <-- Innsynslogg

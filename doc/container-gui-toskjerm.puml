@@ -5,31 +5,31 @@ title "Toskjerms" GUI for testing
 actor Apotektekniker
 actor Farmasøyt
 
-box " Difa"
+box "DIFA"
   participant DifaGUI
-  participant Difa
+  participant DIFA
 end box
 
-group Dialog med Difa
+group Dialog med DIFA
 Apotektekniker -> DifaGUI: Angi person (fødselsnummer eller navn + fødselsdato)
 activate DifaGUI
 Apotektekniker <-- DifaGUI: List resepter
 deactivate DifaGUI
 Apotektekniker -> DifaGUI: Velg resept
 activate DifaGUI
-DifaGUI-> Difa: Hent resept 
-Difa -> Difa: Hent varer i byttegruppe
-Difa -> Difa: Påfør informasjon og varsler
-DifaGUI <-- Difa
+DifaGUI-> DIFA: Hent resept 
+DIFA -> DIFA: Hent varer i byttegruppe
+DIFA -> DIFA: Påfør informasjon og varsler
+DifaGUI <-- DIFA
 Apotektekniker <--DifaGUI: Varsler, byttealternativer <i>uten</i> priser
 deactivate DifaGUI
 Apotektekniker -> DifaGUI: Velg legemiddel, angi pris
 Apotektekniker <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
-note right of Apotektekniker: Difa GUI åpner nettlesers print-dialog
+note right of Apotektekniker: DIFA GUI åpner nettlesers print-dialog
 Apotektekniker -> Apotektekniker: Skriv reseptetikett
 Apotektekniker -> DifaGUI: Scan strekkode på etikett og pakning
 note right of Apotektekniker: Strekkodescanner i tastaturmodus
-DifaGUI -> Difa: Teknisk kontroll
+DifaGUI -> DIFA: Teknisk kontroll
 Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
 Farmasøyt -> DifaGUI: Vis resepter klar til farmasøytkontroll
 Farmasøyt -> DifaGUI: Utfør farmasøytkontroll
@@ -39,9 +39,9 @@ Apotektekniker <-- DifaGUI: Vis reseptoversikt, egenandel, mellomlegg
 Apotektekniker -> Apotektekniker: Registrer signatur og betaling
 Apotektekniker -> DifaGUI: Registrer utlevering
 activate DifaGUI
-DifaGUI -> Difa: Registrer utlevering
-Difa ->]: Utleveringsmelding
-Difa ->]: Refusjonskrav
+DifaGUI -> DIFA: Registrer utlevering
+DIFA ->]: Utleveringsmelding
+DIFA ->]: Refusjonskrav
 Apotektekniker <-- DifaGUI
 deactivate DifaGUI
 

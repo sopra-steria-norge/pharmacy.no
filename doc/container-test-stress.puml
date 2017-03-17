@@ -7,7 +7,7 @@ node TestRunner #yellow
 
 interface FarmasøytApp <<opsjon>> #lime
 
-cloud Difa {
+cloud DIFA {
     node LegemiddelSync #silver
     node Reseptur #pink
     node Resepthistorikk #lime

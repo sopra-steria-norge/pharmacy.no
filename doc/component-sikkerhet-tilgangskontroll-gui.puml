@@ -6,7 +6,7 @@ box "Kjede"
     participant IDP as "Identity Provider"
 end box
 
-box "Difa"
+box "DIFA"
     participant DifaGUI
     participant Tilgangskontroll
     database HPR as "HPR-DB"
