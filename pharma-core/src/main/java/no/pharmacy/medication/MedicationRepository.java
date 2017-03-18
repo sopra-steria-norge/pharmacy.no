@@ -1,17 +1,18 @@
 package no.pharmacy.medication;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
 public interface MedicationRepository {
 
-    List<Medication> list(int offset, int count, Connection conn) throws SQLException;
+    List<Medication> list(int offset, int count);
 
     DataSource getDataSource();
 
     List<Medication> listAlternatives(Medication medication);
+
+    Optional<Medication> findByProductId(String productId);
 
 }

@@ -59,4 +59,8 @@ public class Money {
         return new BigDecimal(cents / 100.0);
     }
 
+    public static Money from(String amount) {
+        return from(new BigDecimal(amount));
+    }
+
 }

@@ -2,7 +2,7 @@ package no.pharmacy.order;
 
 public interface MedicationDispenseRepository {
 
-    void saveMedicationDispenseCollection(DispenseOrder collection);
+    void saveDispenseOrder(DispenseOrder collection);
 
     DispenseOrder getMedicationDispenseCollectionById(String id);
 

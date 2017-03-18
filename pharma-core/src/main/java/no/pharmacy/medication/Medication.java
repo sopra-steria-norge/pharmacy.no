@@ -1,12 +1,14 @@
 package no.pharmacy.medication;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import no.pharmacy.core.Money;
 
-@ToString
+@EqualsAndHashCode(of={"productId", "display"})
+@ToString(exclude="xml")
 @NoArgsConstructor
 public class Medication {
 
@@ -19,8 +21,9 @@ public class Medication {
     private String productId;
     @Getter @Setter
     private String display;
+
     @Getter @Setter
-    private String exchangeGroupId;
+    private String substitutionGroup;
 
     @Getter @Setter
     private String xml;

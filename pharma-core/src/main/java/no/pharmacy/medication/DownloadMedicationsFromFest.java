@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -14,10 +13,14 @@ import org.eaxy.Element;
 import org.eaxy.Xml;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.pharmacy.infrastructure.IOUtil;
 
 public class DownloadMedicationsFromFest {
+
+    private static final Logger logger = LoggerFactory.getLogger(DownloadMedicationsFromFest.class);
 
     private JdbcMedicationRepository medicationRepository;
 
@@ -25,9 +28,13 @@ public class DownloadMedicationsFromFest {
         this.medicationRepository = medicationRepository;
     }
 
-    public void downloadFestFile(Connection conn) throws Exception {
+    public void downloadFestFile() throws Exception {
         File festFile = new File("target/fest251.zip");
-        IOUtil.copy(new URL("https://www.legemiddelsok.no/_layouts/15/FESTmelding/fest251.zip"), festFile);
+
+        URL festUrl = new URL("https://www.legemiddelsok.no/_layouts/15/FESTmelding/fest251.zip");
+        logger.info("Downloading {}", festUrl);
+        IOUtil.copy(festUrl, festFile);
+        logger.info("Downloaded {} into {}", festUrl, festFile);
 
         Document festDoc = null;
         try (ZipInputStream zip = new ZipInputStream(new FileInputStream(festFile))) {
@@ -39,7 +46,9 @@ public class DownloadMedicationsFromFest {
                         zip.read(); zip.read();
                     }
 
+                    logger.info("Reading {}", zipEntry);
                     festDoc = Xml.read(new InputStreamReader(zip));
+                    logger.info("Read complete", zipEntry);
                     break;
                 }
             }
@@ -48,14 +57,17 @@ public class DownloadMedicationsFromFest {
             throw new IllegalArgumentException();
         }
 
-        saveFest(festDoc, conn);
+        saveFest(festDoc);
     }
 
-    private void saveFest(Document festDoc, Connection conn) throws SQLException {
+    private void saveFest(Document festDoc) {
         FestMedicationImporter importer = new FestMedicationImporter();
+        logger.info("Inserting medications");
         for (Medication medication : importer.readMedicationPackage(festDoc.find("KatLegemiddelpakning").first())) {
-            medicationRepository.save(medication, conn);
+            medicationRepository.save(medication);
         }
+        logger.info("Inserted medications");
+
         for (Element byttegruppe : festDoc.find("KatByttegruppe").first().elements()) {
             System.out.println(byttegruppe.toXML());
         }
@@ -73,7 +85,7 @@ public class DownloadMedicationsFromFest {
         flyway.migrate();
 
         try (Connection conn = dataSource.getConnection()) {
-            new DownloadMedicationsFromFest(new JdbcMedicationRepository(dataSource)).downloadFestFile(conn);
+            new DownloadMedicationsFromFest(new JdbcMedicationRepository(dataSource)).downloadFestFile();
         }
     }
 }

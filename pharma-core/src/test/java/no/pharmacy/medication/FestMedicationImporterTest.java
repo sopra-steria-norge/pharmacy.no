@@ -57,7 +57,7 @@ public class FestMedicationImporterTest {
             .isEqualTo("Calcigran Forte Tyggetab 1000 mg/800 IE");
         assertThat(medication.getProductId())
             .isEqualTo("170227");
-        assertThat(medication.getExchangeGroupId())
+        assertThat(medication.getSubstitutionGroup())
             .isEqualTo("ID_D1038B4D-A53B-414B-B51D-05D7D29D9A7C");
     }
 

@@ -1,8 +1,6 @@
 package no.pharmacy.gui.server;
 
 import java.io.File;
-import java.sql.Connection;
-
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Handler;
@@ -20,12 +18,10 @@ import no.pharmacy.gui.server.prescriptions.PrescriptionsController;
 import no.pharmacy.gui.server.prescriptions.PrescriptionsSource;
 import no.pharmacy.gui.server.test.FakeReseptFormidler;
 import no.pharmacy.gui.server.test.ReceiptTestCaseController;
-import no.pharmacy.infrastructure.ExceptionUtil;
-import no.pharmacy.medication.DownloadMedicationsFromFest;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.order.MedicationDispenseRepository;
-import no.pharmacy.test.FakeMedicationDispenseRepository;
+import no.pharmacy.test.JdbcMedicationDispenseRepository;
 
 public class PharmaServer {
 
@@ -49,26 +45,20 @@ public class PharmaServer {
         DataSource dataSource = createDataSource();
 
         JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(dataSource);
-        if (medicationRepository.isEmpty()) {
-            try (Connection conn = dataSource.getConnection()) {
-                new DownloadMedicationsFromFest(medicationRepository).downloadFestFile(conn);
-            } catch (Exception e) {
-                throw ExceptionUtil.softenException(e);
-            }
-        }
+        medicationRepository.refresh();
+
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository);
 
         handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository));
-        handlers.addHandler(createPharmaGui(reseptFormidler, medicationRepository));
+        handlers.addHandler(createPharmaGui(reseptFormidler, dataSource));
 
         return handlers;
     }
 
     private JdbcConnectionPool createDataSource() {
         File currentDir = new File(System.getProperty("user.dir"));
-        File dbFile = new File(currentDir, "target/db/medications");
+        File dbFile = new File(currentDir, "target/db/pharma");
         String url = "jdbc:h2:file:" + dbFile.getAbsolutePath();
-        System.out.println(url);
         JdbcConnectionPool dataSource = JdbcConnectionPool.create(url, "sa", "");
 
         Flyway flyway = new Flyway();
@@ -79,11 +69,12 @@ public class PharmaServer {
         return dataSource;
     }
 
-    private Handler createPharmaGui(PrescriptionsSource reseptFormidler, MedicationRepository medicationRepository) {
+    private Handler createPharmaGui(PrescriptionsSource reseptFormidler, DataSource dataSource) {
         WebAppContext handler = new WebAppContext(null, "/");
         handler.setBaseResource(Resource.newClassPathResource("/pharma-webapp"));
 
-        MedicationDispenseRepository medicationDispenseRepository = new FakeMedicationDispenseRepository();
+        MedicationRepository medicationRepository = new JdbcMedicationRepository(dataSource);
+        MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(dataSource, medicationRepository);
         handler.addServlet(new ServletHolder(new PrescriptionsController(reseptFormidler, medicationDispenseRepository)), "/");
         handler.addServlet(new ServletHolder(new DispenseOrderController(reseptFormidler, medicationDispenseRepository, medicationRepository)), "/medicationDispenseCollections/*");
 

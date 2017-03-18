@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import no.pharmacy.gui.server.prescriptions.PrescriptionsSource;
 import no.pharmacy.medication.Medication;
@@ -26,11 +27,13 @@ public class FakeReseptFormidler implements PrescriptionsSource {
         MedicationOrder medicationOrder = createMedicationOrder(nationalId, product);
         this.prescriptionsForPerson.computeIfAbsent(nationalId, s -> new ArrayList<>())
             .add(medicationOrder);
-        this.prescriptionsById.put(medicationOrder.getIdentifier(), medicationOrder);
+        this.prescriptionsById.put(medicationOrder.getPrescriptionId(), medicationOrder);
     }
 
     private MedicationOrder createMedicationOrder(String nationalId, Medication product) {
-        return new MedicationOrder(nationalId, product);
+        MedicationOrder medicationOrder = new MedicationOrder(nationalId, product);
+        medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
+        return medicationOrder;
     }
 
     @Override

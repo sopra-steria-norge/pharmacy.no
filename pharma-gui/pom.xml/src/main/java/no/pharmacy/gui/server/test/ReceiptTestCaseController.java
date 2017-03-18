@@ -23,7 +23,6 @@ import no.pharmacy.test.PharmaTestData;
 
 public class ReceiptTestCaseController extends HttpServlet {
 
-    private PharmaTestData testData = new PharmaTestData();
     private FakeReseptFormidler simulatedReseptFormidler;
     private MedicationRepository medicationRepository;
 
@@ -48,7 +47,7 @@ public class ReceiptTestCaseController extends HttpServlet {
         }
 
         Element unusedIds = doc.find("...", "#unusedIds").first();
-        for (String nationalId : testData.unusedNationalIds(50)) {
+        for (String nationalId : PharmaTestData.unusedNationalIds(50)) {
             unusedIds.add(Xml.el("option", Xml.attr("value", nationalId), Xml.attr("label", nationalId)));
         }
 
@@ -65,7 +64,7 @@ public class ReceiptTestCaseController extends HttpServlet {
 
     private List<Medication> sampleMedications() {
         try (Connection conn = medicationRepository.getDataSource().getConnection()) {
-            return medicationRepository.list(0, 100, conn);
+            return medicationRepository.list(0, 100);
         } catch (SQLException e) {
             throw ExceptionUtil.softenException(e);
         }

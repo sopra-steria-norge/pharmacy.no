@@ -31,7 +31,7 @@ public class FestMedicationImporter {
             Medication medication = new Medication();
             medication.setDisplay(legemiddelpakning.find("NavnFormStyrke").first().text());
             medication.setProductId(legemiddelpakning.find("Varenr").first().text());
-            medication.setExchangeGroupId(legemiddelpakning.find("PakningByttegruppe", "RefByttegruppe").firstTextOrNull());
+            medication.setSubstitutionGroup(legemiddelpakning.find("PakningByttegruppe", "RefByttegruppe").firstTextOrNull());
             medication.setXml(legemiddelpakning.toXML());
             result.add(medication);
         }

@@ -3,8 +3,6 @@ package no.pharmacy.gui.server.prescriptions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.UUID;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -44,7 +42,7 @@ public class PrescriptionsController extends HttpServlet {
                 results.add(Xml.el("div",
                         Xml.el("label",
                             Xml.el("input")
-                                .type("checkbox").name("prescriptionId").val(order.getIdentifier()),
+                                .type("checkbox").name("prescriptionId").val(order.getPrescriptionId()),
                             //Xml.el("a", order.getPrescriber().getDisplay()).attr("href", "/practitioner/" + order.getPrescriber().getReference()),
                             Xml.el("span", order.getMedication().getDisplay()))));
             }
@@ -58,14 +56,12 @@ public class PrescriptionsController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         DispenseOrder collection = new DispenseOrder();
-        collection.setIdentifier(UUID.randomUUID().toString());
 
         for (String id : req.getParameterValues("prescriptionId")) {
             collection.addMedicationOrder(prescriptionsSource.getById(id));
         }
 
-        medicationDispenseRepository.saveMedicationDispenseCollection(collection);
-
+        medicationDispenseRepository.saveDispenseOrder(collection);
         resp.sendRedirect("/medicationDispenseCollections/" + collection.getIdentifier());
     }
 

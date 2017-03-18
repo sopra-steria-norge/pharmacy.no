@@ -12,11 +12,11 @@ import no.pharmacy.core.Practitioner;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.order.MedicationOrder;
 import no.pharmacy.order.PurchaseOrder;
+import no.pharmacy.test.PharmaTestData;
 
 public class RefundCalculationTest {
 
     private static final Money MAX_COPAY_PER_PRESCRIPTION = Money.inCents(52000);
-    private static int sequence;
 
     @Test
     public void onlyPriceUpToTrinnPriceIsCovered() {
@@ -41,8 +41,8 @@ public class RefundCalculationTest {
     public void shouldCalculateCompleteRefund() throws Exception {
         PurchaseOrder order = new PurchaseOrder();
 
-        Practitioner doctor1 = sampleDoctor();
-        Practitioner doctor2 = sampleDoctor();
+        Practitioner doctor1 = PharmaTestData.sampleDoctor();
+        Practitioner doctor2 = PharmaTestData.sampleDoctor();
 
         LocalDate firstDate = LocalDate.now().minusDays(100);
         LocalDate secondDate = firstDate.plusDays(7);
@@ -55,10 +55,10 @@ public class RefundCalculationTest {
         medication2.setTrinnPrice(Money.inCents(20000));
         medication2.setRetailPrice(medication2.getTrinnPrice().plusCents(-3000));
 
-        MedicationOrder order1 = sampleMedicationOrder(doctor1, firstDate, medication1);
-        MedicationOrder order2 = sampleMedicationOrder(doctor1, firstDate, medication2);
-        MedicationOrder order3 = sampleMedicationOrder(doctor1, secondDate, medication1);
-        MedicationOrder order4 = sampleMedicationOrder(doctor2, firstDate, medication1);
+        MedicationOrder order1 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication1);
+        MedicationOrder order2 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication2);
+        MedicationOrder order3 = PharmaTestData.sampleMedicationOrder(doctor1, secondDate, medication1);
+        MedicationOrder order4 = PharmaTestData.sampleMedicationOrder(doctor2, firstDate, medication1);
 
         order.addAll(order1, order2, order3, order4);
 
@@ -73,7 +73,7 @@ public class RefundCalculationTest {
     public void shouldCalculateRefundGroup() throws Exception {
         PurchaseOrder order = new PurchaseOrder();
 
-        Practitioner doctor1 = sampleDoctor();
+        Practitioner doctor1 = PharmaTestData.sampleDoctor();
 
         LocalDate firstDate = LocalDate.now().minusDays(100);
 
@@ -85,8 +85,8 @@ public class RefundCalculationTest {
         medication2.setTrinnPrice(Money.inCents(20000));
         medication2.setRetailPrice(medication2.getTrinnPrice().plusCents(-3000));
 
-        MedicationOrder order1 = sampleMedicationOrder(doctor1, firstDate, medication1);
-        MedicationOrder order2 = sampleMedicationOrder(doctor1, firstDate, medication2);
+        MedicationOrder order1 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication1);
+        MedicationOrder order2 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication2);
 
         order.addAll(order1, order2);
 
@@ -105,7 +105,7 @@ public class RefundCalculationTest {
     public void shouldCalculateRefundGroup2() throws Exception {
         PurchaseOrder order = new PurchaseOrder();
 
-        Practitioner doctor1 = sampleDoctor();
+        Practitioner doctor1 = PharmaTestData.sampleDoctor();
 
         LocalDate firstDate = LocalDate.now().minusDays(100);
 
@@ -113,31 +113,11 @@ public class RefundCalculationTest {
         medication1.setTrinnPrice(Money.inCents(10000));
         medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(-2000));
 
-        MedicationOrder order1 = sampleMedicationOrder(doctor1, firstDate, medication1);
+        MedicationOrder order1 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication1);
         order.addAll(order1);
 
         assertThat(order.getRefundGroups().iterator().next().getPatientAmount())
             .isEqualTo(medication1.getRetailPrice().percent(39));
-    }
-
-
-    private static Practitioner sampleDoctor() {
-        Practitioner practitioner = new Practitioner();
-        practitioner.setIdentifier(randomId());
-        practitioner.setName("Random J Doctor");
-        return practitioner;
-    }
-
-    private static long randomId() {
-        return sequence++;
-    }
-
-    private static MedicationOrder sampleMedicationOrder(Practitioner prescriber, LocalDate dateWritten, Medication medication) {
-        MedicationOrder medicationOrder = new MedicationOrder();
-        medicationOrder.setPrescriber(prescriber.getReference());
-        medicationOrder.setDateWritten(dateWritten);
-        medicationOrder.setMedication(medication);
-        return medicationOrder;
     }
 
 }

@@ -5,21 +5,26 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.pharmacy.core.Money;
 import no.pharmacy.infrastructure.ExceptionUtil;
 
-public class JdbcMedicationRepository implements MedicationRepository, MedicationSource {
+public class JdbcMedicationRepository extends JdbcSupport implements MedicationRepository, MedicationSource {
 
     private DataSource dataSource;
 
     public JdbcMedicationRepository(DataSource dataSource) {
+        super(dataSource);
         this.dataSource = dataSource;
     }
+
 
     @Override
     public DataSource getDataSource() {
@@ -28,13 +33,13 @@ public class JdbcMedicationRepository implements MedicationRepository, Medicatio
 
     @Override
     public List<Medication> listAlternatives(Medication medication) {
-        if (medication.getExchangeGroupId() == null) {
+        if (medication.getSubstitutionGroup() == null) {
             return new ArrayList<>();
         }
 
         try (Connection conn = dataSource.getConnection()) {
             try (PreparedStatement stmt = conn.prepareStatement("select * from medications where exchange_group_id = ? order by display asc")) {
-                stmt.setString(1, medication.getExchangeGroupId());
+                stmt.setString(1, medication.getSubstitutionGroup());
                 try (ResultSet rs = stmt.executeQuery()) {
                     List<Medication> results = new ArrayList<>();
 
@@ -51,33 +56,16 @@ public class JdbcMedicationRepository implements MedicationRepository, Medicatio
     }
 
     @Override
-    public List<Medication> list(int offset, int count, Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement("select * from medications where exchange_group_id is not null order by display asc  limit ? offset ?")) {
-            stmt.setInt(1, count);
-            stmt.setInt(2, offset);
-            try (ResultSet rs = stmt.executeQuery()) {
-                List<Medication> results = new ArrayList<>();
-
-                while (rs.next()) {
-                    results.add(read(rs));
-                }
-
-                return results;
-            }
-        }
+    public List<Medication> list(int offset, int count) {
+        return queryForList(
+                "select * from medications where exchange_group_id is not null order by display asc  limit ? offset ?",
+                Arrays.asList(count, offset), this::read);
     }
 
-    public Optional<Medication> findByProductId(String productId, Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement("select * from medications where product_id = ?")) {
-            stmt.setString(1, productId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(read(rs));
-                } else {
-                    return Optional.empty();
-                }
-            }
-        }
+    @Override
+    public Optional<Medication> findByProductId(String productId) {
+        return retrieveSingle("select * from medications where product_id = ?",
+                Arrays.asList(productId), this::read);
     }
 
     private Medication read(ResultSet rs) throws SQLException {
@@ -86,37 +74,27 @@ public class JdbcMedicationRepository implements MedicationRepository, Medicatio
         medication.setProductId(rs.getString("product_id"));
         medication.setTrinnPrice(Money.from(rs.getBigDecimal("trinn_price")));
         medication.setRetailPrice(Money.from(rs.getBigDecimal("retail_price")));
-        medication.setExchangeGroupId(rs.getString("exchange_group_id"));
+        medication.setSubstitutionGroup(rs.getString("exchange_group_id"));
         medication.setXml(rs.getString("xml"));
         return medication;
     }
 
-    public void save(Medication medication, Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement("delete from medications where product_id = ?")) {
-            stmt.setString(1, medication.getProductId());
-            stmt.executeUpdate();
-        }
+    public void save(Medication medication) {
+        executeUpdate("delete from medications where product_id = ?",
+                Arrays.asList(medication.getProductId()));
 
-        try (PreparedStatement stmt = conn.prepareStatement("insert into medications (product_id, display, trinn_price, retail_price, exchange_group_id, xml) values (?, ?, ?, ?, ?, ?)")) {
-            stmt.setString(1, medication.getProductId());
-            stmt.setString(2, medication.getDisplay());
-            Money trinnPrice = medication.getTrinnPrice();
-            stmt.setBigDecimal(3, trinnPrice != null ? trinnPrice.toBigDecimal() : null);
-            Money retailPrice = medication.getRetailPrice();
-            stmt.setBigDecimal(4, retailPrice != null ? retailPrice.toBigDecimal() : null);
-            stmt.setString(5, medication.getExchangeGroupId());
-            stmt.setString(6, medication.getXml());
-            stmt.executeUpdate();
-        }
+        List<Object> parameters = Arrays.asList(medication.getProductId(), medication.getDisplay(),
+                medication.getTrinnPrice(), medication.getRetailPrice(),
+                medication.getSubstitutionGroup(), medication.getXml());
+        executeUpdate(
+                "insert into medications (product_id, display, trinn_price, retail_price, exchange_group_id, xml) values (?, ?, ?, ?, ?, ?)",
+                parameters);
     }
 
     @Override
     public Optional<Medication> getMedication(String productId) {
-        try (Connection conn = dataSource.getConnection()) {
-            return findByProductId(productId, conn);
-        } catch (SQLException e) {
-            throw ExceptionUtil.softenException(e);
-        }
+        return retrieveSingle("select * from medications where product_id = ?",
+            Arrays.asList(productId), this::read);
     }
 
     public boolean isEmpty() {
@@ -132,6 +110,24 @@ public class JdbcMedicationRepository implements MedicationRepository, Medicatio
             }
         } catch (SQLException e) {
             throw ExceptionUtil.softenException(e);
+        }
+    }
+
+    public List<Medication> list() {
+        String query = "select * from medications where exchange_group_id is not null order by display asc  limit ? offset ?";
+        return queryForList(query, Arrays.asList(1000, 0), this::read);
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(JdbcMedicationRepository.class);
+
+    public void refresh() {
+        if (isEmpty()) {
+            logger.info("Refreshing medications from FEST");
+            try (Connection conn = dataSource.getConnection()) {
+                new DownloadMedicationsFromFest(this).downloadFestFile();
+            } catch (Exception e) {
+                throw ExceptionUtil.softenException(e);
+            }
         }
     }
 
