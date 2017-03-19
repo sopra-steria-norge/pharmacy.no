@@ -51,7 +51,9 @@ public class JdbcSupport {
     }
 
     public long executeInsert(String query, List<Object> parameters) {
+        long startTime = System.currentTimeMillis();
         try (Connection conn = dataSource.getConnection()) {
+            logger.trace("executeInsert {} {}", query, parameters);
             try (PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
                 setParameters(stmt, parameters);
                 stmt.executeUpdate();
@@ -65,6 +67,8 @@ public class JdbcSupport {
             }
         } catch (SQLException e) {
             throw soften(query, e);
+        } finally {
+            logger.debug("executeInsert {}: {}ms", query, System.currentTimeMillis()-startTime);
         }
     }
 

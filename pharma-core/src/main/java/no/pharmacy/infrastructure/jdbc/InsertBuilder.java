@@ -27,6 +27,10 @@ public class InsertBuilder {
         return jdbcSupport.executeInsert(getQuery(), fieldValues);
     }
 
+    public int executeUpdate() {
+        return jdbcSupport.executeUpdate(getQuery(), fieldValues);
+    }
+
     private String getQuery() {
         return "insert into "
                 + tableName
@@ -42,5 +46,6 @@ public class InsertBuilder {
         }
         return result;
     }
+
 
 }

@@ -29,15 +29,18 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
     @Override
     public void saveDispenseOrder(DispenseOrder order) {
         order.setIdentifier(UUID.randomUUID().toString());
-        executeUpdate("insert into dispense_orders (id) values (?)", Arrays.asList(order.getIdentifier()));
+        insertInto("dispense_orders")
+            .value("id", order.getIdentifier())
+            .executeUpdate();
 
         for (MedicationOrder medicationOrder : order.getMedicationOrders()) {
-            List<Object> parameters = Arrays.asList(order.getIdentifier(),
-                    medicationOrder.getPrescriber(),
-                    medicationOrder.getDateWritten(),
-                    medicationOrder.getMedication().getProductId());
-            String query = "insert into medication_orders (dispense_order_id, prescriber_id, date_written, medication_id) values (?, ?, ?, ?)";
-            medicationOrder.setId(executeInsert(query, parameters));
+            long id = insertInto("medication_orders")
+                .value("dispense_order_id", order.getIdentifier())
+                .value("prescriber_id", medicationOrder.getPrescriber())
+                .value("date_written", medicationOrder.getDateWritten())
+                .value("medication_id", medicationOrder.getMedication().getProductId())
+                .executeInsert();
+            medicationOrder.setId(id);
         }
 
         for (MedicationDispense medicationDispense : order.getMedicationDispenseList()) {
