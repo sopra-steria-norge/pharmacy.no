@@ -1,9 +1,7 @@
-package no.pharmacy.test;
+package no.pharmacy.infrastructure.jdbc;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import no.pharmacy.medication.JdbcSupport;
 
 public class InsertBuilder {
 

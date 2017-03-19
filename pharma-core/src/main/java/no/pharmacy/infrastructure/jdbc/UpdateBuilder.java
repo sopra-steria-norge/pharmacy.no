@@ -1,4 +1,4 @@
-package no.pharmacy.medication;
+package no.pharmacy.infrastructure.jdbc;
 
 import java.util.ArrayList;
 import java.util.List;

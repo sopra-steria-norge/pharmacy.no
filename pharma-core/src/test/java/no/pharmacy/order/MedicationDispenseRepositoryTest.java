@@ -26,7 +26,7 @@ public class MedicationDispenseRepositoryTest {
         repository.saveDispenseOrder(order);
 
         assertThat(order).hasNoNullFieldsOrProperties();
-        DispenseOrder retrievedOrder = repository.getMedicationDispenseCollectionById(order.getIdentifier());
+        DispenseOrder retrievedOrder = repository.getDispenseOrderById(order.getIdentifier());
         assertThat(retrievedOrder)
             .isEqualToComparingFieldByField(order);
         assertThat(retrievedOrder.getMedicationOrders().get(0))
@@ -40,7 +40,7 @@ public class MedicationDispenseRepositoryTest {
         order.addMedicationOrder(testData.sampleMedicationOrder(medication));
 
         repository.saveDispenseOrder(order);
-        MedicationOrder retrievedPrescription = repository.getMedicationDispenseCollectionById(order.getIdentifier()).getMedicationOrders().get(0);
+        MedicationOrder retrievedPrescription = repository.getDispenseOrderById(order.getIdentifier()).getMedicationOrders().get(0);
         assertThat(retrievedPrescription.getAlternatives())
             .extracting(m -> m.getSubstitutionGroup())
             .containsOnly(medication.getSubstitutionGroup());
@@ -75,7 +75,7 @@ public class MedicationDispenseRepositoryTest {
         prescription.setMedication(medicationOrder.getMedication());
         repository.update(prescription);
 
-        DispenseOrder retrieved = repository.getMedicationDispenseCollectionById(order.getIdentifier());
+        DispenseOrder retrieved = repository.getDispenseOrderById(order.getIdentifier());
         assertThat(retrieved.getMedicationDispenses().get(0))
             .isEqualToComparingFieldByField(prescription);
     }

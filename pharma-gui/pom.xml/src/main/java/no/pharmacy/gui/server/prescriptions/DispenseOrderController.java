@@ -31,18 +31,18 @@ public class DispenseOrderController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        DispenseOrder collection = medicationDispenseRepository.getMedicationDispenseCollectionById(req.getPathInfo().substring(1));
+        DispenseOrder dispenseOrder = medicationDispenseRepository.getDispenseOrderById(req.getPathInfo().substring(1));
 
         Document doc = Xml.readResource("/pharma-webapp/medication-dispense-collections/index.html.template");
 
         String medicationOrderTemplate = doc.find("...", "#medicationOrderTemplate").first().elements().iterator().next().toXML();
 
-        Element orderId = doc.find("...", "#orderId").first().val(collection.getIdentifier());
-        orderId.text(collection.getIdentifier());
+        Element orderId = doc.find("...", "#orderId").first().val(dispenseOrder.getIdentifier());
+        orderId.text(dispenseOrder.getIdentifier());
 
         Element medicationOrders = doc.find("...", "#medicationOrders").first();
 
-        for (MedicationDispense prescription : collection.getMedicationDispenseList()) {
+        for (MedicationDispense prescription : dispenseOrder.getMedicationDispenseList()) {
             MedicationOrder medicationOrder = prescription.getAuthorizingPrescription();
             Element orderElement = Xml.xml(medicationOrderTemplate).getRootElement();
             if (medicationOrder.getDateWritten() != null) {
@@ -58,8 +58,8 @@ public class DispenseOrderController extends HttpServlet {
             medicationOrders.add(orderElement);
         }
 
-        doc.find("...", "#totalRefund").first().text(collection.getRefundTotal().toString());
-        doc.find("...", "#uncoveredAmount").first().text(collection.getPatientTotal().toString());
+        doc.find("...", "#totalRefund").first().text(dispenseOrder.getRefundTotal().toString());
+        doc.find("...", "#uncoveredAmount").first().text(dispenseOrder.getPatientTotal().toString());
 
         resp.setContentType("text/html");
         doc.writeTo(resp.getWriter());
@@ -97,7 +97,7 @@ public class DispenseOrderController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        DispenseOrder order = medicationDispenseRepository.getMedicationDispenseCollectionById(req.getParameter("orderId"));
+        DispenseOrder order = medicationDispenseRepository.getDispenseOrderById(req.getParameter("orderId"));
 
         for (MedicationDispense medicationDispense : order.getMedicationDispenseList()) {
             String productId = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][productId]");

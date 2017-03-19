@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import no.pharmacy.core.Money;
 import no.pharmacy.infrastructure.ExceptionUtil;
+import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 
 public class JdbcMedicationRepository extends JdbcSupport implements MedicationRepository, MedicationSource {
 

@@ -6,7 +6,7 @@ public interface MedicationDispenseRepository {
 
     void saveDispenseOrder(DispenseOrder collection);
 
-    DispenseOrder getMedicationDispenseCollectionById(String id);
+    DispenseOrder getDispenseOrderById(String id);
 
     void update(MedicationDispense medicationDispense);
 

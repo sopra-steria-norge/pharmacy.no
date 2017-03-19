@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 
 import no.pharmacy.core.Money;
 import no.pharmacy.dispense.MedicationDispense;
-import no.pharmacy.medication.JdbcSupport;
+import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.order.DispenseOrder;
 import no.pharmacy.order.MedicationDispenseRepository;
@@ -51,7 +51,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
     }
 
     @Override
-    public DispenseOrder getMedicationDispenseCollectionById(String id) {
+    public DispenseOrder getDispenseOrderById(String id) {
         return retrieveSingle("select * from dispense_orders where id = ?",
                 Arrays.asList(id),
                 this::read).get();

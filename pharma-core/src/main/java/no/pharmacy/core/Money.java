@@ -56,7 +56,7 @@ public class Money {
     }
 
     public BigDecimal toBigDecimal() {
-        return new BigDecimal(cents / 100.0);
+        return new BigDecimal(cents).scaleByPowerOfTen(-2);
     }
 
     public static Money from(String amount) {

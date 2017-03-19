@@ -1,4 +1,4 @@
-package no.pharmacy.medication;
+package no.pharmacy.infrastructure.jdbc;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import no.pharmacy.core.Money;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.order.Reference;
-import no.pharmacy.test.InsertBuilder;
 
 public class JdbcSupport {
 
