@@ -10,16 +10,16 @@ package Medication {
     ' Virkestoff
     class Substance
 
-    ' Legemiddeldose
-    class SubstanceDosage {
+    ' VirkestoffMedStyrke
+    class SubstanceConcentration {
         amount
-        unit: mg
+        unit: mg/ml, mg/tablet
     }
 
-    ' Legemiddeldosering
-    class MedicationDosage {
+    ' Legemiddel
+    class MedicationConcentration {
         amount
-        unit : mg
+        unit : mg/ml, mg/tablet
     }
 
     ' Legemiddelform
@@ -37,20 +37,20 @@ package Medication {
     ' Byttegruppe
     class SubstitutionGroup
 
-    SubstanceDosage "*" -up-> Substance
-    Medication "*" -up- "1..*" Substance
+    SubstanceConcentration "*" -up-> Substance
+    Medication "*" -up- "1..*" SubstanceConcentration
     MedicationForm "1..*" -up- Medication
-    MedicationDosage "1..*" - MedicationForm
-    MedicationDosage -up- SubstanceDosage
-    MedicationPackaging "1..*" -up- MedicationDosage
+    MedicationConcentration "1..*" - MedicationForm
+    MedicationConcentration -up- SubstanceConcentration
+    MedicationPackaging "1..*" -up- MedicationConcentration
     MedicationPackaging "1.*" - "0..1" SubstitutionGroup    
 }
 
 ' Resept
 class MedicationOrder
 
-MedicationOrder -right-> SubstanceDosage
-MedicationOrder -right-> MedicationDosage
+MedicationOrder -right-> SubstanceConcentration
+MedicationOrder -right-> MedicationConcentration
 MedicationOrder -right-> MedicationPackaging
 
 
