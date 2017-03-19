@@ -10,8 +10,8 @@ import org.junit.Test;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.Practitioner;
 import no.pharmacy.medication.Medication;
+import no.pharmacy.order.DispenseOrder;
 import no.pharmacy.order.MedicationOrder;
-import no.pharmacy.order.PurchaseOrder;
 import no.pharmacy.test.PharmaTestData;
 
 public class RefundCalculationTest {
@@ -39,7 +39,7 @@ public class RefundCalculationTest {
 
     @Test
     public void shouldCalculateCompleteRefund() throws Exception {
-        PurchaseOrder order = new PurchaseOrder();
+        DispenseOrder order = new DispenseOrder();
 
         Practitioner doctor1 = PharmaTestData.sampleDoctor();
         Practitioner doctor2 = PharmaTestData.sampleDoctor();
@@ -60,7 +60,10 @@ public class RefundCalculationTest {
         MedicationOrder order3 = PharmaTestData.sampleMedicationOrder(doctor1, secondDate, medication1);
         MedicationOrder order4 = PharmaTestData.sampleMedicationOrder(doctor2, firstDate, medication1);
 
-        order.addAll(order1, order2, order3, order4);
+        order.addMedicationOrder(order1);
+        order.addMedicationOrder(order2);
+        order.addMedicationOrder(order3);
+        order.addMedicationOrder(order4);
 
         assertThat(order.getUncoveredTotal()).isEqualTo(medication1.getUncoveredAmount().times(3));
         assertThat(order.getCoveredTotal())
@@ -71,7 +74,7 @@ public class RefundCalculationTest {
 
     @Test
     public void shouldCalculateRefundGroup() throws Exception {
-        PurchaseOrder order = new PurchaseOrder();
+        DispenseOrder order = new DispenseOrder();
 
         Practitioner doctor1 = PharmaTestData.sampleDoctor();
 
@@ -88,7 +91,8 @@ public class RefundCalculationTest {
         MedicationOrder order1 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication1);
         MedicationOrder order2 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication2);
 
-        order.addAll(order1, order2);
+        order.addMedicationOrder(order1);
+        order.addMedicationOrder(order2);
 
         assertThat(order.getRefundGroups()).extracting(g -> g.getMedicationOrders())
             .containsOnly(Arrays.asList(order1, order2));
@@ -103,7 +107,7 @@ public class RefundCalculationTest {
 
     @Test
     public void shouldCalculateRefundGroup2() throws Exception {
-        PurchaseOrder order = new PurchaseOrder();
+        DispenseOrder order = new DispenseOrder();
 
         Practitioner doctor1 = PharmaTestData.sampleDoctor();
 
@@ -113,8 +117,7 @@ public class RefundCalculationTest {
         medication1.setTrinnPrice(Money.inCents(10000));
         medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(-2000));
 
-        MedicationOrder order1 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication1);
-        order.addAll(order1);
+        order.addMedicationOrder(PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication1));
 
         assertThat(order.getRefundGroups().iterator().next().getPatientAmount())
             .isEqualTo(medication1.getRetailPrice().percent(39));

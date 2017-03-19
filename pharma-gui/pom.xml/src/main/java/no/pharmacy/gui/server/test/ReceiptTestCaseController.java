@@ -1,7 +1,6 @@
 package no.pharmacy.gui.server.test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -40,7 +39,7 @@ public class ReceiptTestCaseController extends HttpServlet {
             message = (String) flash.get("message");
         }
 
-        Document doc = readResource("/pharma-testrig-webapp/index.html.template");
+        Document doc = Xml.readResource("/pharma-testrig-webapp/index.html.template");
 
         if (message != null) {
             doc.find("...", "#flashMessage").first().text(message);
@@ -80,14 +79,5 @@ public class ReceiptTestCaseController extends HttpServlet {
 
         resp.sendRedirect(req.getRequestURI());
     }
-
-    private Document readResource(String name) throws IOException {
-        InputStream input = getClass().getResourceAsStream(name);
-        if (input == null) {
-            throw new IllegalArgumentException("Can't load " + name);
-        }
-        return Xml.readAndClose(input);
-    }
-
 
 }

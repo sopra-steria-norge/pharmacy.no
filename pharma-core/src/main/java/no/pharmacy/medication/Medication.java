@@ -40,7 +40,8 @@ public class Medication {
     }
 
     public Money getCoveredAmount() {
-        return retailPrice.isGreaterThan(trinnPrice) ? trinnPrice : retailPrice;
+        return trinnPrice != null && retailPrice.isGreaterThan(trinnPrice) ? trinnPrice :
+            (retailPrice != null ? retailPrice : Money.inCents(1000000));
     }
 
 }

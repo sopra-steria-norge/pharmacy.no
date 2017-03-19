@@ -8,7 +8,6 @@ import org.eaxy.Namespace;
 import org.eaxy.Xml;
 import org.junit.Test;
 
-import no.pharmacy.core.Practitioner;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.test.FakeMedicationSource;
 import no.pharmacy.test.PharmaTestData;
@@ -22,7 +21,6 @@ public class MedicationOrderDecodeTest {
     @Test
     public void decodesM1() throws Exception {
         PharmaTestData testData = new PharmaTestData();
-        Practitioner prescriber = testData.samplePractitioner();
         Medication medication = testData.sampleMedication(new FakeMedicationSource());
         Document prescriptionDocument = Xml.doc(ERESEPT.el("Resept",
                 ERESEPT.el("Forskrivningsdato", LocalDate.now().toString()),

@@ -1,7 +1,6 @@
 package no.pharmacy.gui.server.prescriptions;
 
 import java.io.IOException;
-import java.io.InputStream;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,14 +20,11 @@ import no.pharmacy.order.MedicationOrder;
 
 public class DispenseOrderController extends HttpServlet {
 
-    private PrescriptionsSource reseptFormidler;
     private MedicationDispenseRepository medicationDispenseRepository;
     private MedicationRepository medicationRepository;
 
-    public DispenseOrderController(PrescriptionsSource reseptFormidler,
-            MedicationDispenseRepository medicationDispenseRepository,
+    public DispenseOrderController(MedicationDispenseRepository medicationDispenseRepository,
             MedicationRepository medicationRepository) {
-        this.reseptFormidler = reseptFormidler;
         this.medicationDispenseRepository = medicationDispenseRepository;
         this.medicationRepository = medicationRepository;
     }
@@ -37,17 +33,17 @@ public class DispenseOrderController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         DispenseOrder collection = medicationDispenseRepository.getMedicationDispenseCollectionById(req.getPathInfo().substring(1));
 
-
-        Document doc = readResource("/pharma-webapp/medication-dispense-collections/index.html.template");
+        Document doc = Xml.readResource("/pharma-webapp/medication-dispense-collections/index.html.template");
 
         String medicationOrderTemplate = doc.find("...", "#medicationOrderTemplate").first().elements().iterator().next().toXML();
 
         Element orderId = doc.find("...", "#orderId").first().val(collection.getIdentifier());
+        orderId.text(collection.getIdentifier());
 
         Element medicationOrders = doc.find("...", "#medicationOrders").first();
 
-        for (MedicationDispense dispense : collection.getMedicationDispenseList()) {
-            MedicationOrder medicationOrder = dispense.getAuthorizingPrescription();
+        for (MedicationDispense prescription : collection.getMedicationDispenseList()) {
+            MedicationOrder medicationOrder = prescription.getAuthorizingPrescription();
             Element orderElement = Xml.xml(medicationOrderTemplate).getRootElement();
             if (medicationOrder.getDateWritten() != null) {
                 orderElement.find("...", ".dateWritten").first().text(medicationOrder.getDateWritten().toString());
@@ -56,18 +52,20 @@ public class DispenseOrderController extends HttpServlet {
             orderElement.find("...", ".prescribedMedication").first().text(medicationOrder.getMedication().getDisplay());
             Element alternativeMedications = orderElement.find("...", ".alternativeMedications").first();
             for (Medication alternativeMedication : medicationRepository.listAlternatives(medicationOrder.getMedication())) {
-                alternativeMedications.add(createMedicationOption(dispense.getId(), medicationOrder, alternativeMedication));
-
+                alternativeMedications.add(createMedicationOption(prescription.getId(), prescription, alternativeMedication));
             }
 
             medicationOrders.add(orderElement);
         }
 
+        doc.find("...", "#totalRefund").first().text(collection.getRefundTotal().toString());
+        doc.find("...", "#uncoveredAmount").first().text(collection.getPatientTotal().toString());
+
         resp.setContentType("text/html");
         doc.writeTo(resp.getWriter());
     }
 
-    private Element createMedicationOption(Long dispenseId, MedicationOrder medicationOrder, Medication medication) {
+    private Element createMedicationOption(Long dispenseId, MedicationDispense dispense, Medication medication) {
         Element productIdField = Xml.el("input")
                 .type("radio").name("medicationOrder[" + dispenseId + "][productId]")
                 .addClass("productSelect")
@@ -75,21 +73,25 @@ public class DispenseOrderController extends HttpServlet {
         Element productName = Xml.el("a", "[info]")
                 .addClass("medicationDetails")
                 .attr("href", "#");
-        Element priceField = Xml.el("div",
-                Xml.text("Utsalgspris:"),
-                Xml.el("input")
-                    .type("number")
-                    .name("medicationOrder[" + dispenseId + "][" + medication.getProductId() + "][price]")
-                    .attr("step", "any"))
-                    .addClass("medicationPrice");
+        Element priceInput = Xml.el("input")
+            .type("number")
+            .name("medicationOrder[" + dispenseId + "][" + medication.getProductId() + "][price]")
+            .attr("step", "any");
         Element productDetails = Xml.el("div", "Details for " + medication.getDisplay())
                 .addClass("medicationDescription");
+        if (dispense.getMedication().equals(medication)) {
+            productIdField.checked(true);
+            priceInput.val(dispense.getPrice().format());
+        }
         return Xml.el("li",
                 Xml.el("label",
                     productIdField,
                     Xml.el("span", medication.getDisplay()),
                     productName,
-                    priceField,
+                    Xml.el("div",
+                            Xml.text("Utsalgspris:"),
+                            priceInput)
+                                .addClass("medicationPrice"),
                     productDetails));
     }
 
@@ -106,17 +108,11 @@ public class DispenseOrderController extends HttpServlet {
 
             medicationDispense.setMedication(medication);
             medicationDispense.setPrice(Money.from(price));
+
+            medicationDispenseRepository.update(medicationDispense);
         }
 
         resp.sendRedirect(req.getRequestURI());
-    }
-
-    private Document readResource(String name) throws IOException {
-        InputStream input = getClass().getResourceAsStream(name);
-        if (input == null) {
-            throw new IllegalArgumentException("Can't load " + name);
-        }
-        return Xml.readAndClose(input);
     }
 
 }

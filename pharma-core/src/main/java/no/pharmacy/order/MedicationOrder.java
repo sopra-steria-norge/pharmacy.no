@@ -55,6 +55,6 @@ public class MedicationOrder {
     }
 
     public String getRefundGroup() {
-        return dateWritten.toString() + "/" + prescriber.getReference();
+        return dateWritten + "/" + prescriber.getReference();
     }
 }

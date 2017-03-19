@@ -62,4 +62,22 @@ public class MedicationDispenseRepositoryTest {
             .isEqualTo(medicationOrder);
     }
 
+    @Test
+    public void itUpdatesMedicationDispense() {
+        DispenseOrder order = new DispenseOrder();
+
+        MedicationOrder medicationOrder = testData.sampleMedicationOrder();
+        order.addMedicationOrder(medicationOrder);
+        repository.saveDispenseOrder(order);
+
+        MedicationDispense prescription = order.getMedicationDispenseList().get(0);
+        prescription.setPrice(testData.samplePrice());
+        prescription.setMedication(medicationOrder.getMedication());
+        repository.update(prescription);
+
+        DispenseOrder retrieved = repository.getMedicationDispenseCollectionById(order.getIdentifier());
+        assertThat(retrieved.getMedicationDispenses().get(0))
+            .isEqualToComparingFieldByField(prescription);
+    }
+
 }

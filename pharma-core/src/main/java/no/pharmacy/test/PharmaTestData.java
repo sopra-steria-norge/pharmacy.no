@@ -14,6 +14,7 @@ import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcConnectionPool;
 
 import lombok.Getter;
+import no.pharmacy.core.Money;
 import no.pharmacy.core.Practitioner;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.Medication;
@@ -171,6 +172,11 @@ public class PharmaTestData {
                 "038397", "048788", "048797", "089497", "438175", "010965", "022113", "183039", "458492", "088656", "043175", "023949", "164606", "587209", "397520", "414533", "004752", "011054", "578081", "004741", "038407", "081825", "159558", "071712", "164617", "114740", "022175", "079261", "423739", "038507", "010288", "088645", "435610", "500038", "164628", "403219", "595422", "384157", "509091", "184839"
         };
         return medicationRepository.findByProductId(pickOne(id)).get();
+    }
+
+
+    public Money samplePrice() {
+        return Money.inCents(random(2000) * 10);
     }
 
 

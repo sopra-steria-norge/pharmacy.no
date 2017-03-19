@@ -1,7 +1,6 @@
 package no.pharmacy.gui.server.prescriptions;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -30,7 +29,7 @@ public class PrescriptionsController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Document doc = readResource("/pharma-webapp/index.html.template");
+        Document doc = Xml.readResource("/pharma-webapp/index.html.template");
 
         String nationalId = req.getParameter("nationalId");
         if (nationalId != null) {
@@ -63,13 +62,5 @@ public class PrescriptionsController extends HttpServlet {
 
         medicationDispenseRepository.saveDispenseOrder(collection);
         resp.sendRedirect("/medicationDispenseCollections/" + collection.getIdentifier());
-    }
-
-    private Document readResource(String name) throws IOException {
-        InputStream input = getClass().getResourceAsStream(name);
-        if (input == null) {
-            throw new IllegalArgumentException("Can't load " + name);
-        }
-        return Xml.readAndClose(input);
     }
 }

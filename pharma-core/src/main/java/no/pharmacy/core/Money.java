@@ -24,7 +24,7 @@ public class Money {
 
     @Override
     public String toString() {
-        return "kr " + (cents/100.0);
+        return "kr " + format();
     }
 
     public Money plus(Money other) {
@@ -61,6 +61,10 @@ public class Money {
 
     public static Money from(String amount) {
         return from(new BigDecimal(amount));
+    }
+
+    public String format() {
+        return String.valueOf(cents/100.0);
     }
 
 }

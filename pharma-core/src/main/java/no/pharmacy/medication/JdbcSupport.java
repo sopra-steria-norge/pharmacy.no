@@ -13,11 +13,17 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.pharmacy.core.Money;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.order.Reference;
+import no.pharmacy.test.InsertBuilder;
 
 public class JdbcSupport {
+
+    private static final Logger logger = LoggerFactory.getLogger(JdbcSupport.class);
 
     private final DataSource dataSource;
 
@@ -30,14 +36,18 @@ public class JdbcSupport {
         T read(ResultSet rs) throws SQLException;
     }
 
-    public void executeUpdate(String query, List<Object> parameters) {
+    public int executeUpdate(String query, List<Object> parameters) {
+        long startTime = System.currentTimeMillis();
         try (Connection conn = dataSource.getConnection()) {
+            logger.trace("executeUpdate {} {}", query, parameters);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 setParameters(stmt, parameters);
-                stmt.executeUpdate();
+                return stmt.executeUpdate();
             }
         } catch (SQLException e) {
             throw soften(query, e);
+        } finally {
+            logger.debug("executeUpdate {}: {}ms", query, System.currentTimeMillis()-startTime);
         }
     }
 
@@ -112,6 +122,14 @@ public class JdbcSupport {
 
     protected LocalDate toLocalDate(Date date) {
         return date != null ? date.toLocalDate() : null;
+    }
+
+    protected InsertBuilder insertInto(String tableName) {
+        return new InsertBuilder(this, tableName);
+    }
+
+    protected UpdateBuilder update(String tableName) {
+        return new UpdateBuilder(this, tableName);
     }
 
 }

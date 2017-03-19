@@ -53,7 +53,7 @@
 		<h2>Pris</h2>
 		
 		<ul>
-			<li><strong>Refusjon:</strong> <span id='coveredAmount'></span></li>
+			<li><strong>Refusjon:</strong> <span id='totalRefund'></span></li>
 			<li><strong>Egenandel:</strong> <span id='copay'></span></li>
 			<li><strong>Mellomlegg pasient:</strong> <span id='uncoveredAmount'></span></li>
 			<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
@@ -78,6 +78,7 @@ $(function() {
 		$(this).closest('li').find('.medicationPrice').show();
 		return false;
 	});	
+	$(".productSelect[checked]").closest("li").find(".medicationPrice").show();
 });
 </script>
 </body>

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import no.pharmacy.core.Money;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.medication.JdbcSupport;
 import no.pharmacy.medication.MedicationRepository;
@@ -49,10 +50,6 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
 
     }
 
-    private InsertBuilder insertInto(String tableName) {
-        return new InsertBuilder(this, tableName);
-    }
-
     @Override
     public DispenseOrder getMedicationDispenseCollectionById(String id) {
         return retrieveSingle("select * from dispense_orders where id = ?",
@@ -83,6 +80,9 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
 
         MedicationDispense dispense = new MedicationDispense(medicationOrder);
         dispense.setId(rs.getLong("id"));
+        dispense.setPrice(Money.from(rs.getBigDecimal("price")));
+        dispense.setMedication(medicationRepository.findByProductId(rs.getString("medication_id"))
+                .orElse(null));
         return dispense;
     }
 
@@ -101,5 +101,14 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
     private List<MedicationOrder> findMedicationOrders(String identifier) {
         return queryForList("select * from medication_orders where dispense_order_id = ?",
                 Arrays.asList(identifier), this::readMedicationOrder);
+    }
+
+    @Override
+    public void update(MedicationDispense prescription) {
+        update("medication_dispenses")
+            .where("id", prescription.getId())
+            .set("price", prescription.getPrice())
+            .set("medication_id", prescription.getMedication().getProductId())
+            .executeUpdate();
     }
 }

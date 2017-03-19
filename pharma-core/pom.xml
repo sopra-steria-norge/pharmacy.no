@@ -10,7 +10,7 @@
 		<dependency>
 			<groupId>org.eaxy</groupId>
 			<artifactId>eaxy</artifactId>
-			<version>0.1</version>
+			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>

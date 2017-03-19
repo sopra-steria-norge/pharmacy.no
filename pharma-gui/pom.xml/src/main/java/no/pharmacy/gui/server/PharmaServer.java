@@ -76,7 +76,7 @@ public class PharmaServer {
         MedicationRepository medicationRepository = new JdbcMedicationRepository(dataSource);
         MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(dataSource, medicationRepository);
         handler.addServlet(new ServletHolder(new PrescriptionsController(reseptFormidler, medicationDispenseRepository)), "/");
-        handler.addServlet(new ServletHolder(new DispenseOrderController(reseptFormidler, medicationDispenseRepository, medicationRepository)), "/medicationDispenseCollections/*");
+        handler.addServlet(new ServletHolder(new DispenseOrderController(medicationDispenseRepository, medicationRepository)), "/medicationDispenseCollections/*");
 
         return handler;
     }
