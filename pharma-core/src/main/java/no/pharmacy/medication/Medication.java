@@ -26,7 +26,7 @@ public class Medication {
     @Getter @Setter
     private String xml;
 
-    public Medication(String productId, String name, int trinnPriceInCents, int retailPriceInCents) {
+    public Medication(String productId, String name, int trinnPriceInCents) {
         this.productId = productId;
         this.display = name;
         this.trinnPrice = Money.inCents(trinnPriceInCents);

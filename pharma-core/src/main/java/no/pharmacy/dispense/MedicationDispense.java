@@ -46,4 +46,12 @@ public class MedicationDispense {
         return authorizingPrescription.getRefundGroup();
     }
 
+    public Money getCoveredAmount() {
+        return getMedication().getCoveredAmount(getPrice());
+    }
+
+    public Money getUncoveredAmount() {
+        return getMedication().getUncoveredAmount(getPrice());
+    }
+
 }

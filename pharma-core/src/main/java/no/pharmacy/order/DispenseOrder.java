@@ -50,7 +50,7 @@ public class DispenseOrder {
     public Money getUncoveredTotal() {
         Money result = Money.zero();
         for (MedicationDispense dispense : medicationDispenses) {
-            result = result.plus(dispense.getMedication().getUncoveredAmount(dispense.getPrice()));
+            result = result.plus(dispense.getUncoveredAmount());
         }
         return result;
     }
@@ -61,7 +61,7 @@ public class DispenseOrder {
             if (dispense.getPrice() == null) {
                 return null;
             }
-            result = result.plus(dispense.getMedication().getCoveredAmount(dispense.getPrice()));
+            result = result.plus(dispense.getCoveredAmount());
         }
         return result;
     }

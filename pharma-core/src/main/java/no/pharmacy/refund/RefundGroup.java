@@ -33,7 +33,7 @@ public class RefundGroup {
             if (dispense.getPrice() == null) {
                 return null;
             }
-            result = result.plus(dispense.getMedication().getCoveredAmount(dispense.getPrice()));
+            result = result.plus(dispense.getCoveredAmount());
         }
         return result;
     }

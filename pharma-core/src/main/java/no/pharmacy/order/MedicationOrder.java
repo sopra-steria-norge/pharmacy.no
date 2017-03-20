@@ -46,7 +46,7 @@ public class MedicationOrder {
         validator.validate(d.getRootElement());
 
         this.prescriber = new Reference("test", "test display");
-        this.medication = new Medication("1243", "hello", 1000, 1000);
+        this.medication = new Medication("1243", "hello", 1000);
         // TODO Auto-generated constructor stub
     }
 

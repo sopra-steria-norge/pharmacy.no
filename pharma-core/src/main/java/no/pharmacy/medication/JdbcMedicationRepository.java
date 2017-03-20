@@ -83,13 +83,14 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         executeUpdate("delete from medications where product_id = ?",
                 Arrays.asList(medication.getProductId()));
 
-        // todo insertInto()
-        List<Object> parameters = Arrays.asList(medication.getProductId(), medication.getDisplay(),
-                medication.getTrinnPrice(),
-                medication.getSubstitutionGroup(), medication.getXml());
-        executeUpdate(
-                "insert into medications (product_id, display, trinn_price, exchange_group_id, xml) values (?, ?, ?, ?, ?)",
-                parameters);
+        insertInto("medications")
+            .value("product_id", medication.getProductId())
+            .value("display", medication.getDisplay())
+            .value("trinn_price", medication.getTrinnPrice())
+            .value("exchange_group_id", medication.getSubstitutionGroup())
+            .value("xml", medication.getXml())
+            .executeInsert()
+            ;
     }
 
     @Override
