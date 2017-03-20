@@ -42,4 +42,8 @@ public class MedicationDispense {
                 : null;
     }
 
+    public String getRefundGroup() {
+        return authorizingPrescription.getRefundGroup();
+    }
+
 }

@@ -59,7 +59,7 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
     @Override
     public List<Medication> list(int offset, int count) {
         return queryForList(
-                "select * from medications where exchange_group_id is not null order by display asc  limit ? offset ?",
+                "select * from medications where exchange_group_id is not null and trinn_price is not null order by display asc  limit ? offset ?",
                 Arrays.asList(count, offset), this::read);
     }
 
@@ -74,7 +74,6 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         medication.setDisplay(rs.getString("display"));
         medication.setProductId(rs.getString("product_id"));
         medication.setTrinnPrice(Money.from(rs.getBigDecimal("trinn_price")));
-        medication.setRetailPrice(Money.from(rs.getBigDecimal("retail_price")));
         medication.setSubstitutionGroup(rs.getString("exchange_group_id"));
         medication.setXml(rs.getString("xml"));
         return medication;
@@ -84,11 +83,12 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         executeUpdate("delete from medications where product_id = ?",
                 Arrays.asList(medication.getProductId()));
 
+        // todo insertInto()
         List<Object> parameters = Arrays.asList(medication.getProductId(), medication.getDisplay(),
-                medication.getTrinnPrice(), medication.getRetailPrice(),
+                medication.getTrinnPrice(),
                 medication.getSubstitutionGroup(), medication.getXml());
         executeUpdate(
-                "insert into medications (product_id, display, trinn_price, retail_price, exchange_group_id, xml) values (?, ?, ?, ?, ?, ?)",
+                "insert into medications (product_id, display, trinn_price, exchange_group_id, xml) values (?, ?, ?, ?, ?)",
                 parameters);
     }
 

@@ -3,12 +3,11 @@ package no.pharmacy.refund;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import no.pharmacy.core.Money;
 import no.pharmacy.core.Practitioner;
+import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.order.DispenseOrder;
 import no.pharmacy.order.MedicationOrder;
@@ -22,18 +21,18 @@ public class RefundCalculationTest {
     public void onlyPriceUpToTrinnPriceIsCovered() {
         Medication medication1 = new Medication();
         medication1.setTrinnPrice(Money.inCents(10000));
-        medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(2000));
+        Money retailPrice = medication1.getTrinnPrice().plusCents(2000);
 
-        assertThat(medication1.getUncoveredAmount())
-            .isEqualTo(medication1.getRetailPrice().minus(medication1.getTrinnPrice()));
+        assertThat(medication1.getUncoveredAmount(retailPrice))
+            .isEqualTo(retailPrice.minus(medication1.getTrinnPrice()));
     }
 
     @Test
     public void medicationsCostingLessThanTrinnPriceAreFullyCovered() {
         Medication medication = new Medication();
         medication.setTrinnPrice(Money.inCents(20000));
-        medication.setRetailPrice(medication.getTrinnPrice().plusCents(-3000));
-        assertThat(medication.getUncoveredAmount())
+        Money retailPrice = medication.getTrinnPrice().plusCents(-3000);
+        assertThat(medication.getUncoveredAmount(retailPrice))
             .isEqualTo(Money.zero());
     }
 
@@ -49,27 +48,24 @@ public class RefundCalculationTest {
 
         Medication medication1 = new Medication();
         medication1.setTrinnPrice(Money.inCents(10000));
-        medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(2000));
+        Money retailPrice1 = medication1.getTrinnPrice().plusCents(2000);
 
         Medication medication2 = new Medication();
-        medication2.setTrinnPrice(Money.inCents(20000));
-        medication2.setRetailPrice(medication2.getTrinnPrice().plusCents(-3000));
+        medication2.setTrinnPrice(Money.inCents(500000));
+        Money retailPrice2 = medication2.getTrinnPrice().plusCents(-3000);
 
-        MedicationOrder order1 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication1);
-        MedicationOrder order2 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication2);
-        MedicationOrder order3 = PharmaTestData.sampleMedicationOrder(doctor1, secondDate, medication1);
-        MedicationOrder order4 = PharmaTestData.sampleMedicationOrder(doctor2, firstDate, medication1);
+        addMedicationDispense(order, doctor1, firstDate, medication1, retailPrice1);
+        addMedicationDispense(order, doctor1, firstDate, medication2, retailPrice2);
+        addMedicationDispense(order, doctor1, secondDate, medication1, retailPrice1);
+        addMedicationDispense(order, doctor2, firstDate, medication1, retailPrice1);
 
-        order.addMedicationOrder(order1);
-        order.addMedicationOrder(order2);
-        order.addMedicationOrder(order3);
-        order.addMedicationOrder(order4);
-
-        assertThat(order.getUncoveredTotal()).isEqualTo(medication1.getUncoveredAmount().times(3));
+        assertThat(order.getUncoveredTotal()).isEqualTo(medication1.getUncoveredAmount(retailPrice1).times(3));
         assertThat(order.getCoveredTotal())
-            .isEqualTo(medication1.getCoveredAmount().times(3).plus(medication2.getCoveredAmount()));
+            .isEqualTo(medication1.getCoveredAmount(retailPrice1).times(3)
+                    .plus(medication2.getCoveredAmount(retailPrice2)));
         assertThat(order.getPatientTotal())
-            .isEqualTo(medication1.getCoveredAmount().times(2).percent(39).plus(MAX_COPAY_PER_PRESCRIPTION));
+            .isEqualTo(medication1.getCoveredAmount(retailPrice1).times(2).percent(39)
+                    .plus(MAX_COPAY_PER_PRESCRIPTION));
     }
 
     @Test
@@ -82,27 +78,30 @@ public class RefundCalculationTest {
 
         Medication medication1 = new Medication();
         medication1.setTrinnPrice(Money.inCents(100000));
-        medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(-2000));
+        Money retailPrice1 = medication1.getTrinnPrice().plusCents(-2000);
 
         Medication medication2 = new Medication();
-        medication2.setTrinnPrice(Money.inCents(20000));
-        medication2.setRetailPrice(medication2.getTrinnPrice().plusCents(-3000));
+        medication2.setTrinnPrice(Money.inCents(50000));
+        Money retailPrice2 = medication2.getTrinnPrice().plusCents(-3000);
 
-        MedicationOrder order1 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication1);
-        MedicationOrder order2 = PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication2);
-
-        order.addMedicationOrder(order1);
-        order.addMedicationOrder(order2);
-
-        assertThat(order.getRefundGroups()).extracting(g -> g.getMedicationOrders())
-            .containsOnly(Arrays.asList(order1, order2));
+        addMedicationDispense(order, doctor1, firstDate, medication1, retailPrice1);
+        addMedicationDispense(order, doctor1, firstDate, medication2, retailPrice2);
 
         assertThat(order.getRefundGroups().iterator().next().getPatientAmount())
             .isEqualTo(MAX_COPAY_PER_PRESCRIPTION);
         assertThat(order.getPatientTotal()).isEqualTo(MAX_COPAY_PER_PRESCRIPTION);
         assertThat(order.getUncoveredTotal()).isEqualTo(Money.zero());
         assertThat(order.getRefundTotal())
-            .isEqualTo(medication1.getRetailPrice().plus(medication2.getRetailPrice()).minus(MAX_COPAY_PER_PRESCRIPTION));
+            .isEqualTo(retailPrice1.plus(retailPrice2).minus(MAX_COPAY_PER_PRESCRIPTION));
+    }
+
+    private void addMedicationDispense(DispenseOrder order,
+            Practitioner doctor, LocalDate firstDate,
+            Medication medication, Money retailPrice) {
+        MedicationOrder prescription = PharmaTestData.sampleMedicationOrder(doctor, firstDate, medication);
+        MedicationDispense dispense = order.addMedicationOrder(prescription);
+        dispense.setPrice(retailPrice);
+        dispense.setMedication(medication);
     }
 
     @Test
@@ -115,12 +114,12 @@ public class RefundCalculationTest {
 
         Medication medication1 = new Medication();
         medication1.setTrinnPrice(Money.inCents(10000));
-        medication1.setRetailPrice(medication1.getTrinnPrice().plusCents(-2000));
+        Money retailPrice1 = medication1.getTrinnPrice().plusCents(-2000);
 
-        order.addMedicationOrder(PharmaTestData.sampleMedicationOrder(doctor1, firstDate, medication1));
+        addMedicationDispense(order, doctor1, firstDate, medication1, retailPrice1);
 
         assertThat(order.getRefundGroups().iterator().next().getPatientAmount())
-            .isEqualTo(medication1.getRetailPrice().percent(39));
+            .isEqualTo(retailPrice1.percent(39));
     }
 
 }

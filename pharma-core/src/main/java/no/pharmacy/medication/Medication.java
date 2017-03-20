@@ -14,8 +14,6 @@ public class Medication {
 
     @Getter @Setter
     private Money trinnPrice;
-    @Getter @Setter
-    private Money retailPrice;
 
     @Getter @Setter
     private String productId;
@@ -32,16 +30,14 @@ public class Medication {
         this.productId = productId;
         this.display = name;
         this.trinnPrice = Money.inCents(trinnPriceInCents);
-        this.retailPrice = Money.inCents(retailPriceInCents);
     }
 
-    public Money getUncoveredAmount() {
+    public Money getUncoveredAmount(Money retailPrice) {
         return retailPrice.isGreaterThan(trinnPrice) ? retailPrice.minus(trinnPrice) : Money.zero();
     }
 
-    public Money getCoveredAmount() {
-        return trinnPrice != null && retailPrice.isGreaterThan(trinnPrice) ? trinnPrice :
-            (retailPrice != null ? retailPrice : Money.inCents(1000000));
+    public Money getCoveredAmount(Money retailPrice) {
+        return trinnPrice != null && retailPrice.isGreaterThan(trinnPrice) ? trinnPrice : retailPrice;
     }
 
 }

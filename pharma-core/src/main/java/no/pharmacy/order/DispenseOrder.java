@@ -25,9 +25,11 @@ public class DispenseOrder {
     @Getter
     private List<MedicationDispense> medicationDispenses = new ArrayList<>();
 
-    public void addMedicationOrder(MedicationOrder medicationOrder) {
+    public MedicationDispense addMedicationOrder(MedicationOrder medicationOrder) {
+        MedicationDispense dispense = new MedicationDispense(medicationOrder);
         this.medicationOrders.add(medicationOrder);
-        this.medicationDispenses.add(new MedicationDispense(medicationOrder));
+        this.medicationDispenses.add(dispense);
+        return dispense;
     }
 
     public List<MedicationDispense> getMedicationDispenseList() {
@@ -37,9 +39,9 @@ public class DispenseOrder {
     public Collection<RefundGroup> getRefundGroups() {
         Map<String, RefundGroup> result = new HashMap<>();
 
-        for (MedicationOrder medicationOrder : medicationOrders) {
-            result.computeIfAbsent(medicationOrder.getRefundGroup(), s -> new RefundGroup())
-                .add(medicationOrder);
+        for (MedicationDispense dispense : medicationDispenses) {
+            result.computeIfAbsent(dispense.getRefundGroup(), s -> new RefundGroup())
+                .add(dispense);
         }
 
         return result.values();
@@ -47,16 +49,19 @@ public class DispenseOrder {
 
     public Money getUncoveredTotal() {
         Money result = Money.zero();
-        for (MedicationOrder medicationOrder : medicationOrders) {
-            result = result.plus(medicationOrder.getMedication().getUncoveredAmount());
+        for (MedicationDispense dispense : medicationDispenses) {
+            result = result.plus(dispense.getMedication().getUncoveredAmount(dispense.getPrice()));
         }
         return result;
     }
 
     public Money getCoveredTotal() {
         Money result = Money.zero();
-        for (MedicationOrder medicationOrder : medicationOrders) {
-            result = result.plus(medicationOrder.getMedication().getCoveredAmount());
+        for (MedicationDispense dispense : medicationDispenses) {
+            if (dispense.getPrice() == null) {
+                return null;
+            }
+            result = result.plus(dispense.getMedication().getCoveredAmount(dispense.getPrice()));
         }
         return result;
     }
@@ -64,12 +69,17 @@ public class DispenseOrder {
     public Money getPatientTotal() {
         Money result = Money.zero();
         for (RefundGroup refundGroup : getRefundGroups()) {
-            result = result.plus(refundGroup.getPatientAmount());
+            Money patientAmount = refundGroup.getPatientAmount();
+            if (patientAmount == null) {
+                return null;
+            }
+            result = result.plus(patientAmount);
         }
         return result;
     }
 
     public Money getRefundTotal() {
-        return getCoveredTotal().minus(getPatientTotal());
+        Money coveredTotal = getCoveredTotal();
+        return coveredTotal != null ? coveredTotal.minus(getPatientTotal()) : null;
     }
 }

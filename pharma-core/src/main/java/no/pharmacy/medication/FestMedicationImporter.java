@@ -6,6 +6,7 @@ import java.util.List;
 import org.eaxy.Element;
 import org.eaxy.Validator;
 
+import no.pharmacy.core.Money;
 import no.pharmacy.order.Reference;
 
 public class FestMedicationImporter {
@@ -32,11 +33,22 @@ public class FestMedicationImporter {
             medication.setDisplay(legemiddelpakning.find("NavnFormStyrke").first().text());
             medication.setProductId(legemiddelpakning.find("Varenr").first().text());
             medication.setSubstitutionGroup(legemiddelpakning.find("PakningByttegruppe", "RefByttegruppe").firstTextOrNull());
+            medication.setTrinnPrice(getTrinnPrice(legemiddelpakning));
             medication.setXml(legemiddelpakning.toXML());
             result.add(medication);
         }
 
         return result;
+    }
+
+
+    private Money getTrinnPrice(Element legemiddelpakning) {
+        for (Element element : legemiddelpakning.find("PrisVare")) {
+            if (!element.find("Type[V=5]").isEmpty()) {
+                return Money.from(element.find("Pris").first().attr("V"));
+            }
+        }
+        return null;
     }
 
 }

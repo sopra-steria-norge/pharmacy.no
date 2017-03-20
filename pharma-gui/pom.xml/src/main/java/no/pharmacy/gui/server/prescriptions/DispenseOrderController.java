@@ -1,6 +1,8 @@
 package no.pharmacy.gui.server.prescriptions;
 
 import java.io.IOException;
+import java.util.Objects;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -58,9 +60,12 @@ public class DispenseOrderController extends HttpServlet {
             medicationOrders.add(orderElement);
         }
 
-        doc.find("...", "#totalRefund").first().text(dispenseOrder.getRefundTotal().toString());
-        doc.find("...", "#uncoveredAmount").first().text(dispenseOrder.getPatientTotal().toString());
-
+        Money refundTotal = dispenseOrder.getRefundTotal();
+        if (refundTotal != null) {
+            doc.find("...", "#totalRefund").first().text(refundTotal.toString());
+            doc.find("...", "#copay").first().text(dispenseOrder.getPatientTotal().toString());
+            doc.find("...", "#uncoveredAmount").first().text(dispenseOrder.getUncoveredTotal().toString());
+        }
         resp.setContentType("text/html");
         doc.writeTo(resp.getWriter());
     }
@@ -79,7 +84,7 @@ public class DispenseOrderController extends HttpServlet {
             .attr("step", "any");
         Element productDetails = Xml.el("div", "Details for " + medication.getDisplay())
                 .addClass("medicationDescription");
-        if (dispense.getMedication().equals(medication)) {
+        if (Objects.equals(dispense.getMedication(), medication)) {
             productIdField.checked(true);
             priceInput.val(dispense.getPrice().format());
         }
@@ -87,9 +92,10 @@ public class DispenseOrderController extends HttpServlet {
                 Xml.el("label",
                     productIdField,
                     Xml.el("span", medication.getDisplay()),
+                    Xml.el("span", "Trinnpris " + medication.getTrinnPrice()),
                     productName,
                     Xml.el("div",
-                            Xml.text("Utsalgspris:"),
+                            Xml.text("Utsalgspris: "),
                             priceInput)
                                 .addClass("medicationPrice"),
                     productDetails));

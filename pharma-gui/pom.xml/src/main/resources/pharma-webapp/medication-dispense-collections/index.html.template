@@ -68,14 +68,17 @@
 <script>
 $(function() {
 	$("#medicationOrders").on('click', '.medicationDetails', function() {
+		var shouldShow = !$(this).closest('li').find('.medicationDescription').is(":visible");
 		$(".medicationDescription").hide();
-		$(this).closest('li').find('.medicationDescription').show();
+		if (shouldShow) {
+			$(this).closest('li').find('.medicationDescription').show();
+		}
 		return false;
 	});	
 	$("#medicationOrders").on('change', '.productSelect', function() {
 		$(".medicationPrice").hide();
 		$(".medicationDescription").hide();
-		$(this).closest('li').find('.medicationPrice').show();
+		$(this).closest('li').find('.medicationPrice').show();			
 		return false;
 	});	
 	$(".productSelect[checked]").closest("li").find(".medicationPrice").show();

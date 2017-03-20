@@ -48,7 +48,7 @@ public class Money {
     }
 
     public Money percent(int amount) {
-        return new Money(cents*100/amount);
+        return new Money(cents*amount/100);
     }
 
     public static Money from(BigDecimal decimal) {
