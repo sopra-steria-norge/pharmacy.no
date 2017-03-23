@@ -2,11 +2,8 @@ package no.pharmacy.test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
-
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationSource;
 
@@ -40,8 +37,7 @@ public class FakeMedicationSource implements MedicationSource {
     }
 
     public Medication pickOne() {
-        List<Medication> values = new ArrayList<>(medications.values());
-        return values.get(new Random().nextInt(values.size()));
+        return PharmaTestData.pickOne(new ArrayList<>(medications.values()));
     }
 
 }

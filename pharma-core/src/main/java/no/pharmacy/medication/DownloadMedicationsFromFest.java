@@ -9,7 +9,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.eaxy.Document;
-import org.eaxy.Element;
 import org.eaxy.Xml;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -63,15 +62,16 @@ public class DownloadMedicationsFromFest {
     private void saveFest(Document festDoc) {
         FestMedicationImporter importer = new FestMedicationImporter();
         logger.info("Inserting medications");
-        for (Medication medication : importer.readMedicationPackage(festDoc.find("KatLegemiddelpakning").first())) {
+        for (Medication medication : importer.readMedicationPackages(festDoc.find("KatLegemiddelpakning").first())) {
             medicationRepository.save(medication);
         }
         logger.info("Inserted medications");
 
-        for (Element byttegruppe : festDoc.find("KatByttegruppe").first().elements()) {
-            System.out.println(byttegruppe.toXML());
+        logger.info("Inserting interactions");
+        for (MedicationInteraction interaction : importer.readInteractions(festDoc.find("KatInteraksjon").first())) {
+            medicationRepository.save(interaction);
         }
-        System.out.println(festDoc);
+        logger.info("Inserted interactions");
     }
 
 

@@ -1,15 +1,17 @@
-package no.pharmacy.gui.server.test;
+package no.pharmacy.web.test;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import no.pharmacy.gui.server.prescriptions.PrescriptionsSource;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationSource;
 import no.pharmacy.order.MedicationOrder;
+import no.pharmacy.test.PharmaTestData;
+import no.pharmacy.web.prescriptions.PrescriptionsSource;
 
 public class FakeReseptFormidler implements PrescriptionsSource {
 
@@ -33,6 +35,7 @@ public class FakeReseptFormidler implements PrescriptionsSource {
     private MedicationOrder createMedicationOrder(String nationalId, Medication product) {
         MedicationOrder medicationOrder = new MedicationOrder(nationalId, product);
         medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
+        medicationOrder.setDateWritten(LocalDate.now().minusDays(PharmaTestData.random(14)));
         return medicationOrder;
     }
 

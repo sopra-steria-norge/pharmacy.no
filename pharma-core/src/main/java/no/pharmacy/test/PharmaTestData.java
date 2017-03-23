@@ -90,7 +90,7 @@ public class PharmaTestData {
         return fakeMedicationSource.pickOne();
     }
 
-    public static <T> T pickOne(T[] options) {
+    public static <T> T pickOneOf(T... options) {
         return options[random(options.length)];
     }
 
@@ -111,14 +111,14 @@ public class PharmaTestData {
 
     private String sampleLastName() {
         // https://www.ssb.no/a/navn/alf/etter100.html
-        return pickOne(new String[] { "Hansen", "Johansen", "Olsen", "Larsen", "Andersen", "Pedersen", "Nilsen", "Kristiansen", "Jensen", "Karlsen", "Johnsen", "Pettersen", "Eriksen", "Berg", "Haugen" });
+        return pickOneOf(new String[] { "Hansen", "Johansen", "Olsen", "Larsen", "Andersen", "Pedersen", "Nilsen", "Kristiansen", "Jensen", "Karlsen", "Johnsen", "Pettersen", "Eriksen", "Berg", "Haugen" });
     }
 
     private String sampleFirstName() {
         // https://www.ssb.no/befolkning/statistikker/navn/aar/2016-01-26?fokus=true
         String[] femaleNames = { "Emma", "Nora", "Sara", "Sofie", "Olivia", "Sofia", "Emilie", "Ella", "Leah", "Maja" };
         String[] maleNames = { "William", "Mathias", "Oliver", "Jakob", "Lucas", "Filip", "Liam", "Aksel", "Emil", "Oskar" };
-        return chance(50) ? pickOne(femaleNames) : pickOne(maleNames);
+        return chance(50) ? pickOneOf(femaleNames) : pickOneOf(maleNames);
     }
 
     private boolean chance(int percent) {
@@ -152,6 +152,19 @@ public class PharmaTestData {
         return sampleMedicationOrder(sampleDoctor(), samplePastDate(), sampleMedication());
     }
 
+    public Medication sampleMedication(String productId) {
+        if (medicationCache.isEmpty()) {
+            medicationCache.addAll(medicationRepository.list());
+        }
+
+        for (Medication medication : medicationCache) {
+            if (medication.getProductId().equals(productId)) {
+                return medication;
+            }
+        }
+        throw new IllegalArgumentException("Can't find medication " + productId);
+    }
+
     private Medication sampleMedication() {
         if (medicationCache.isEmpty()) {
             medicationCache.addAll(medicationRepository.list());
@@ -171,7 +184,7 @@ public class PharmaTestData {
         String[] id = {
                 "038397", "048788", "048797", "089497", "438175", "010965", "022113", "183039", "458492", "088656", "043175", "023949", "164606", "587209", "397520", "414533", "004752", "011054", "578081", "004741", "038407", "081825", "159558", "071712", "164617", "114740", "022175", "079261", "423739", "038507", "010288", "088645", "435610", "500038", "164628", "403219", "595422", "384157", "509091", "184839"
         };
-        return medicationRepository.findByProductId(pickOne(id)).get();
+        return medicationRepository.findByProductId(pickOneOf(id)).get();
     }
 
 
@@ -179,6 +192,15 @@ public class PharmaTestData {
         return Money.inCents(random(2000) * 10);
     }
 
+    public static <T extends Enum<T>> T pickOne(Class<T> enumClass) {
+        return pickOneOf(enumClass.getEnumConstants());
+    }
 
-
+    public static String lorum() {
+        List<String> words = new ArrayList<>();
+        for (int i=0; i<random(20)+20; i++) {
+            words.add(pickOneOf("Lorem", "ipsum", "dolor", "sit", "amet", "ut", "qui", "nisl", "munere", "nonumy", "Noster", "malorum", "at", "vim", "ad", "diceret", "scaevola", "pro", "Affert", "putant", "per", "no"));
+        }
+        return String.join(" ", words);
+    }
 }

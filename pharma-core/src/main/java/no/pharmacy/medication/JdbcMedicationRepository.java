@@ -6,8 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -75,7 +78,9 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         medication.setProductId(rs.getString("product_id"));
         medication.setTrinnPrice(Money.from(rs.getBigDecimal("trinn_price")));
         medication.setSubstitutionGroup(rs.getString("exchange_group_id"));
+        medication.setSubstance(rs.getString("substance"));
         medication.setXml(rs.getString("xml"));
+        medication.getInteractions().addAll(listInteractions(medication.getSubstance()));
         return medication;
     }
 
@@ -88,6 +93,7 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
             .value("display", medication.getDisplay())
             .value("trinn_price", medication.getTrinnPrice())
             .value("exchange_group_id", medication.getSubstitutionGroup())
+            .value("substance", medication.getSubstance())
             .value("xml", medication.getXml())
             .executeInsert()
             ;
@@ -117,13 +123,17 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
 
     public List<Medication> list() {
         String query = "select * from medications where exchange_group_id is not null order by display asc  limit ? offset ?";
-        return queryForList(query, Arrays.asList(1000, 0), this::read);
+        return queryForList(query, Arrays.asList(10000, 0), this::read);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcMedicationRepository.class);
 
     public void refresh() {
         if (isEmpty()) {
+            if (System.getProperty("pharmacy.disable_fest_refresh") != null) {
+                throw new IllegalStateException("Database empty, but FEST refresh is disabled");
+            }
+
             logger.info("Refreshing medications from FEST");
             try (Connection conn = dataSource.getConnection()) {
                 new DownloadMedicationsFromFest(this).downloadFestFile();
@@ -132,5 +142,77 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
             }
         }
     }
+
+    public void save(MedicationInteraction interaction) {
+        insertInto("medication_interactions")
+            .value("id", interaction.getId())
+            .value("severity", interaction.getSeverity())
+            .value("clinical_consequence", interaction.getClinicalConsequence())
+            .value("interaction_mechanism", interaction.getInteractionMechanism())
+            .executeUpdate();
+
+        for (String atcCode : interaction.getSubstanceCodes()) {
+            insertInto("interacting_substance")
+                .value("interaction_id", interaction.getId())
+                .value("atc_code", atcCode)
+                .executeUpdate();
+        }
+        interactionCache.clear();
+    }
+
+    private Map<String, List<MedicationInteraction>> interactionCache = new HashMap<>();
+
+    public synchronized List<MedicationInteraction> listInteractions(String atcCode) {
+        if (interactionCache.isEmpty()) {
+            String query = "select * from medication_interactions i inner join interacting_substance s on i.id = s.interaction_id "
+                    + "order by i.id";
+            List<MedicationInteraction> interactions = queryForResultSet(query,
+                    new ArrayList<>(), this::readInteractions);
+            for (MedicationInteraction interaction : interactions) {
+                for (String substance : interaction.getSubstanceCodes()) {
+                    interactionCache
+                        .computeIfAbsent(substance, s -> new ArrayList<>())
+                        .add(interaction);
+                }
+            }
+        }
+
+
+        String anatomicalGroup = atcCode.substring(0, 1);
+        String therapeuticGroup = atcCode.substring(0, 3);
+        String pharmacologicalGroup = atcCode.substring(0, 4);
+        String chemicalGroup = atcCode.substring(0, 5);
+        String substance = atcCode.length() >= 7 ? atcCode.substring(0, 7) : "N/A";
+        List<MedicationInteraction> result = new ArrayList<>();
+        List<MedicationInteraction> empty = new ArrayList<>();
+        result.addAll(interactionCache.getOrDefault(anatomicalGroup, empty));
+        result.addAll(interactionCache.getOrDefault(therapeuticGroup, empty));
+        result.addAll(interactionCache.getOrDefault(pharmacologicalGroup, empty));
+        result.addAll(interactionCache.getOrDefault(chemicalGroup, empty));
+        result.addAll(interactionCache.getOrDefault(substance, empty));
+        return result;
+    }
+
+
+    private List<MedicationInteraction> readInteractions(ResultSet rs) throws SQLException {
+        String id = "";
+        List<MedicationInteraction> result = new ArrayList<>();
+        while (rs.next()) {
+            if (!id.equals(rs.getString("id"))) {
+                id = rs.getString("id");
+                MedicationInteraction interaction = new MedicationInteraction();
+                interaction.setId(id);
+                interaction.setSeverity(MedicalInteractionSeverity.valueOf(rs.getString("severity")));
+                interaction.setClinicalConsequence(rs.getString("clinical_consequence"));
+                interaction.setInteractionMechanism(rs.getString("interaction_mechanism"));
+                result.add(interaction);
+            }
+            result.get(result.size()-1).getSubstanceCodes().add(rs.getString("atc_code"));
+        }
+        return result;
+    }
+
+
+
 
 }

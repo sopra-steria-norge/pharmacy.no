@@ -1,10 +1,15 @@
 package no.pharmacy.dispense;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import no.pharmacy.core.Money;
 import no.pharmacy.medication.Medication;
+import no.pharmacy.medication.MedicationInteraction;
 import no.pharmacy.order.MedicationOrder;
 
 @EqualsAndHashCode(of={"id", "medication", "authorizingPrescription" })
@@ -52,6 +57,25 @@ public class MedicationDispense {
 
     public Money getUncoveredAmount() {
         return getMedication().getUncoveredAmount(getPrice());
+    }
+
+    public List<MedicationOrderWarning> getWarnings(MedicationHistory history) {
+        ArrayList<MedicationOrderWarning> result = new ArrayList<>();
+
+        for (MedicationDispense historicalDispense : history.getDispenses()) {
+            if (historicalDispense.equals(this)) continue;
+            for (MedicationInteraction interaction : getInteractions(historicalDispense)) {
+                result.add(new MedicationOrderWarning(historicalDispense, interaction));
+            }
+        }
+
+        return result;
+    }
+
+    private List<MedicationInteraction> getInteractions(MedicationDispense historicalDispense) {
+        return medication.getInteractions().stream()
+            .filter(i -> i.interactsWith(historicalDispense.getMedication().getSubstance()))
+            .collect(Collectors.toList());
     }
 
 }

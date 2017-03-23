@@ -17,7 +17,6 @@ public class MedicationOrderDecodeTest {
     private static Namespace ERESEPT = new Namespace("http://www.kith.no/xmlstds/eresept/m1/2013-10-08", "er");
     private static Namespace FORSKRIVNING = new Namespace("http://www.kith.no/xmlstds/eresept/forskrivning/2013-10-08", "f");
 
-
     @Test
     public void decodesM1() throws Exception {
         PharmaTestData testData = new PharmaTestData();

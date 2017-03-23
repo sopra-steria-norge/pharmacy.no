@@ -35,6 +35,13 @@ public class JdbcSupport {
         T read(ResultSet rs) throws SQLException;
     }
 
+    @FunctionalInterface
+    public interface ResultSetListMapper<T> {
+        List<T> read(ResultSet rs) throws SQLException;
+    }
+
+
+
     public int executeUpdate(String query, List<Object> parameters) {
         long startTime = System.currentTimeMillis();
         try (Connection conn = dataSource.getConnection()) {
@@ -46,7 +53,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw soften(query, e);
         } finally {
-            logger.debug("executeUpdate {}: {}ms", query, System.currentTimeMillis()-startTime);
+            logger.trace("executeUpdate {}: {}ms", query, System.currentTimeMillis()-startTime);
         }
     }
 
@@ -68,7 +75,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw soften(query, e);
         } finally {
-            logger.debug("executeInsert {}: {}ms", query, System.currentTimeMillis()-startTime);
+            logger.trace("executeInsert {}: {}ms", query, System.currentTimeMillis()-startTime);
         }
     }
 
@@ -83,6 +90,8 @@ public class JdbcSupport {
                 stmt.setBigDecimal(i+1, ((Money)parameter).toBigDecimal());
             } else if (parameter instanceof Reference) {
                 stmt.setString(i+1, ((Reference)parameter).getReference());
+            } else if (parameter instanceof Enum<?>) {
+                stmt.setString(i+1, ((Enum<?>)parameter).name());
             } else {
                 stmt.setObject(i+1, parameter);
             }
@@ -106,8 +115,27 @@ public class JdbcSupport {
         }
     }
 
-    protected <T> List<T> queryForList(String query, List<Object> parameters, ResultSetMapper<T> mapper) {
+    protected <T> List<T> queryForResultSet(String query, List<Object> parameters, ResultSetListMapper<T> mapper) {
+        long startTime = System.currentTimeMillis();
         try (Connection conn = dataSource.getConnection()) {
+            logger.trace("queryForResultSet {} {}", query, parameters);
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                setParameters(stmt, parameters);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return mapper.read(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw soften(query, e);
+        } finally {
+            logger.trace("queryForResultSet {}: {}ms", query, System.currentTimeMillis()-startTime);
+        }
+    }
+
+    protected <T> List<T> queryForList(String query, List<Object> parameters, ResultSetMapper<T> mapper) {
+        long startTime = System.currentTimeMillis();
+        try (Connection conn = dataSource.getConnection()) {
+            logger.trace("queryForList {} {}", query, parameters);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 setParameters(stmt, parameters);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -120,6 +148,8 @@ public class JdbcSupport {
             }
         } catch (SQLException e) {
             throw soften(query, e);
+        } finally {
+            logger.trace("queryForList {}: {}ms", query, System.currentTimeMillis()-startTime);
         }
     }
 

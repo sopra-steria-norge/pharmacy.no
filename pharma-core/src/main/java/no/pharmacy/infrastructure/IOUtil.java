@@ -32,6 +32,17 @@ import java.util.Map;
 
 public class IOUtil {
 
+    public static void post(String content, URL url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setDoOutput(true);
+
+        try (OutputStream output = connection.getOutputStream()) {
+            copy(content, output);
+        }
+
+        checkResponse(connection);
+    }
+
     public static String toString(URLConnection connection) throws IOException {
         try (Reader reader = IOUtil.createReader(connection)) {
             return IOUtil.toString(reader);

@@ -1,4 +1,4 @@
-package no.pharmacy.gui.server.prescriptions;
+package no.pharmacy.web.prescriptions;
 
 import java.io.IOException;
 import java.util.List;

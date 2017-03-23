@@ -11,10 +11,11 @@ import lombok.Setter;
 import lombok.ToString;
 import no.pharmacy.core.Money;
 import no.pharmacy.dispense.MedicationDispense;
+import no.pharmacy.dispense.MedicationHistory;
 import no.pharmacy.refund.RefundGroup;
 
 @ToString(of = { "identifier" })
-public class DispenseOrder {
+public class DispenseOrder implements MedicationHistory {
 
     @Getter @Setter
     private String identifier;
@@ -24,6 +25,11 @@ public class DispenseOrder {
 
     @Getter
     private List<MedicationDispense> medicationDispenses = new ArrayList<>();
+
+    @Override
+    public List<MedicationDispense> getDispenses() {
+        return medicationDispenses;
+    }
 
     public MedicationDispense addMedicationOrder(MedicationOrder medicationOrder) {
         MedicationDispense dispense = new MedicationDispense(medicationOrder);
@@ -82,4 +88,5 @@ public class DispenseOrder {
         Money coveredTotal = getCoveredTotal();
         return coveredTotal != null ? coveredTotal.minus(getPatientTotal()) : null;
     }
+
 }

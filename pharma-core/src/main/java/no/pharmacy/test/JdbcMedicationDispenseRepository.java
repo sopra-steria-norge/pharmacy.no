@@ -2,6 +2,7 @@ package no.pharmacy.test;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,13 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
     public JdbcMedicationDispenseRepository(DataSource dataSource, MedicationRepository medicationRepository) {
         super(dataSource);
         this.medicationRepository = medicationRepository;
+    }
+
+    @Override
+    public List<DispenseOrder> listReadyForPharmacist() {
+        return queryForList("select * from dispense_orders", new ArrayList<>(),
+                this::read);
+        // TODO Return DispenseOrderSummary
     }
 
     @Override

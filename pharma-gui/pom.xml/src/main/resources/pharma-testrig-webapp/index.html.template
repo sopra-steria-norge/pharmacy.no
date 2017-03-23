@@ -13,18 +13,30 @@
 		<input type="text" name="nationalId" placeholder="Fødselsnummer" list="unusedIds" />
 		<datalist id="unusedIds"></datalist>
 	
-		<h2>Forskrivning på legemiddelpakning</h2>
-
-		<label>
-			Legemiddel
-			<select name="productId"></select>
-		</label>
-		
-		<div>
-			<button>
-				Legg til resept
-			</button>
-		</div>
+		<fieldset>
+			<h2>Forskrivning på legemiddelpakning</h2>
+	
+			<label>
+				Legemiddel
+				<select name="productId"></select>
+			</label>
+			
+			<div>
+				<button>
+					Legg til resept
+				</button>
+			</div>
+		</fieldset>
+		<fieldset>
+			<h2>Scenario</h2>
+	
+			
+			<div>
+				<button id="drugInteraction" name="scenario" value="drugInteraction">
+					To legemidler med interaksjon (Ritalin og Aurorix)
+				</button>
+			</div>
+		</fieldset>
 	</form>
 
 </body>

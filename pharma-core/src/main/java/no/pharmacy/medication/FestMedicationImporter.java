@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eaxy.Element;
+import org.eaxy.ElementSet;
 import org.eaxy.Validator;
 
 import no.pharmacy.core.Money;
@@ -26,7 +27,7 @@ public class FestMedicationImporter {
     }
 
 
-    public List<Medication> readMedicationPackage(Element katLegemiddelpakning) { List<Medication> result = new ArrayList<>();
+    public List<Medication> readMedicationPackages(Element katLegemiddelpakning) { List<Medication> result = new ArrayList<>();
         for (Element oppfLegemiddelpakning : katLegemiddelpakning.elements()) {
             Element legemiddelpakning = oppfLegemiddelpakning.find("Legemiddelpakning").first();
             Medication medication = new Medication();
@@ -34,6 +35,10 @@ public class FestMedicationImporter {
             medication.setProductId(legemiddelpakning.find("Varenr").first().text());
             medication.setSubstitutionGroup(legemiddelpakning.find("PakningByttegruppe", "RefByttegruppe").firstTextOrNull());
             medication.setTrinnPrice(getTrinnPrice(legemiddelpakning));
+            ElementSet atcCodes = legemiddelpakning.find("Atc");
+            if (atcCodes.isPresent()) {
+                medication.setSubstance(atcCodes.first().attr("V"));
+            }
             medication.setXml(legemiddelpakning.toXML());
             result.add(medication);
         }
@@ -49,6 +54,30 @@ public class FestMedicationImporter {
             }
         }
         return null;
+    }
+
+
+    public List<MedicationInteraction> readInteractions(Element katInteraksjon) {
+        ArrayList<MedicationInteraction> result = new ArrayList<>();
+        interaction: for (Element interaksjon : katInteraksjon.find("OppfInteraksjon", "Interaksjon")) {
+            MedicationInteraction interaction = new MedicationInteraction();
+            interaction.setId(interaksjon.find("Id").first().text());
+            interaction.setClinicalConsequence(interaksjon.find("KliniskKonsekvens").firstTextOrNull());
+            interaction.setInteractionMechanism(interaksjon.find("Interaksjonsmekanisme").firstTextOrNull());
+            interaction.setSeverity(MedicalInteractionSeverity.SEVERE);
+
+            for (Element substance : interaksjon.find("Substansgruppe")) {
+                // TODO: This is incorrect if one Substansgruppe has several Substans
+                ElementSet atcCodes = substance.find("Substans", "Atc");
+                if (atcCodes.isEmpty()) {
+                    continue interaction;
+                }
+                interaction.getSubstanceCodes().add(atcCodes.first().attr("V"));
+            }
+
+            result.add(interaction);
+        }
+        return result;
     }
 
 }

@@ -1,6 +1,7 @@
-package no.pharmacy.gui.server;
+package no.pharmacy.web.gui.server;
 
 import java.io.File;
+
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Handler;
@@ -13,23 +14,34 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcConnectionPool;
 
-import no.pharmacy.gui.server.prescriptions.DispenseOrderController;
-import no.pharmacy.gui.server.prescriptions.PrescriptionsController;
-import no.pharmacy.gui.server.prescriptions.PrescriptionsSource;
-import no.pharmacy.gui.server.test.FakeReseptFormidler;
-import no.pharmacy.gui.server.test.ReceiptTestCaseController;
+import ch.qos.logback.classic.Level;
+import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.order.MedicationDispenseRepository;
 import no.pharmacy.test.JdbcMedicationDispenseRepository;
+import no.pharmacy.web.prescriptions.DispenseOrderController;
+import no.pharmacy.web.prescriptions.PharmacistController;
+import no.pharmacy.web.prescriptions.PrescriptionsController;
+import no.pharmacy.web.prescriptions.PrescriptionsSource;
+import no.pharmacy.web.test.FakeReseptFormidler;
+import no.pharmacy.web.test.ReceiptTestCaseController;
 
 public class PharmaServer {
 
     private static final String SHUTDOWN_TOKEN = "c5d4a90d-e4be-414c-ad8a-2a172c31a230";
-    private Server server = new Server(8080);
+
+    private LogConfiguration logConfiguration = new LogConfiguration();
+    private Server server;
+
+    public PharmaServer() {
+        logConfiguration.setLevel("org.eclipse.jetty", Level.WARN);
+        logConfiguration.setLevel("org.flywaydb", Level.WARN);
+
+        server = new Server(8080);
+    }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(System.getProperty("user.dir"));
         new PharmaServer().start();
     }
 
@@ -77,6 +89,7 @@ public class PharmaServer {
         MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(dataSource, medicationRepository);
         handler.addServlet(new ServletHolder(new PrescriptionsController(reseptFormidler, medicationDispenseRepository)), "/");
         handler.addServlet(new ServletHolder(new DispenseOrderController(medicationDispenseRepository, medicationRepository)), "/medicationDispenseCollections/*");
+        handler.addServlet(new ServletHolder(new PharmacistController(medicationDispenseRepository, medicationRepository)), "/pharmacist/*");
 
         return handler;
     }

@@ -1,5 +1,8 @@
 package no.pharmacy.medication;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,10 +24,16 @@ public class Medication {
     private String display;
 
     @Getter @Setter
+    private String substance;
+
+    @Getter @Setter
     private String substitutionGroup;
 
     @Getter @Setter
     private String xml;
+
+    @Getter
+    private List<MedicationInteraction> interactions = new ArrayList<>();
 
     public Medication(String productId, String name, int trinnPriceInCents) {
         this.productId = productId;
@@ -33,11 +42,13 @@ public class Medication {
     }
 
     public Money getUncoveredAmount(Money retailPrice) {
-        return retailPrice.isGreaterThan(trinnPrice) ? retailPrice.minus(trinnPrice) : Money.zero();
+        return trinnPrice != null && retailPrice.isGreaterThan(trinnPrice) ? retailPrice.minus(trinnPrice) : Money.zero();
     }
 
     public Money getCoveredAmount(Money retailPrice) {
         return trinnPrice != null && retailPrice.isGreaterThan(trinnPrice) ? trinnPrice : retailPrice;
     }
+
+
 
 }

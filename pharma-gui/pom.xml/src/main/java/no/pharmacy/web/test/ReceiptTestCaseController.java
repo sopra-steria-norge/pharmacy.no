@@ -1,4 +1,4 @@
-package no.pharmacy.gui.server.test;
+package no.pharmacy.web.test;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -72,10 +72,17 @@ public class ReceiptTestCaseController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String nationalId = req.getParameter("nationalId");
-        simulatedReseptFormidler.addPrescription(nationalId, req.getParameter("productId"));
-        HashMap<Object, Object> value = new HashMap<>();
-        value.put("message", "La inn resept for " + nationalId);
-        req.getSession().setAttribute("flash", value);
+        String scenario = req.getParameter("scenario");
+        HashMap<Object, Object> flash = new HashMap<>();
+        if ("drugInteraction".equals(scenario)) {
+            simulatedReseptFormidler.addPrescription(nationalId, "500595");
+            simulatedReseptFormidler.addPrescription(nationalId, "466813");
+        } else {
+            simulatedReseptFormidler.addPrescription(nationalId, req.getParameter("productId"));
+        }
+        flash.put("message", "La inn resept for " + nationalId);
+        flash.put("patient", nationalId);
+        req.getSession().setAttribute("flash", flash);
 
         resp.sendRedirect(req.getRequestURI());
     }

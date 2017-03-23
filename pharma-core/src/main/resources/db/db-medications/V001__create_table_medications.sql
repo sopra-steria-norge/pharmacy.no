@@ -5,5 +5,6 @@ create table Medications (
 	exchange_group_id varchar(50),
 	trinn_price number,
 	retail_price number,
+	substance varchar(20),
 	xml text
 );

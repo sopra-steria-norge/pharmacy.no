@@ -50,20 +50,24 @@
 	
 		<div id="medicationOrders"></div>
 		
-		<h2>Pris</h2>
-		
-		<ul>
-			<li><strong>Refusjon:</strong> <span id='totalRefund'></span></li>
-			<li><strong>Egenandel:</strong> <span id='copay'></span></li>
-			<li><strong>Mellomlegg pasient:</strong> <span id='uncoveredAmount'></span></li>
-			<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
-		</ul>
-		
-		<button>Velg vare</button>
-		<button>✓ Teknisk kontroll</button>
-		<button>✓ Farmasøytkontroll</button>
+		<div id="price">
+		<h2>Pris</h2>		
+			<ul>
+				<li><strong>Refusjon:</strong> <span id='totalRefund'></span></li>
+				<li><strong>Egenandel:</strong> <span id='copay'></span></li>
+				<li><strong>Mellomlegg pasient:</strong> <span id='uncoveredAmount'></span></li>
+				<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
+			</ul>
+			
+			<button>Velg vare</button>
+		</div>
 	</form>
 
+	<button>✓ Teknisk kontroll</button>
+
+	<a href="/pharmacist/">
+		<button>✓ Farmasøytkontroll</button>
+	</a>
 
 <script>
 $(function() {

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Farmasøytkontroll | pharmacy.no</title>
+</head>
+<body>
+
+	<form>
+		<div id="dispenseOrders"></div>
+		
+		<button>Kontroller</button>
+	</form>
+
+
+</body>
+</html>

@@ -1,5 +1,7 @@
 package no.pharmacy.order;
 
+import java.util.List;
+
 import no.pharmacy.dispense.MedicationDispense;
 
 public interface MedicationDispenseRepository {
@@ -9,5 +11,7 @@ public interface MedicationDispenseRepository {
     DispenseOrder getDispenseOrderById(String id);
 
     void update(MedicationDispense medicationDispense);
+
+    List<DispenseOrder> listReadyForPharmacist();
 
 }
