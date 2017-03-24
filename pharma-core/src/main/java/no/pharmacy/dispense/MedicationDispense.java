@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import no.pharmacy.core.Money;
+import no.pharmacy.infrastructure.CryptoUtil;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationInteraction;
 import no.pharmacy.order.MedicationOrder;
@@ -113,4 +114,9 @@ public class MedicationDispense {
         return medication != null ? medication.getProductId() : null;
     }
 
+    public String getDosageBarcode() {
+        byte[] hash = CryptoUtil.sha256(getPrintedDosageText());
+        int i = (hash[0]&0x8f) << 24 | (hash[1]&0xff) << 16 | (hash[2]&0xff) << 8 | (hash[3]&0xff);
+        return String.valueOf(i);
+    }
 }

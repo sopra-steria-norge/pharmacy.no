@@ -31,8 +31,9 @@ public class FestMedicationImporter {
         for (Element oppfLegemiddelpakning : katLegemiddelpakning.elements()) {
             Element legemiddelpakning = oppfLegemiddelpakning.find("Legemiddelpakning").first();
             Medication medication = new Medication();
-            medication.setDisplay(legemiddelpakning.find("NavnFormStyrke").first().text());
-            medication.setProductId(legemiddelpakning.find("Varenr").first().text());
+            medication.setDisplay(legemiddelpakning.find("NavnFormStyrke").firstTextOrNull());
+            medication.setProductId(legemiddelpakning.find("Varenr").firstTextOrNull());
+            medication.setGtin(legemiddelpakning.find("Ean").firstTextOrNull());
             medication.setSubstitutionGroup(legemiddelpakning.find("PakningByttegruppe", "RefByttegruppe").firstTextOrNull());
             medication.setTrinnPrice(getTrinnPrice(legemiddelpakning));
             ElementSet atcCodes = legemiddelpakning.find("Atc");

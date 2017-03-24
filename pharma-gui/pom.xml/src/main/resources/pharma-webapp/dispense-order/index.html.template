@@ -76,7 +76,9 @@
 		</div>
 	</form>
 
-	<button>✓ Teknisk kontroll</button>
+	<a id="technicalControl" href="#">
+		<button>✓ Teknisk kontroll</button>
+	</a>
 
 	<a href="/pharmacist/">
 		<button>✓ Farmasøytkontroll</button>

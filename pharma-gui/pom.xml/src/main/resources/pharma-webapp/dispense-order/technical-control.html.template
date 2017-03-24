@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Teknisk kontroll | pharmacy.no</title>
+	<style>
+		.medicationPrice { display: none; }
+		.medicationDescription { display: none; }
+		.error { border: 2px solid red; }
+	</style>
+<script
+  src="https://code.jquery.com/jquery-3.1.1.js"
+  integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+  crossorigin="anonymous"></script>
+</head>
+<body>
+
+	<script id="medicationDispenseTemplate" type="template">
+	<div>
+		<h3 class='prescribedMedication'></h3>
+		
+		<div>
+			
+		</div>
+
+		<table>
+			<tr>
+				<td><textarea class="dosageText" cols="25" rows="6" tabindex="-1" disabled="disabled"></textarea></td>
+				<td><textarea class="printedDosageText" cols="25" rows="6" tabindex="-1"></textarea></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><button tabindex="-1">Print</button></td>
+			</tr>
+			<tr>
+				<td>Doseringsetikett</td>
+				<td>Pakning</td>
+			</tr>
+			<tr>
+				<td>
+					<input class="scannedDosageTextBarcode" autofocus="autofocus" placeholder="Skan doseringstekst" />
+				</td>
+				<td>
+					<input class="scannedPackagingBarcode" placeholder="Skan pakning" />
+				</td>
+			</tr>
+			<tr>
+				<td class="expectedDosageTextBarcode"></td>
+				<td class="expectedPackagingBarcode"></td>
+			</tr>
+		</table>
+	</div>
+	</script>
+
+
+	<form method="post">
+		<input type='hidden' name='orderId' id='orderId' />
+		<h2 id='patient'>Pasient: </h2>
+	
+		<div id="medicationDispenses"></div>
+
+		<button>✓ Teknisk kontroll</button>
+	</form>
+</body>
+</html>

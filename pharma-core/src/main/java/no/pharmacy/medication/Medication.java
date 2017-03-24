@@ -20,6 +20,10 @@ public class Medication {
 
     @Getter @Setter
     private String productId;
+
+    @Getter @Setter
+    private String gtin;
+
     @Getter @Setter
     private String display;
 

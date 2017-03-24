@@ -213,4 +213,10 @@ public class PharmaTestData {
         }
         return String.join(" ", words);
     }
+
+
+    public static String sampleGtin() {
+        return pickOneOf("70", "74", "40", "73")
+                + randomNumericString(11);
+    }
 }

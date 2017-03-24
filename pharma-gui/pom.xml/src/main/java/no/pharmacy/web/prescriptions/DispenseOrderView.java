@@ -27,8 +27,6 @@ public class DispenseOrderView implements HtmlView {
 
         String medicationOrderTemplate = doc.find("...", "#medicationOrderTemplate").first().elements().iterator().next().toXML();
 
-        Element orderId = doc.find("...", "#orderId").first().val(dispenseOrder.getIdentifier());
-        orderId.text(dispenseOrder.getIdentifier());
 
         Element medicationOrders = doc.find("...", "#medicationOrders").first();
 
@@ -37,6 +35,7 @@ public class DispenseOrderView implements HtmlView {
         }
 
         displayPrices(doc);
+        doc.find("...", "#technicalControl").first().attr("href", "./" + dispenseOrder.getIdentifier() + "/technicalControl");
         return doc;
     }
 

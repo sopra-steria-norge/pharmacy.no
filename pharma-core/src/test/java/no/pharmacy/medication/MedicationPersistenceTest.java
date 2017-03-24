@@ -89,6 +89,7 @@ public class MedicationPersistenceTest {
     private Medication sampleMedication() {
         Medication medication = new FakeMedicationSource().pickOne();
         medication.setSubstitutionGroup(UUID.randomUUID().toString());
+        medication.setGtin(PharmaTestData.sampleGtin());
         medication.setSubstance(PharmaTestData.pickOneOf("A12AX", "N01BB02", "J06BA01", "J01CA08"));
         medication.setXml(Xml.el("testElement", "Hello world").toXML());
         return medication;

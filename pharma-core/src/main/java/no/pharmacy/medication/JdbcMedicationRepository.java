@@ -68,6 +68,7 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
 
     @Override
     public Optional<Medication> findByProductId(String productId) {
+        // Cache!
         return retrieveSingle("select * from medications where product_id = ?",
                 Arrays.asList(productId), this::read);
     }
@@ -76,6 +77,7 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         Medication medication = new Medication();
         medication.setDisplay(rs.getString("display"));
         medication.setProductId(rs.getString("product_id"));
+        medication.setGtin(rs.getString("gtin"));
         medication.setTrinnPrice(Money.from(rs.getBigDecimal("trinn_price")));
         medication.setSubstitutionGroup(rs.getString("exchange_group_id"));
         medication.setSubstance(rs.getString("substance"));
@@ -90,6 +92,7 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
 
         insertInto("medications")
             .value("product_id", medication.getProductId())
+            .value("gtin", medication.getGtin())
             .value("display", medication.getDisplay())
             .value("trinn_price", medication.getTrinnPrice())
             .value("exchange_group_id", medication.getSubstitutionGroup())

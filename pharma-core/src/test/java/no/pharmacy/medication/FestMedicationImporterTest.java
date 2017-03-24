@@ -51,6 +51,7 @@ public class FestMedicationImporterTest {
                 F.el("Reseptgruppe"),
                 F.el("PakningByttegruppe", F.el("RefByttegruppe", "ID_D1038B4D-A53B-414B-B51D-05D7D29D9A7C")),
                 F.el("Varenr", "170227"),
+                F.el("Ean", "7046261537308"),
                 F.el("PrisVare",
                         F.el("Type").attr("V", "5").attr("S", "2.16.578.1.12.4.1.1.7453").attr("DN", "Trinnpris"),
                         F.el("Pris").attr("V", "87.9").attr("U", "NOK")));
@@ -71,6 +72,8 @@ public class FestMedicationImporterTest {
             .isEqualTo("Calcigran Forte Tyggetab 1000 mg/800 IE");
         assertThat(medication.getProductId())
             .isEqualTo("170227");
+        assertThat(medication.getGtin())
+            .isEqualTo("7046261537308");
         assertThat(medication.getSubstitutionGroup())
             .isEqualTo("ID_D1038B4D-A53B-414B-B51D-05D7D29D9A7C");
     }
