@@ -22,6 +22,19 @@
 			<li>Forskrevet dato: <span class='dateWritten'></span></li>
 		</ul>
 
+		<h4>Doseringstekst</h4>
+
+		<table>
+			<tr>
+				<td>Forskrevet:</td>
+				<td>Oppdatert:</td>
+			</tr>
+			<tr>
+				<td><textarea class="dosageText" disabled="disabled" cols="25" rows="6"></textarea></td>
+				<td><textarea class="printedDosageText" cols="25" rows="6"></textarea></td>
+			</tr>
+		</table>
+
 		<h4>Alternative legemidler</h4>
 
 		<ol class='alternativeMedications'></ol>

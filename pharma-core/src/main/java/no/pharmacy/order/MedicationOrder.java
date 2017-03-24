@@ -34,6 +34,9 @@ public class MedicationOrder {
     @Getter @Setter
     private List<Medication> alternatives;
 
+    @Getter @Setter
+    private String dosageText;
+
     public MedicationOrder() {
         // TODO Auto-generated constructor stub
     }

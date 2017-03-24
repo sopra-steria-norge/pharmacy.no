@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -23,27 +24,34 @@ import no.pharmacy.order.MedicationOrder;
 public class PharmaTestData {
 
     private static int sequence;
-    private final List<Medication> medicationCache = new ArrayList<>();
+    private static final List<Medication> medicationCache = new ArrayList<>();
 
     @Getter
     private final JdbcMedicationRepository medicationRepository;
 
     private static Random random = new Random();
+    private static JdbcConnectionPool medicationTestDatasource;
 
     public PharmaTestData() {
-        File currentDir = new File(System.getProperty("user.dir"));
-        File dbFile = new File(currentDir, "target/db/medications");
-        String url = "jdbc:h2:file:" + dbFile.getAbsolutePath();
-
-        DataSource medicationTestDatasource = JdbcConnectionPool.create(url, "sa", "");
-
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(medicationTestDatasource);
-        flyway.setLocations("db/db-medications");
-        flyway.migrate();
-
-        this.medicationRepository = new JdbcMedicationRepository(medicationTestDatasource);
+        this.medicationRepository = new JdbcMedicationRepository(createMedicationDataSource());
         medicationRepository.refresh();
+    }
+
+
+    private static synchronized DataSource createMedicationDataSource() {
+        if (medicationTestDatasource == null) {
+            File currentDir = new File(System.getProperty("user.dir"));
+            File dbFile = new File(currentDir, "target/db/medications");
+            String url = "jdbc:h2:file:" + dbFile.getAbsolutePath();
+
+            medicationTestDatasource = JdbcConnectionPool.create(url, "sa", "");
+
+            Flyway flyway = new Flyway();
+            flyway.setDataSource(medicationTestDatasource);
+            flyway.setLocations("db/db-medications");
+            flyway.migrate();
+        }
+        return medicationTestDatasource;
     }
 
 
@@ -142,9 +150,11 @@ public class PharmaTestData {
 
     public static MedicationOrder sampleMedicationOrder(Practitioner prescriber, LocalDate dateWritten, Medication medication) {
         MedicationOrder medicationOrder = new MedicationOrder();
+        medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
         medicationOrder.setPrescriber(prescriber.getReference());
         medicationOrder.setDateWritten(dateWritten);
         medicationOrder.setMedication(medication);
+        medicationOrder.setDosageText(medication.getDisplay() + "\n\nTo tabelletter, morgen og kveld");
         return medicationOrder;
     }
 

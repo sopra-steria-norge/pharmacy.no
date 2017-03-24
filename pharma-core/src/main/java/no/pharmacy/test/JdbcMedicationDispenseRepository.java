@@ -47,18 +47,22 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
             long id = insertInto("medication_orders")
                 .value("dispense_order_id", order.getIdentifier())
                 .value("prescriber_id", medicationOrder.getPrescriber())
+                .value("prescription_id", medicationOrder.getPrescriptionId())
                 .value("date_written", medicationOrder.getDateWritten())
                 .value("medication_id", medicationOrder.getMedication().getProductId())
+                .value("dosage_text", medicationOrder.getDosageText())
                 .executeInsert();
             medicationOrder.setId(id);
         }
 
-        for (MedicationDispense medicationDispense : order.getMedicationDispenses()) {
+        for (MedicationDispense dispense : order.getMedicationDispenses()) {
             long id = insertInto("medication_dispenses")
                 .value("dispense_order_id", order.getIdentifier())
-                .value("authorizing_prescription_id", medicationDispense.getAuthorizingPrescription().getId())
+                .value("price", dispense.getPrice())
+                .value("printed_dosage_text", dispense.getPrintedDosageText())
+                .value("authorizing_prescription_id", dispense.getAuthorizingPrescription().getId())
                 .executeInsert();
-            medicationDispense.setId(id);
+            dispense.setId(id);
         }
 
     }
@@ -99,6 +103,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
                 MedicationDispense dispense = new MedicationDispense(medicationOrder);
                 dispense.setId(rs.getLong("id"));
                 dispense.setPrice(Money.from(rs.getBigDecimal("price")));
+                dispense.setPrintedDosageText(rs.getString("printed_dosage_text"));
                 dispense.setMedication(medicationRepository.findByProductId(rs.getString("medication_id"))
                         .orElse(null));
                 result.add(dispense);
@@ -126,6 +131,8 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         medicationOrder.setId(rs.getLong("id"));
         medicationOrder.setPrescriber(new Reference(rs.getString("prescriber_id"), "Random J Doctor"));
         medicationOrder.setDateWritten(toLocalDate(rs.getDate("date_written")));
+        medicationOrder.setDosageText(rs.getString("dosage_text"));
+        medicationOrder.setPrescriptionId(rs.getString("prescription_id"));
         medicationOrder.setMedication(medicationRepository.findByProductId(rs.getString("medication_id")).get());
         medicationOrder.setAlternatives(medicationRepository.listAlternatives(medicationOrder.getMedication()));
 
@@ -138,17 +145,18 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
     }
 
     @Override
-    public void update(MedicationDispense prescription) {
+    public void update(MedicationDispense dispense) {
         update("medication_dispenses")
-            .where("id", prescription.getId())
-            .set("price", prescription.getPrice())
-            .set("medication_id", prescription.getMedication().getProductId())
+            .where("id", dispense.getId())
+            .set("price", dispense.getPrice())
+            .set("printed_dosage_text", dispense.getPrintedDosageText())
+            .set("medication_id", dispense.getMedicationId())
             .executeUpdate();
 
-        executeUpdate("delete from medication_dispense_actions where dispense_id = ?", Arrays.asList(prescription.getId()));
-        for (MedicationDispenseAction action : prescription.getWarningActions()) {
+        executeUpdate("delete from medication_dispense_actions where dispense_id = ?", Arrays.asList(dispense.getId()));
+        for (MedicationDispenseAction action : dispense.getWarningActions()) {
             insertInto("medication_dispense_actions")
-                .value("dispense_id", prescription.getId())
+                .value("dispense_id", dispense.getId())
                 .value("interaction_id", action.getWarningCode())
                 .value("interacting_dispense_display", action.getWarning().displayInteractingDispense())
                 .value("interacting_dispense_id", action.getWarning().getInteractingDispenseId())

@@ -40,7 +40,11 @@ public class DispenseOrderController extends HttpServlet {
         DispenseOrder order = prescriptionRepository.getDispenseOrderById(req.getParameter("orderId"));
 
         for (MedicationDispense medicationDispense : order.getMedicationDispenses()) {
+            String dosageText = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][printedDosageText]");
+            medicationDispense.setPrintedDosageText(dosageText);
+
             String productId = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][productId]");
+            if (productId == null) continue;
 
             String price = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][" + productId + "][price]");
 

@@ -25,11 +25,13 @@ public class FakeReseptFormidler implements PrescriptionsSource {
         this.medicationSource = medicationSource;
     }
 
-    public void addPrescription(String nationalId, Medication product) {
+    public MedicationOrder addPrescription(String nationalId, Medication product) {
         MedicationOrder medicationOrder = createMedicationOrder(nationalId, product);
         this.prescriptionsForPerson.computeIfAbsent(nationalId, s -> new ArrayList<>())
             .add(medicationOrder);
         this.prescriptionsById.put(medicationOrder.getPrescriptionId(), medicationOrder);
+        medicationOrder.setDosageText(product.getDisplay() + "\n\n2 piller, morgen og kveld");
+        return medicationOrder;
     }
 
     private MedicationOrder createMedicationOrder(String nationalId, Medication product) {
@@ -49,8 +51,8 @@ public class FakeReseptFormidler implements PrescriptionsSource {
         return this.prescriptionsById.get(id);
     }
 
-    public void addPrescription(String nationalId, String productId) {
-        addPrescription(nationalId,
+    public MedicationOrder addPrescription(String nationalId, String productId) {
+        return addPrescription(nationalId,
                 this.medicationSource.getMedication(productId).orElseThrow(() -> new IllegalArgumentException(productId)));
     }
 

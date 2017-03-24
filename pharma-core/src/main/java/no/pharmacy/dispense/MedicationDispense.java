@@ -1,5 +1,6 @@
 package no.pharmacy.dispense;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ public class MedicationDispense {
     public MedicationDispense(MedicationOrder authorizingPrescription) {
         this.authorizingPrescription = authorizingPrescription;
         //this.medication = authorizingPrescription.getMedication();
+        this.printedDosageText = authorizingPrescription.getDosageText();
     }
 
     public MedicationDispense() {
@@ -33,6 +35,9 @@ public class MedicationDispense {
 
     @Getter @Setter
     private Money price;
+
+    @Getter @Setter
+    private String printedDosageText;
 
     @Getter @Setter
     private MedicationOrder authorizingPrescription;
@@ -65,6 +70,9 @@ public class MedicationDispense {
     }
 
     private List<MedicationInteraction> getInteractions(MedicationDispense historicalDispense) {
+        if (medication == null || historicalDispense.getMedication() == null) {
+            return new ArrayList<>();
+        }
         return medication.getInteractions().stream()
             .filter(i -> i.interactsWith(historicalDispense.getMedication().getSubstance()))
             .collect(Collectors.toList());
@@ -99,6 +107,10 @@ public class MedicationDispense {
 
     public Collection<MedicationDispenseAction> getWarningActions() {
         return this.actions.values();
+    }
+
+    public String getMedicationId() {
+        return medication != null ? medication.getProductId() : null;
     }
 
 }

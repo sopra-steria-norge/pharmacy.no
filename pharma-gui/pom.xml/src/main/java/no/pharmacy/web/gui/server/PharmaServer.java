@@ -63,7 +63,7 @@ public class PharmaServer {
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository);
 
         handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository));
-        handlers.addHandler(createPharmaGui(reseptFormidler, pharmaDataSource));
+        handlers.addHandler(createPharmaGui(reseptFormidler, pharmaDataSource, medicationRepository));
 
         return handlers;
     }
@@ -96,11 +96,10 @@ public class PharmaServer {
         return dataSource;
     }
 
-    private Handler createPharmaGui(PrescriptionsSource reseptFormidler, DataSource dataSource) {
+    private Handler createPharmaGui(PrescriptionsSource reseptFormidler, DataSource dataSource, MedicationRepository medicationRepository) {
         WebAppContext handler = new WebAppContext(null, "/");
         handler.setBaseResource(Resource.newClassPathResource("/pharma-webapp"));
 
-        MedicationRepository medicationRepository = new JdbcMedicationRepository(dataSource);
         MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(dataSource, medicationRepository);
         handler.addServlet(new ServletHolder(new PrescriptionsController(reseptFormidler, medicationDispenseRepository)), "/");
         handler.addServlet(new ServletHolder(new DispenseOrderController(medicationDispenseRepository, medicationRepository)), "/medicationDispenseCollections/*");

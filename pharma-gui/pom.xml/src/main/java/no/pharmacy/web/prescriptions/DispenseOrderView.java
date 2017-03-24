@@ -32,8 +32,8 @@ public class DispenseOrderView implements HtmlView {
 
         Element medicationOrders = doc.find("...", "#medicationOrders").first();
 
-        for (MedicationDispense prescription : dispenseOrder.getMedicationDispenses()) {
-            medicationOrders.add(displayMedicationDispense(medicationOrderTemplate, prescription));
+        for (MedicationDispense dispense : dispenseOrder.getMedicationDispenses()) {
+            medicationOrders.add(displayMedicationDispense(medicationOrderTemplate, dispense));
         }
 
         displayPrices(doc);
@@ -49,17 +49,22 @@ public class DispenseOrderView implements HtmlView {
         }
     }
 
-    protected Element displayMedicationDispense(String medicationOrderTemplate, MedicationDispense prescription) {
+    protected Element displayMedicationDispense(String medicationOrderTemplate, MedicationDispense dispense) {
         Element orderElement = Xml.xml(medicationOrderTemplate).getRootElement();
-        MedicationOrder medicationOrder = prescription.getAuthorizingPrescription();
+        MedicationOrder medicationOrder = dispense.getAuthorizingPrescription();
         if (medicationOrder.getDateWritten() != null) {
             orderElement.find("...", ".dateWritten").first().text(medicationOrder.getDateWritten().toString());
         }
         orderElement.find("...", ".prescriber").first().text(medicationOrder.getPrescriber().getDisplay());
         orderElement.find("...", ".prescribedMedication").first().text(medicationOrder.getMedication().getDisplay());
+
+        orderElement.find("...", ".dosageText").first().text(medicationOrder.getDosageText());
+
+        String dosageTextName = "medicationOrder[" + dispense.getId() + "][printedDosageText]";
+        orderElement.find("...", ".printedDosageText").first().name(dosageTextName).text(dispense.getPrintedDosageText());
         Element alternativeMedications = orderElement.find("...", ".alternativeMedications").first();
         for (Medication alternativeMedication : medicationOrder.getAlternatives()) {
-            alternativeMedications.add(createMedicationOption(prescription.getId(), prescription, alternativeMedication));
+            alternativeMedications.add(createMedicationOption(dispense.getId(), dispense, alternativeMedication));
         }
         return orderElement;
     }

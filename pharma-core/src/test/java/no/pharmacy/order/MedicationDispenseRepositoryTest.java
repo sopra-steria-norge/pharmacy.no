@@ -6,14 +6,22 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
+import ch.qos.logback.classic.Level;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseAction;
+import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.test.JdbcMedicationDispenseRepository;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.TestDataSource;
 
 public class MedicationDispenseRepositoryTest {
+
+    private static LogConfiguration logConfiguration = new LogConfiguration();
+    static {
+        logConfiguration.setLevel("org.flywaydb", Level.INFO);
+        logConfiguration.setLevel("no.pharmacy.infrastructure.jdbc", Level.TRACE);
+    }
 
     private DataSource dataSource = TestDataSource.pharmacistInstance();
     private PharmaTestData testData = new PharmaTestData();
@@ -22,9 +30,11 @@ public class MedicationDispenseRepositoryTest {
             testData.getMedicationRepository());
 
     @Test
-    public void retrievesSimpleDispenseOrder() {
+    public void shouldRetrieveSimpleDispenseOrder() {
         DispenseOrder order = new DispenseOrder();
-        order.addMedicationOrder(testData.sampleMedicationOrder());
+        MedicationDispense dispense = order.addMedicationOrder(testData.sampleMedicationOrder());
+        dispense.setPrice(testData.samplePrice());
+        dispense.setPrintedDosageText("Corrected text");
 
         repository.saveDispenseOrder(order);
 
@@ -33,7 +43,11 @@ public class MedicationDispenseRepositoryTest {
         assertThat(retrievedOrder)
             .isEqualToComparingFieldByField(order);
         assertThat(retrievedOrder.getMedicationOrders().get(0))
+            .hasNoNullFieldsOrProperties()
             .isEqualToIgnoringGivenFields(order.getMedicationOrders().get(0), "alternatives");
+        assertThat(retrievedOrder.getMedicationDispenses().get(0))
+            .isEqualToComparingFieldByField(dispense)
+            .hasNoNullFieldsOrPropertiesExcept("medication");
     }
 
     @Test
@@ -66,21 +80,22 @@ public class MedicationDispenseRepositoryTest {
     }
 
     @Test
-    public void itUpdatesMedicationDispense() {
+    public void shouldUpdateMedicationDispense() {
         DispenseOrder order = new DispenseOrder();
 
         MedicationOrder medicationOrder = testData.sampleMedicationOrder();
         order.addMedicationOrder(medicationOrder);
         repository.saveDispenseOrder(order);
 
-        MedicationDispense prescription = order.getMedicationDispenses().get(0);
-        prescription.setPrice(testData.samplePrice());
-        prescription.setMedication(medicationOrder.getMedication());
-        repository.update(prescription);
+        MedicationDispense dispense = order.getMedicationDispenses().get(0);
+        dispense.setPrice(testData.samplePrice());
+        dispense.setMedication(medicationOrder.getMedication());
+        dispense.setPrintedDosageText("Updated dosage text");
+        repository.update(dispense);
 
         DispenseOrder retrieved = repository.getDispenseOrderById(order.getIdentifier());
         assertThat(retrieved.getMedicationDispenses().get(0))
-            .isEqualToComparingFieldByField(prescription);
+            .isEqualToComparingFieldByField(dispense);
     }
 
     @Test
