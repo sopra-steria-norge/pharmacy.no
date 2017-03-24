@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Farmasøytkontrol | pharmacy.no</title>
+	<style>
+	.error { border: 1px solid red; }
+	</style>
+</head>
+<body>
+
+	<h1>Farmasøytkontroll</h1>
+
+	<form method="post">
+		<input type='hidden' name='orderId' id='orderId' />
+		<h2 id='patient'>Pasient: </h2>
+	
+		<div id="medicationOrders"></div>
+			
+		<button>✓ Bekreft farmasøytkontroll</button>
+	</form>
+
+
+</body>
+</html>

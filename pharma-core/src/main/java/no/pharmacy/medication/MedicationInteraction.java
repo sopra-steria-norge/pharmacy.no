@@ -9,7 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @EqualsAndHashCode(of="id")
-@ToString
+@ToString(of={"id", "severity", "substanceCodes"})
 public class MedicationInteraction {
 
     @Getter @Setter

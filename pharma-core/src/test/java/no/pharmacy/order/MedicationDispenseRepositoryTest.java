@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import org.junit.Test;
 
 import no.pharmacy.dispense.MedicationDispense;
+import no.pharmacy.dispense.MedicationDispenseAction;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.test.JdbcMedicationDispenseRepository;
 import no.pharmacy.test.PharmaTestData;
@@ -55,8 +56,8 @@ public class MedicationDispenseRepositoryTest {
         MedicationOrder medicationOrder = testData.sampleMedicationOrder();
         order.addMedicationOrder(medicationOrder);
 
-        assertThat(order.getMedicationDispenseList()).hasSize(1);
-        MedicationDispense dispense = order.getMedicationDispenseList().get(0);
+        assertThat(order.getMedicationDispenses()).hasSize(1);
+        MedicationDispense dispense = order.getMedicationDispenses().get(0);
         assertThat(dispense.getMedication()).isNull();
         assertThat(dispense.getAuthorizingPrescription())
             .isEqualTo(medicationOrder);
@@ -70,7 +71,7 @@ public class MedicationDispenseRepositoryTest {
         order.addMedicationOrder(medicationOrder);
         repository.saveDispenseOrder(order);
 
-        MedicationDispense prescription = order.getMedicationDispenseList().get(0);
+        MedicationDispense prescription = order.getMedicationDispenses().get(0);
         prescription.setPrice(testData.samplePrice());
         prescription.setMedication(medicationOrder.getMedication());
         repository.update(prescription);
@@ -78,6 +79,50 @@ public class MedicationDispenseRepositoryTest {
         DispenseOrder retrieved = repository.getDispenseOrderById(order.getIdentifier());
         assertThat(retrieved.getMedicationDispenses().get(0))
             .isEqualToComparingFieldByField(prescription);
+    }
+
+    @Test
+    public void shouldSaveInteractionWarnings() {
+        DispenseOrder dispenseOrder = new DispenseOrder();
+        Medication ritalin = testData.sampleMedication("500595");
+        Medication aurorix = testData.sampleMedication("466813");
+        MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
+        ritalinDispense.setMedication(ritalin);
+        dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(aurorix)).setMedication(aurorix);
+
+        repository.saveDispenseOrder(dispenseOrder);
+
+        dispenseOrder.createWarnings();
+        repository.update(ritalinDispense);
+
+        MedicationDispense retrieved = repository.getDispenseOrderById(dispenseOrder.getIdentifier())
+            .getMedicationDispenses().get(0);
+        assertThat(retrieved).isEqualToComparingFieldByField(ritalinDispense);
+    }
+
+    @Test
+    public void shouldUpdateDispenseActions() {
+        DispenseOrder dispenseOrder = new DispenseOrder();
+        Medication ritalin = testData.sampleMedication("500595");
+        Medication aurorix = testData.sampleMedication("466813");
+        MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
+        ritalinDispense.setMedication(ritalin);
+        dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(aurorix)).setMedication(aurorix);
+
+        repository.saveDispenseOrder(dispenseOrder);
+
+        dispenseOrder.createWarnings();
+        repository.update(ritalinDispense);
+        for (MedicationDispenseAction action : ritalinDispense.getWarningActions()) {
+            action.setAction("2");
+            action.setRemark("Test remark");
+        }
+        repository.update(ritalinDispense);
+
+        MedicationDispense retrieved = repository.getDispenseOrderById(dispenseOrder.getIdentifier())
+            .getMedicationDispenses().get(0);
+        assertThat(retrieved).isEqualToComparingFieldByField(ritalinDispense);
+
     }
 
 }

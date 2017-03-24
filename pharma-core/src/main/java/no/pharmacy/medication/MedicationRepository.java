@@ -15,4 +15,6 @@ public interface MedicationRepository {
 
     Optional<Medication> findByProductId(String productId);
 
+    MedicationInteraction getInteraction(String id);
+
 }

@@ -19,8 +19,9 @@ public class DispenseOrderTest {
         MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
         ritalinDispense.setMedication(ritalin);
         dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(aurorix)).setMedication(aurorix);
+        dispenseOrder.createWarnings();
 
-        Assertions.assertThat(ritalinDispense.getWarnings(dispenseOrder))
+        Assertions.assertThat(ritalinDispense.getWarningActions())
             .isNotEmpty();
     }
 
@@ -30,8 +31,9 @@ public class DispenseOrderTest {
         Medication ritalin = testData.sampleMedication("500595");
         MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
         ritalinDispense.setMedication(ritalin);
+        dispenseOrder.createWarnings();
 
-        Assertions.assertThat(ritalinDispense.getWarnings(dispenseOrder))
+        Assertions.assertThat(ritalinDispense.getWarningActions())
             .isEmpty();
     }
 

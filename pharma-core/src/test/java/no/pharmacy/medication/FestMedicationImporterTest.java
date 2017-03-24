@@ -30,59 +30,41 @@ public class FestMedicationImporterTest {
     public void readExchangeGroup() throws Exception {
         Reference expectedExchangeGroup = new Reference("000905", "EPROSARTAN TABLETTER 600MG");
 
-        Element oppfByttegruppe = M30.el("OppfByttegruppe",
-                M30.el("Id", "ID_51BCDA82-1EAA-454A-932B-7E716F5AC484"),
-                M30.el("Tidspunkt", "2014-12-06T01:16:07"),
-                M30.el("Status").attr("V", "A").attr("DN", "Aktiv oppføring"),
-                M30.el("Byttegruppe",
-                        M30.el("Id", "ID_3650EDAA-3095-4578-8E35-FF844099F895"),
-                        M30.el("Kode")
-                            .attr("V", expectedExchangeGroup.getReference())
-                            .attr("DN", expectedExchangeGroup.getDisplay()),
-                        M30.el("MerknadTilByttbarhet", "false")));
+        Element byttegruppe = M30.el("Byttegruppe",
+                M30.el("Id", "ID_3650EDAA-3095-4578-8E35-FF844099F895"),
+                M30.el("Kode")
+                    .attr("V", expectedExchangeGroup.getReference())
+                    .attr("DN", expectedExchangeGroup.getDisplay()),
+                M30.el("MerknadTilByttbarhet", "false"));
 
-        Reference group = importer.readMedicationGroup(M30.el("KatByttegruppe", oppfByttegruppe)).get(0);
+        validator.validate(byttegruppe);
+
+        Reference group = importer.readMedicationGroup(katWrapper(byttegruppe)).get(0);
         assertThat(group).isEqualToComparingFieldByField(expectedExchangeGroup);
     }
 
     @Test
     public void readMedicationPackage() {
-        /*
-         *
-        <PrisVare>
-          <Type V="5" S="2.16.578.1.12.4.1.1.7453" DN="Trinnpris" />
-          <Pris V="87.9" U="NOK" />
-          <GyldigFraDato>2016-01-01</GyldigFraDato>
-        </PrisVare>
-
-         */
-
-        Element oppfLegemiddelPakning =
-                oppfWrapper(F.el("Legemiddelpakning",
-                        F.el("Atc").attr("V", "A12AX").attr("S", "2.16.578.1.12.4.1.1.7180").attr("DN", "Kalsium..."),
-                        F.el("NavnFormStyrke", "Calcigran Forte Tyggetab 1000 mg/800 IE"),
-                        F.el("Reseptgruppe"),
-                        F.el("PakningByttegruppe", F.el("RefByttegruppe", "ID_D1038B4D-A53B-414B-B51D-05D7D29D9A7C")),
-                        F.el("Varenr", "170227"),
-                        F.el("PrisVare",
-                                F.el("Type").attr("V", "5").attr("S", "2.16.578.1.12.4.1.1.7453").attr("DN", "Trinnpris"),
-                                F.el("Pris").attr("V", "87.9").attr("U", "NOK"))));
+        Element legemiddelpakning = F.el("Legemiddelpakning",
+                F.el("Atc").attr("V", "A12AX").attr("S", "2.16.578.1.12.4.1.1.7180").attr("DN", "Kalsium..."),
+                F.el("NavnFormStyrke", "Calcigran Forte Tyggetab 1000 mg/800 IE"),
+                F.el("Reseptgruppe"),
+                F.el("PakningByttegruppe", F.el("RefByttegruppe", "ID_D1038B4D-A53B-414B-B51D-05D7D29D9A7C")),
+                F.el("Varenr", "170227"),
+                F.el("PrisVare",
+                        F.el("Type").attr("V", "5").attr("S", "2.16.578.1.12.4.1.1.7453").attr("DN", "Trinnpris"),
+                        F.el("Pris").attr("V", "87.9").attr("U", "NOK")));
         validator.validate(M30.el("FEST",
                 M30.el("HentetDato", Instant.now().toString()),
-                M30.el("KatLegemiddelpakning", oppfLegemiddelPakning),
-                M30.el("KatByttegruppe",
-                        M30.el("OppfByttegruppe",
-                                M30.el("Id", "test"),
-                                M30.el("Tidspunkt", Instant.now().toString()),
-                                M30.el("Status"),
-                                M30.el("Byttegruppe",
-                                        M30.el("Id", "ID_D1038B4D-A53B-414B-B51D-05D7D29D9A7C"),
-                                        M30.el("Kode")
-                                            .attr("V", "A")
-                                            .attr("DN", "Nothing"),
-                                        M30.el("MerknadTilByttbarhet", "false"))))));
+                katWrapper(legemiddelpakning),
+                katWrapper(M30.el("Byttegruppe",
+                                M30.el("Id", "ID_D1038B4D-A53B-414B-B51D-05D7D29D9A7C"),
+                                M30.el("Kode")
+                                    .attr("V", "A")
+                                    .attr("DN", "Nothing"),
+                                M30.el("MerknadTilByttbarhet", "false")))));
 
-        Medication medication = importer.readMedicationPackages(M30.el("KatLegemiddelpakning", oppfLegemiddelPakning)).get(0);
+        Medication medication = importer.readMedicationPackages(katWrapper(legemiddelpakning)).get(0);
         assertThat(medication).hasNoNullFieldsOrProperties();
 
         assertThat(medication.getDisplay())
@@ -96,7 +78,7 @@ public class FestMedicationImporterTest {
 
     @Test
     public void shouldReadInteractions() {
-        Element oppInteraksjon = oppfWrapper(M30.el("Interaksjon",
+        Element interaksjon = M30.el("Interaksjon",
                 M30.el("Id", "ID_06688DFC-BF07-4113-A6E4-9F8F00E5A536"),
                 M30.el("Relevans").attr("V", "1").attr("DN", "Bør unngås"),
                 M30.el("KliniskKonsekvens", "Risiko for toksiske..."),
@@ -110,10 +92,10 @@ public class FestMedicationImporterTest {
                         M30.el("Substans",
                                 M30.el("Substans", "Moklobemid"),
                                 M30.el("Atc").attr("V", "N06AG02").attr("DN", "Moklobemid")))
-                ));
-        validator.validate(M30.el("KatInteraksjon", oppInteraksjon));
+                );
+        validator.validate(katWrapper(interaksjon));
 
-        MedicationInteraction interaction = importer.readInteractions(M30.el("KatInteraksjon", oppInteraksjon)).get(0);
+        MedicationInteraction interaction = importer.readInteractions(katWrapper(interaksjon)).get(0);
 
         assertThat(interaction).hasNoNullFieldsOrProperties();
         assertThat(interaction.getSubstanceCodes()).contains("N06BA05", "N06AG02");
@@ -124,8 +106,33 @@ public class FestMedicationImporterTest {
     }
 
     @Test
+    public void shouldReadInteractionSeverity() {
+        Element interaksjon = M30.el("Interaksjon",
+                M30.el("Id", "ID_01675B8B-ADBA-4713-A1AC-A0B600BC9516"),
+                M30.el("Relevans").attr("V", "2").attr("DN", "Forholdsregler bør tas"),
+                M30.el("KliniskKonsekvens", "Mulig forlenget nevromuskulær blokade ..."),
+                M30.el("Interaksjonsmekanisme", "Dantrolen reduserer de intramuskulære..."),
+                M30.el("Kildegrunnlag").attr("V", "2").attr("DN", "Kasusrapporter"),
+                M30.el("Substansgruppe",
+                        M30.el("Substans",
+                                M30.el("Substans", "Dantrolen"),
+                                M30.el("Atc").attr("V", "M03CA01").attr("DN", "Dantrolen"))),
+                M30.el("Substansgruppe",
+                        M30.el("Substans",
+                                M30.el("Substans", "Pankuron"),
+                                M30.el("Atc").attr("V", "M03AC01").attr("DN", "Pankuron")))
+                );
+        validator.validate(katWrapper(interaksjon));
+
+        MedicationInteraction interaction = importer.readInteractions(katWrapper(interaksjon)).get(0);
+
+        assertThat(interaction).hasNoNullFieldsOrProperties();
+        assertThat(interaction.getSeverity()).isEqualTo(MedicalInteractionSeverity.SERIOUS);
+    }
+
+    @Test
     public void shouldSkipInteractionsOnVirkestoff() {
-        Element oppInteraksjon = oppfWrapper(M30.el("Interaksjon",
+        Element interaksjon = M30.el("Interaksjon",
                 M30.el("Id", "ID_22B74A78-B075-4B78-9CB4-9F9400FF377F"),
                 M30.el("Relevans").attr("V", "3").attr("DN", "Ingen tiltak nødvendig"),
                 M30.el("KliniskKonsekvens", "Økt konsentrasjon av triazolam..."),
@@ -140,15 +147,19 @@ public class FestMedicationImporterTest {
                         M30.el("Substans",
                                 M30.el("Substans", "Triazolam"),
                                 M30.el("Atc").attr("V", "N05CD05").attr("DN", "Triazolam")))
-                ));
+                );
         validator.validate(M30.el("FEST",
                 M30.el("HentetDato", Instant.now().toString()),
-                M30.el("KatVirkestoff", oppfWrapper(F.el("Virkestoff",
+                katWrapper(F.el("Virkestoff",
                         F.el("Id", "ID_48C0F789"),
-                        F.el("Navn", "(ikke angitt)")))),
-                M30.el("KatInteraksjon", oppInteraksjon)));
+                        F.el("Navn", "(ikke angitt)"))),
+                katWrapper(interaksjon)));
 
-        assertThat(importer.readInteractions(M30.el("KatInteraksjon", oppInteraksjon))).isEmpty();
+        assertThat(importer.readInteractions(katWrapper(interaksjon))).isEmpty();
+    }
+
+    private Element katWrapper(Element el) {
+        return M30.el("Kat" + el.tagName(), oppfWrapper(el));
     }
 
     private Element oppfWrapper(Element el) {

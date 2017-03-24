@@ -157,26 +157,20 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
                 .value("atc_code", atcCode)
                 .executeUpdate();
         }
-        interactionCache.clear();
+        interactionsByAtc.clear();
     }
 
-    private Map<String, List<MedicationInteraction>> interactionCache = new HashMap<>();
+    private Map<String, List<MedicationInteraction>> interactionsByAtc = new HashMap<>();
+    private Map<String, MedicationInteraction> interactionsById = new HashMap<>();
+
+    @Override
+    public MedicationInteraction getInteraction(String id) {
+        ensureInteractionCache();
+        return interactionsById.get(id);
+    }
 
     public synchronized List<MedicationInteraction> listInteractions(String atcCode) {
-        if (interactionCache.isEmpty()) {
-            String query = "select * from medication_interactions i inner join interacting_substance s on i.id = s.interaction_id "
-                    + "order by i.id";
-            List<MedicationInteraction> interactions = queryForResultSet(query,
-                    new ArrayList<>(), this::readInteractions);
-            for (MedicationInteraction interaction : interactions) {
-                for (String substance : interaction.getSubstanceCodes()) {
-                    interactionCache
-                        .computeIfAbsent(substance, s -> new ArrayList<>())
-                        .add(interaction);
-                }
-            }
-        }
-
+        ensureInteractionCache();
 
         String anatomicalGroup = atcCode.substring(0, 1);
         String therapeuticGroup = atcCode.substring(0, 3);
@@ -185,12 +179,30 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         String substance = atcCode.length() >= 7 ? atcCode.substring(0, 7) : "N/A";
         List<MedicationInteraction> result = new ArrayList<>();
         List<MedicationInteraction> empty = new ArrayList<>();
-        result.addAll(interactionCache.getOrDefault(anatomicalGroup, empty));
-        result.addAll(interactionCache.getOrDefault(therapeuticGroup, empty));
-        result.addAll(interactionCache.getOrDefault(pharmacologicalGroup, empty));
-        result.addAll(interactionCache.getOrDefault(chemicalGroup, empty));
-        result.addAll(interactionCache.getOrDefault(substance, empty));
+        result.addAll(interactionsByAtc.getOrDefault(anatomicalGroup, empty));
+        result.addAll(interactionsByAtc.getOrDefault(therapeuticGroup, empty));
+        result.addAll(interactionsByAtc.getOrDefault(pharmacologicalGroup, empty));
+        result.addAll(interactionsByAtc.getOrDefault(chemicalGroup, empty));
+        result.addAll(interactionsByAtc.getOrDefault(substance, empty));
         return result;
+    }
+
+
+    private void ensureInteractionCache() {
+        if (interactionsByAtc.isEmpty()) {
+            String query = "select * from medication_interactions i inner join interacting_substance s on i.id = s.interaction_id "
+                    + "order by i.id";
+            List<MedicationInteraction> interactions = queryForResultSet(query,
+                    new ArrayList<>(), this::readInteractions);
+            for (MedicationInteraction interaction : interactions) {
+                for (String substance : interaction.getSubstanceCodes()) {
+                    interactionsByAtc
+                        .computeIfAbsent(substance, s -> new ArrayList<>())
+                        .add(interaction);
+                }
+                interactionsById.put(interaction.getId(), interaction);
+            }
+        }
     }
 
 

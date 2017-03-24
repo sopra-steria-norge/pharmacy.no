@@ -38,10 +38,6 @@ public class DispenseOrder implements MedicationHistory {
         return dispense;
     }
 
-    public List<MedicationDispense> getMedicationDispenseList() {
-        return medicationDispenses;
-    }
-
     public Collection<RefundGroup> getRefundGroups() {
         Map<String, RefundGroup> result = new HashMap<>();
 
@@ -87,6 +83,21 @@ public class DispenseOrder implements MedicationHistory {
     public Money getRefundTotal() {
         Money coveredTotal = getCoveredTotal();
         return coveredTotal != null ? coveredTotal.minus(getPatientTotal()) : null;
+    }
+
+    public boolean isAllWarningsAddressed() {
+        for (MedicationDispense dispense : medicationDispenses) {
+            if (!dispense.isAllWarningsAddressed()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void createWarnings() {
+        for (MedicationDispense dispense : medicationDispenses) {
+            dispense.createWarnings(this);
+        }
     }
 
 }

@@ -13,7 +13,7 @@ import no.pharmacy.medication.Medication;
 import no.pharmacy.order.DispenseOrder;
 import no.pharmacy.order.MedicationOrder;
 
-public class DispenseOrderView {
+public class DispenseOrderView implements HtmlView {
 
     protected DispenseOrder dispenseOrder;
 
@@ -21,7 +21,8 @@ public class DispenseOrderView {
         this.dispenseOrder = dispenseOrder;
     }
 
-    Document dispenseOrderView() throws IOException {
+    @Override
+    public Document createView() throws IOException {
         Document doc = Xml.readResource("/pharma-webapp/dispense-order/index.html.template");
 
         String medicationOrderTemplate = doc.find("...", "#medicationOrderTemplate").first().elements().iterator().next().toXML();
@@ -31,7 +32,7 @@ public class DispenseOrderView {
 
         Element medicationOrders = doc.find("...", "#medicationOrders").first();
 
-        for (MedicationDispense prescription : dispenseOrder.getMedicationDispenseList()) {
+        for (MedicationDispense prescription : dispenseOrder.getMedicationDispenses()) {
             medicationOrders.add(displayMedicationDispense(medicationOrderTemplate, prescription));
         }
 

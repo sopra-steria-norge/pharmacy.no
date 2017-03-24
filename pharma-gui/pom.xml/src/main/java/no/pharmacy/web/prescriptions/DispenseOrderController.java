@@ -30,7 +30,7 @@ public class DispenseOrderController extends HttpServlet {
         DispenseOrder dispenseOrder = prescriptionRepository.getDispenseOrderById(req.getPathInfo().substring(1));
 
         DispenseOrderView view = new DispenseOrderView(dispenseOrder);
-        Document doc = view.dispenseOrderView();
+        Document doc = view.createView();
         resp.setContentType("text/html");
         doc.writeTo(resp.getWriter());
     }
@@ -39,7 +39,7 @@ public class DispenseOrderController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         DispenseOrder order = prescriptionRepository.getDispenseOrderById(req.getParameter("orderId"));
 
-        for (MedicationDispense medicationDispense : order.getMedicationDispenseList()) {
+        for (MedicationDispense medicationDispense : order.getMedicationDispenses()) {
             String productId = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][productId]");
 
             String price = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][" + productId + "][price]");
@@ -48,7 +48,10 @@ public class DispenseOrderController extends HttpServlet {
 
             medicationDispense.setMedication(medication);
             medicationDispense.setPrice(Money.from(price));
+        }
 
+        order.createWarnings();
+        for (MedicationDispense medicationDispense : order.getMedicationDispenses()) {
             prescriptionRepository.update(medicationDispense);
         }
 

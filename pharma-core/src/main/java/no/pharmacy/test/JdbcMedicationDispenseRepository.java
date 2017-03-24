@@ -11,6 +11,8 @@ import javax.sql.DataSource;
 
 import no.pharmacy.core.Money;
 import no.pharmacy.dispense.MedicationDispense;
+import no.pharmacy.dispense.MedicationDispenseAction;
+import no.pharmacy.dispense.MedicationOrderWarning;
 import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.order.DispenseOrder;
@@ -51,7 +53,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
             medicationOrder.setId(id);
         }
 
-        for (MedicationDispense medicationDispense : order.getMedicationDispenseList()) {
+        for (MedicationDispense medicationDispense : order.getMedicationDispenses()) {
             long id = insertInto("medication_dispenses")
                 .value("dispense_order_id", order.getIdentifier())
                 .value("authorizing_prescription_id", medicationDispense.getAuthorizingPrescription().getId())
@@ -73,28 +75,49 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         result.setIdentifier(rs.getString("id"));
 
         result.getMedicationOrders().addAll(findMedicationOrders(result.getIdentifier()));
-        result.getMedicationDispenseList().addAll(findMedicationDispenses(result.getIdentifier(),
+        result.getMedicationDispenses().addAll(findMedicationDispenses(result.getIdentifier(),
                 result.getMedicationOrders()));
 
         return result;
     }
 
     private List<MedicationDispense> findMedicationDispenses(String identifier, List<MedicationOrder> prescriptions) {
-        return queryForList("select * from medication_dispenses where dispense_order_id = ?",
+        return queryForResultSet("select * from medication_dispenses d left outer join medication_dispense_actions a on d.id = a.dispense_id where dispense_order_id = ? order by id",
                 Arrays.asList(identifier),
                 rs -> readMedicationDispense(rs, prescriptions));
     }
 
-    private MedicationDispense readMedicationDispense(ResultSet rs, List<MedicationOrder> prescriptions) throws SQLException {
-        long prescriptionId = rs.getLong("authorizing_prescription_id");
-        MedicationOrder medicationOrder = prescriptions.stream().filter(p -> p.getId() == prescriptionId).findFirst().get();
+    private List<MedicationDispense> readMedicationDispense(ResultSet rs, List<MedicationOrder> prescriptions) throws SQLException {
+        List<MedicationDispense> result = new ArrayList<>();
+        long previousId = -1;
 
-        MedicationDispense dispense = new MedicationDispense(medicationOrder);
-        dispense.setId(rs.getLong("id"));
-        dispense.setPrice(Money.from(rs.getBigDecimal("price")));
-        dispense.setMedication(medicationRepository.findByProductId(rs.getString("medication_id"))
-                .orElse(null));
-        return dispense;
+        while (rs.next()) {
+            long prescriptionId = rs.getLong("authorizing_prescription_id");
+            if (prescriptionId != previousId) {
+                MedicationOrder medicationOrder = prescriptions.stream().filter(p -> p.getId() == prescriptionId).findFirst().get();
+
+                MedicationDispense dispense = new MedicationDispense(medicationOrder);
+                dispense.setId(rs.getLong("id"));
+                dispense.setPrice(Money.from(rs.getBigDecimal("price")));
+                dispense.setMedication(medicationRepository.findByProductId(rs.getString("medication_id"))
+                        .orElse(null));
+                result.add(dispense);
+
+                previousId = prescriptionId;
+            }
+            if (rs.getString("interaction_id") != null) {
+                result.get(result.size()-1).addMedicationDispenseAction(readMedicationDispenseAction(rs));
+            }
+        }
+        return result;
+    }
+
+    private MedicationDispenseAction readMedicationDispenseAction(ResultSet rs) throws SQLException {
+        return new MedicationDispenseAction(
+                new MedicationOrderWarning(
+                        rs.getLong("interacting_dispense_id"), rs.getString("interacting_dispense_display"),
+                        medicationRepository.getInteraction(rs.getString("interaction_id"))),
+                rs.getString("warning_remark"), rs.getString("warning_action"));
     }
 
     private MedicationOrder readMedicationOrder(ResultSet rs) throws SQLException {
@@ -121,5 +144,17 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
             .set("price", prescription.getPrice())
             .set("medication_id", prescription.getMedication().getProductId())
             .executeUpdate();
+
+        executeUpdate("delete from medication_dispense_actions where dispense_id = ?", Arrays.asList(prescription.getId()));
+        for (MedicationDispenseAction action : prescription.getWarningActions()) {
+            insertInto("medication_dispense_actions")
+                .value("dispense_id", prescription.getId())
+                .value("interaction_id", action.getWarningCode())
+                .value("interacting_dispense_display", action.getWarning().displayInteractingDispense())
+                .value("interacting_dispense_id", action.getWarning().getInteractingDispenseId())
+                .value("warning_action", action.getAction())
+                .value("warning_remark", action.getRemark())
+                .executeUpdate();
+        }
     }
 }

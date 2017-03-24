@@ -64,7 +64,7 @@ public class FestMedicationImporter {
             interaction.setId(interaksjon.find("Id").first().text());
             interaction.setClinicalConsequence(interaksjon.find("KliniskKonsekvens").firstTextOrNull());
             interaction.setInteractionMechanism(interaksjon.find("Interaksjonsmekanisme").firstTextOrNull());
-            interaction.setSeverity(MedicalInteractionSeverity.SEVERE);
+            interaction.setSeverity(MedicalInteractionSeverity.byValue(interaksjon.find("Relevans").first().attr("V")));
 
             for (Element substance : interaksjon.find("Substansgruppe")) {
                 // TODO: This is incorrect if one Substansgruppe has several Substans
