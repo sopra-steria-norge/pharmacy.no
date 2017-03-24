@@ -160,8 +160,8 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         interactionsByAtc.clear();
     }
 
-    private Map<String, List<MedicationInteraction>> interactionsByAtc = new HashMap<>();
-    private Map<String, MedicationInteraction> interactionsById = new HashMap<>();
+    private static Map<String, List<MedicationInteraction>> interactionsByAtc = new HashMap<>();
+    private static Map<String, MedicationInteraction> interactionsById = new HashMap<>();
 
     @Override
     public MedicationInteraction getInteraction(String id) {
@@ -189,18 +189,20 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
 
 
     private void ensureInteractionCache() {
-        if (interactionsByAtc.isEmpty()) {
-            String query = "select * from medication_interactions i inner join interacting_substance s on i.id = s.interaction_id "
-                    + "order by i.id";
-            List<MedicationInteraction> interactions = queryForResultSet(query,
-                    new ArrayList<>(), this::readInteractions);
-            for (MedicationInteraction interaction : interactions) {
-                for (String substance : interaction.getSubstanceCodes()) {
-                    interactionsByAtc
-                        .computeIfAbsent(substance, s -> new ArrayList<>())
-                        .add(interaction);
+        synchronized (interactionsByAtc) {
+            if (interactionsByAtc.isEmpty()) {
+                String query = "select * from medication_interactions i inner join interacting_substance s on i.id = s.interaction_id "
+                        + "order by i.id";
+                List<MedicationInteraction> interactions = queryForResultSet(query,
+                        new ArrayList<>(), this::readInteractions);
+                for (MedicationInteraction interaction : interactions) {
+                    for (String substance : interaction.getSubstanceCodes()) {
+                        interactionsByAtc
+                            .computeIfAbsent(substance, s -> new ArrayList<>())
+                            .add(interaction);
+                    }
+                    interactionsById.put(interaction.getId(), interaction);
                 }
-                interactionsById.put(interaction.getId(), interaction);
             }
         }
     }

@@ -53,7 +53,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw soften(query, e);
         } finally {
-            logger.trace("executeUpdate {}: {}ms", query, System.currentTimeMillis()-startTime);
+            logExecution("executeUpdate", query, startTime);
         }
     }
 
@@ -75,7 +75,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw soften(query, e);
         } finally {
-            logger.trace("executeInsert {}: {}ms", query, System.currentTimeMillis()-startTime);
+            logger.trace("executeUpdate {}: {}ms", query, System.currentTimeMillis()-startTime);
         }
     }
 
@@ -128,7 +128,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw soften(query, e);
         } finally {
-            logger.trace("queryForResultSet {}: {}ms", query, System.currentTimeMillis()-startTime);
+            logExecution("queryForResultSet", query, startTime);
         }
     }
 
@@ -149,7 +149,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw soften(query, e);
         } finally {
-            logger.trace("queryForList {}: {}ms", query, System.currentTimeMillis()-startTime);
+            logExecution("queryForList", query, startTime);
         }
     }
 
@@ -163,6 +163,15 @@ public class JdbcSupport {
 
     protected UpdateBuilder update(String tableName) {
         return new UpdateBuilder(this, tableName);
+    }
+
+    private void logExecution(String method, String query, long startTime) {
+        long executionTime = System.currentTimeMillis()-startTime;
+        if (executionTime > 1000) {
+            logger.warn("SLOW {} {}: {}ms", method, query, executionTime);
+        } else {
+            logger.trace("{} {}: {}ms", method, query, executionTime);
+        }
     }
 
 }

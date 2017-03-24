@@ -20,7 +20,7 @@ public class MedicationDispenseRepositoryTest {
     private static LogConfiguration logConfiguration = new LogConfiguration();
     static {
         logConfiguration.setLevel("org.flywaydb", Level.INFO);
-        logConfiguration.setLevel("no.pharmacy.infrastructure.jdbc", Level.TRACE);
+        logConfiguration.setLevel("no.pharmacy", Level.INFO);
     }
 
     private DataSource dataSource = TestDataSource.pharmacistInstance();
@@ -66,7 +66,7 @@ public class MedicationDispenseRepositoryTest {
     }
 
     @Test
-    public void populatesMedicationDispense() {
+    public void shouldPopulateMedicationDispense() {
         DispenseOrder order = new DispenseOrder();
 
         MedicationOrder medicationOrder = testData.sampleMedicationOrder();
