@@ -77,15 +77,15 @@ public class DownloadMedicationsFromFest {
 
     public static void main(String[] args) throws Exception {
         String url = "jdbc:h2:file:" + new File("target/db/medications").getAbsolutePath();
-        JdbcConnectionPool dataSource = JdbcConnectionPool.create(url, "sa", "");
+        JdbcConnectionPool medicationDataSource = JdbcConnectionPool.create(url, "sa", "");
 
         Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
+        flyway.setDataSource(medicationDataSource);
         flyway.setLocations("db/db-medications");
         flyway.migrate();
 
-        try (Connection conn = dataSource.getConnection()) {
-            new DownloadMedicationsFromFest(new JdbcMedicationRepository(dataSource)).downloadFestFile();
+        try (Connection conn = medicationDataSource.getConnection()) {
+            new DownloadMedicationsFromFest(new JdbcMedicationRepository(medicationDataSource)).downloadFestFile();
         }
     }
 }

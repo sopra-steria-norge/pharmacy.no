@@ -17,7 +17,7 @@ import no.pharmacy.test.TestDataSource;
 
 public class MedicationPersistenceTest {
 
-    private DataSource dataSource = TestDataSource.instance();
+    private DataSource dataSource = TestDataSource.medicationInstance();
     private JdbcMedicationRepository repository = new JdbcMedicationRepository(dataSource);
 
     @Test

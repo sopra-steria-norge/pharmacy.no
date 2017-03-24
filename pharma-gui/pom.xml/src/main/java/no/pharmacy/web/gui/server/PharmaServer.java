@@ -54,22 +54,37 @@ public class PharmaServer {
         HandlerList handlers = new HandlerList();
         handlers.addHandler(new ShutdownHandler(SHUTDOWN_TOKEN, true, true));
 
-        DataSource dataSource = createDataSource();
+        DataSource medicationDataSource = createMedicationDataSource();
+        DataSource pharmaDataSource = createPharmaDataSource();
 
-        JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(dataSource);
+        JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(medicationDataSource);
         medicationRepository.refresh();
 
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository);
 
         handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository));
-        handlers.addHandler(createPharmaGui(reseptFormidler, dataSource));
+        handlers.addHandler(createPharmaGui(reseptFormidler, pharmaDataSource));
 
         return handlers;
     }
 
-    private JdbcConnectionPool createDataSource() {
+    private DataSource createPharmaDataSource() {
         File currentDir = new File(System.getProperty("user.dir"));
-        File dbFile = new File(currentDir, "target/db/pharma");
+        File dbFile = new File(currentDir, "target/db/pharmacist");
+        String url = "jdbc:h2:file:" + dbFile.getAbsolutePath();
+        JdbcConnectionPool dataSource = JdbcConnectionPool.create(url, "sa", "");
+
+        Flyway flyway = new Flyway();
+        flyway.setDataSource(dataSource);
+        flyway.setLocations("db/db-pharmacist");
+        flyway.migrate();
+
+        return dataSource;
+    }
+
+    private JdbcConnectionPool createMedicationDataSource() {
+        File currentDir = new File(System.getProperty("user.dir"));
+        File dbFile = new File(currentDir, "target/db/medications");
         String url = "jdbc:h2:file:" + dbFile.getAbsolutePath();
         JdbcConnectionPool dataSource = JdbcConnectionPool.create(url, "sa", "");
 

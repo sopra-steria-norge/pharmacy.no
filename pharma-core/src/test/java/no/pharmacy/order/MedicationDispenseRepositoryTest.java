@@ -15,9 +15,11 @@ import no.pharmacy.test.TestDataSource;
 
 public class MedicationDispenseRepositoryTest {
 
-    private DataSource dataSource = TestDataSource.instance();
+    private DataSource dataSource = TestDataSource.pharmacistInstance();
     private PharmaTestData testData = new PharmaTestData();
-    private MedicationDispenseRepository repository = new JdbcMedicationDispenseRepository(dataSource, testData.getMedicationRepository());
+    private MedicationDispenseRepository repository = new JdbcMedicationDispenseRepository(
+            dataSource,
+            testData.getMedicationRepository());
 
     @Test
     public void retrievesSimpleDispenseOrder() {
