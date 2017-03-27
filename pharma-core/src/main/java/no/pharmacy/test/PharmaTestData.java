@@ -1,6 +1,5 @@
 package no.pharmacy.test;
 
-import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -13,6 +12,8 @@ import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import lombok.Getter;
 import no.pharmacy.core.Money;
@@ -23,6 +24,8 @@ import no.pharmacy.medication.Medication;
 import no.pharmacy.order.MedicationOrder;
 
 public class PharmaTestData {
+
+    private static final Logger logger = LoggerFactory.getLogger(PharmaTestData.class);
 
     private static int sequence;
     private static final List<Medication> medicationCache = new ArrayList<>();
@@ -35,16 +38,14 @@ public class PharmaTestData {
 
     public PharmaTestData() {
         this.medicationRepository = new JdbcMedicationRepository(medicationDataSource());
-        medicationRepository.refresh(FestMedicationImporter.FEST_URL);
+        medicationRepository.refresh(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString()));
     }
 
     public static synchronized DataSource medicationDataSource() {
         if (medicationTestDatasource == null) {
-            File currentDir = new File(System.getProperty("user.dir"));
-            File dbFile = new File(currentDir, "target/db/medications");
-            String url = "jdbc:h2:file:" + dbFile.getAbsolutePath();
-
-            medicationTestDatasource = JdbcConnectionPool.create(url, "sa", "");
+            String jdbcUrl = System.getProperty("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications");
+            medicationTestDatasource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
+            logger.info("Initializing {}", jdbcUrl);
 
             Flyway flyway = new Flyway();
             flyway.setDataSource(medicationTestDatasource);

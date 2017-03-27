@@ -1,1 +1,3 @@
 -Dpharmacy.disable_fest_refresh
+-Dpharmacy.fest_source=file:src/test/resources/fest-mini.xml
+-Dpharmacy.medication.jdbc.url=jdbc:h2:mem:medications
