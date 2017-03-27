@@ -57,6 +57,7 @@ public class CreateMiniFest {
             includeLegemiddelpakningByVarenummer(id);
         }
 
+        includeLegemiddelpakning("ID_5DC7F4A6-EB4D-48DC-93B7-4A4B1D0573CC"); // Hepsera Tab 10 mg
         includeLegemiddelpakning("ID_0819AD27-301D-4A53-8ED6-CB46F0A67770"); // Paracetduo
         includeLegemiddelpakning("ID_29E9684D-3D1D-4C5C-8663-A478297892CD"); // NovoRapid Flexpen
         includeLegemiddelpakning("ID_99C4A44A-0968-48C2-8D59-51F93457EBC7"); // Ritalin
