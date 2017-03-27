@@ -94,7 +94,7 @@ public class JdbcSupport {
         }
     }
 
-    protected <T> Optional<T> retrieveSingle(String query, List<Object> parameters, ResultSetMapper<T> mapper) {
+    public <T> Optional<T> retrieveSingle(String query, List<Object> parameters, ResultSetMapper<T> mapper) {
         long startTime = System.currentTimeMillis();
         logger.trace("retrieveSingle {} {}", query, parameters);
         try (Connection conn = dataSource.getConnection()) {
@@ -157,7 +157,7 @@ public class JdbcSupport {
         return date != null ? date.toLocalDate() : null;
     }
 
-    protected InsertBuilder insertInto(String tableName) {
+    public InsertBuilder insertInto(String tableName) {
         return new InsertBuilder(this, tableName);
     }
 
@@ -165,6 +165,7 @@ public class JdbcSupport {
         return new UpdateBuilder(this, tableName);
     }
 
+    @SuppressWarnings("unused")
     private RuntimeException soften(String query, SQLException e) {
         return ExceptionUtil.softenException(e);
     }
