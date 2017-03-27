@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import no.pharmacy.core.Money;
+import no.pharmacy.core.Reference;
 
 @ToString(of = { "identifier" })
 public class DispenseOrder implements MedicationHistory {
@@ -22,6 +23,9 @@ public class DispenseOrder implements MedicationHistory {
 
     @Getter
     private List<MedicationDispense> medicationDispenses = new ArrayList<>();
+
+    @Getter @Setter
+    private Reference patient;
 
     @Getter @Setter
     private String customerSignature;

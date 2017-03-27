@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import org.junit.Test;
 
 import no.pharmacy.core.Money;
-import no.pharmacy.core.Practitioner;
+import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
@@ -14,6 +14,8 @@ import no.pharmacy.medication.Medication;
 import no.pharmacy.test.PharmaTestData;
 
 public class RefundCalculationTest {
+
+    private PharmaTestData testData = new PharmaTestData();
 
     private static final Money MAX_COPAY_PER_PRESCRIPTION = Money.inCents(52000);
 
@@ -40,8 +42,8 @@ public class RefundCalculationTest {
     public void shouldCalculateCompleteRefund() throws Exception {
         DispenseOrder order = new DispenseOrder();
 
-        Practitioner doctor1 = PharmaTestData.sampleDoctor();
-        Practitioner doctor2 = PharmaTestData.sampleDoctor();
+        Reference doctor1 = testData.sampleDoctor();
+        Reference doctor2 = testData.sampleDoctor();
 
         LocalDate firstDate = LocalDate.now().minusDays(100);
         LocalDate secondDate = firstDate.plusDays(7);
@@ -72,7 +74,7 @@ public class RefundCalculationTest {
     public void shouldCalculateRefundGroup() throws Exception {
         DispenseOrder order = new DispenseOrder();
 
-        Practitioner doctor1 = PharmaTestData.sampleDoctor();
+        Reference doctor1 = testData.sampleDoctor();
 
         LocalDate firstDate = LocalDate.now().minusDays(100);
 
@@ -96,9 +98,9 @@ public class RefundCalculationTest {
     }
 
     private void addMedicationDispense(DispenseOrder order,
-            Practitioner doctor, LocalDate firstDate,
+            Reference practitioner, LocalDate firstDate,
             Medication medication, Money retailPrice) {
-        MedicationOrder prescription = PharmaTestData.sampleMedicationOrder(doctor, firstDate, medication);
+        MedicationOrder prescription = PharmaTestData.sampleMedicationOrder(practitioner, firstDate, medication);
         MedicationDispense dispense = order.addMedicationOrder(prescription);
         dispense.setPrice(retailPrice);
         dispense.setMedication(medication);
@@ -108,7 +110,7 @@ public class RefundCalculationTest {
     public void shouldCalculateRefundGroup2() throws Exception {
         DispenseOrder order = new DispenseOrder();
 
-        Practitioner doctor1 = PharmaTestData.sampleDoctor();
+        Reference doctor1 = testData.sampleDoctor();
 
         LocalDate firstDate = LocalDate.now().minusDays(100);
 

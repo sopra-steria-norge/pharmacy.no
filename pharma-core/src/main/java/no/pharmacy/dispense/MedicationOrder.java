@@ -54,7 +54,7 @@ public class MedicationOrder {
         // TODO Auto-generated constructor stub
     }
 
-    public MedicationOrder(String nationalId, Medication product) {
+    public MedicationOrder(Medication product) {
         this.medication = product;
     }
 

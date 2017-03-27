@@ -14,6 +14,8 @@ public class TestDataSource {
     private static DataSource medicationsDataSource;
     private static DataSource pharmacistDataSource;
 
+    private static DataSource patientDataSource;
+
     public synchronized static DataSource medicationInstance() {
         if (medicationsDataSource == null) {
             String jdbcUrl = System.getProperty("test.medication.jdbc.url", "jdbc:h2:mem:medication");
@@ -42,6 +44,26 @@ public class TestDataSource {
             flyway.migrate();
         }
         return pharmacistDataSource;
+    }
+
+    public static synchronized DataSource patientInstance() {
+        if (patientDataSource == null) {
+            patientDataSource = createDataSource("test.patient.jdbc.url", "jdbc:h2:mem:patient", "db/db-patient");
+        }
+        return patientDataSource;
+    }
+
+    private static DataSource createDataSource(String property, String jdbcDefaultUrl, String migrations) {
+        String jdbcUrl = System.getProperty(property, jdbcDefaultUrl);
+        DataSource dataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
+        logger.info("Initializing {}", jdbcUrl);
+
+        Flyway flyway = new Flyway();
+        flyway.setDataSource(dataSource);
+        flyway.setLocations(migrations);
+        flyway.clean();
+        flyway.migrate();
+        return dataSource;
     }
 
 }

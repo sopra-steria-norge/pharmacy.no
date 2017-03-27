@@ -88,7 +88,9 @@ public class MedicationPersistenceTest {
 
     private Medication sampleMedication() {
         PharmaTestData testData = new PharmaTestData();
-        Medication medication = testData.sampleMedication();
+        Medication medication = new Medication();
+        medication.setProductId(PharmaTestData.sampleProductId());
+        medication.setDisplay(PharmaTestData.lorum());
         medication.setSubstitutionGroup(UUID.randomUUID().toString());
         medication.setGtin(PharmaTestData.sampleGtin());
         medication.setSubstance(PharmaTestData.pickOneOf("A12AX", "N01BB02", "J06BA01", "J01CA08"));

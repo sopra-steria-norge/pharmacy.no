@@ -32,6 +32,8 @@ public class MedicationDispenseRepositoryTest {
         MedicationDispense dispense = order.addMedicationOrder(testData.sampleMedicationOrder());
         dispense.setPrice(testData.samplePrice());
         dispense.setPrintedDosageText("Corrected text");
+
+        order.setPatient(testData.samplePatient());
         order.setCustomerSignature(testData.samplePng());
 
         repository.saveDispenseOrder(order);
@@ -51,6 +53,8 @@ public class MedicationDispenseRepositoryTest {
     @Test
     public void populatesAlternativeMedicationsOnRetrieve() {
         DispenseOrder order = new DispenseOrder();
+        order.setPatient(testData.samplePatient());
+
         Medication medication = testData.medicationWithSubstitutes();
         order.addMedicationOrder(testData.sampleMedicationOrder(medication));
 
@@ -80,6 +84,7 @@ public class MedicationDispenseRepositoryTest {
     @Test
     public void shouldUpdateMedicationDispense() {
         DispenseOrder order = new DispenseOrder();
+        order.setPatient(testData.samplePatient());
 
         MedicationOrder medicationOrder = testData.sampleMedicationOrder();
         order.addMedicationOrder(medicationOrder);
@@ -99,6 +104,7 @@ public class MedicationDispenseRepositoryTest {
     @Test
     public void shouldSaveInteractionWarnings() {
         DispenseOrder dispenseOrder = new DispenseOrder();
+        dispenseOrder.setPatient(testData.samplePatient());
         Medication ritalin = testData.getMedication("500595");
         Medication aurorix = testData.getMedication("466813");
         MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
@@ -118,6 +124,7 @@ public class MedicationDispenseRepositoryTest {
     @Test
     public void shouldUpdateDispenseActions() {
         DispenseOrder dispenseOrder = new DispenseOrder();
+        dispenseOrder.setPatient(testData.samplePatient());
         Medication ritalin = testData.getMedication("500595");
         Medication aurorix = testData.getMedication("466813");
         MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
@@ -148,6 +155,7 @@ public class MedicationDispenseRepositoryTest {
         logConfig.setLevel("no.pharmacy", Level.TRACE);
 
         DispenseOrder dispenseOrder = new DispenseOrder();
+        dispenseOrder.setPatient(testData.samplePatient());
         dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(testData.sampleMedication()));
 
         repository.saveDispenseOrder(dispenseOrder);

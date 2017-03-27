@@ -2,6 +2,8 @@ package no.pharmacy.dispense;
 
 import java.util.List;
 
+import no.pharmacy.core.Reference;
+
 public interface MedicationDispenseRepository {
 
     void saveDispenseOrder(DispenseOrder dispenseOrder);
@@ -13,5 +15,7 @@ public interface MedicationDispenseRepository {
     List<DispenseOrder> listReadyForPharmacist();
 
     void update(DispenseOrder order);
+
+    List<DispenseOrder> historicalDispensesForPerson(Reference patient);
 
 }

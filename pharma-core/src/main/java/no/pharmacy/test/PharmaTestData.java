@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import lombok.Getter;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.Practitioner;
+import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
@@ -57,7 +58,7 @@ public class PharmaTestData {
 
 
     // TODO: Use a master list of national IDs known not to be used by anyone
-    public static List<String> unusedNationalIds(int count) {
+    public List<String> unusedNationalIds(int count) {
         List<String> result = new ArrayList<>();
         for (int i=0; i<count; i++) {
             result.add(unusedNationalId());
@@ -66,7 +67,7 @@ public class PharmaTestData {
         return result;
     }
 
-    private static String unusedNationalId() {
+    public String unusedNationalId() {
         // TODO: Also have some D-numbers
         LocalDate birthDate = LocalDate.now().minusYears(80)
                 .plusDays(random(80*365));
@@ -101,31 +102,28 @@ public class PharmaTestData {
         return practitioner;
     }
 
-    private String sampleName() {
+    public static String sampleName() {
         return sampleFirstName() + " " + sampleLastName();
     }
 
-    private String sampleLastName() {
+    private static String sampleLastName() {
         // https://www.ssb.no/a/navn/alf/etter100.html
         return pickOneOf(new String[] { "Hansen", "Johansen", "Olsen", "Larsen", "Andersen", "Pedersen", "Nilsen", "Kristiansen", "Jensen", "Karlsen", "Johnsen", "Pettersen", "Eriksen", "Berg", "Haugen" });
     }
 
-    private String sampleFirstName() {
+    private static String sampleFirstName() {
         // https://www.ssb.no/befolkning/statistikker/navn/aar/2016-01-26?fokus=true
         String[] femaleNames = { "Emma", "Nora", "Sara", "Sofie", "Olivia", "Sofia", "Emilie", "Ella", "Leah", "Maja" };
         String[] maleNames = { "William", "Mathias", "Oliver", "Jakob", "Lucas", "Filip", "Liam", "Aksel", "Emil", "Oskar" };
         return chance(50) ? pickOneOf(femaleNames) : pickOneOf(maleNames);
     }
 
-    private boolean chance(int percent) {
+    private static boolean chance(int percent) {
         return random(100) < percent;
     }
 
-    public static Practitioner sampleDoctor() {
-        Practitioner practitioner = new Practitioner();
-        practitioner.setIdentifier(randomId());
-        practitioner.setName("Random J Doctor");
-        return practitioner;
+    public Reference sampleDoctor() {
+        return new Reference(String.valueOf(randomId()), sampleName());
     }
 
     public static long randomId() {
@@ -136,10 +134,10 @@ public class PharmaTestData {
         return sampleMedicationOrder(sampleDoctor(), samplePastDate(), medication);
     }
 
-    public static MedicationOrder sampleMedicationOrder(Practitioner prescriber, LocalDate dateWritten, Medication medication) {
+    public static MedicationOrder sampleMedicationOrder(Reference prescriber, LocalDate dateWritten, Medication medication) {
         MedicationOrder medicationOrder = new MedicationOrder();
         medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
-        medicationOrder.setPrescriber(prescriber.getReference());
+        medicationOrder.setPrescriber(prescriber);
         medicationOrder.setDateWritten(dateWritten);
         medicationOrder.setMedication(medication);
         medicationOrder.setDosageText(medication.getDisplay() + "\n\nTo tabelletter, morgen og kveld");
@@ -209,5 +207,13 @@ public class PharmaTestData {
     public static String sampleGtin() {
         return pickOneOf("70", "74", "40", "73")
                 + randomNumericString(11);
+    }
+
+    public Reference samplePatient() {
+        return new Reference(UUID.randomUUID().toString(), sampleName());
+    }
+
+    public static String sampleProductId() {
+        return randomNumericString(6);
     }
 }

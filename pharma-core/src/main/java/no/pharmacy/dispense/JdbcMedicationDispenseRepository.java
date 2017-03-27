@@ -31,18 +31,30 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
     }
 
     @Override
+    public List<DispenseOrder> historicalDispensesForPerson(Reference patient) {
+        return queryForList("select * from dispense_orders where dispensed = ?", Arrays.asList(true),
+                this::read);
+        // TODO Include nationalId in query
+        // TODO Return DispenseOrderSummary
+    }
+
+
+    @Override
     public void saveDispenseOrder(DispenseOrder order) {
         order.setIdentifier(UUID.randomUUID().toString());
         insertInto("dispense_orders")
             .value("id", order.getIdentifier())
             .value("customer_signature", order.getCustomerSignature())
             .value("dispensed", order.isDispensed())
+            .value("patient_id", order.getPatient().getReference())
+            .value("patient_name", order.getPatient().getDisplay())
             .executeUpdate();
 
         for (MedicationOrder medicationOrder : order.getMedicationOrders()) {
             long id = insertInto("medication_orders")
                 .value("dispense_order_id", order.getIdentifier())
-                .value("prescriber_id", medicationOrder.getPrescriber())
+                .value("prescriber_id", medicationOrder.getPrescriber().getReference())
+                .value("prescriber_name", medicationOrder.getPrescriber().getDisplay())
                 .value("prescription_id", medicationOrder.getPrescriptionId())
                 .value("date_written", medicationOrder.getDateWritten())
                 .value("medication_id", medicationOrder.getMedication().getProductId())
@@ -89,6 +101,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         result.setIdentifier(rs.getString("id"));
         result.setCustomerSignature(rs.getString("customer_signature"));
         result.setDispensed(rs.getBoolean("dispensed"));
+        result.setPatient(new Reference(rs.getString("patient_id"), rs.getString("patient_name")));
 
         result.getMedicationOrders().addAll(findMedicationOrders(result.getIdentifier()));
         result.getMedicationDispenses().addAll(findMedicationDispenses(result.getIdentifier(),
@@ -141,9 +154,9 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
 
     private MedicationOrder readMedicationOrder(ResultSet rs) throws SQLException {
         MedicationOrder medicationOrder = new MedicationOrder();
-        // TODO: Join in doctor
         medicationOrder.setId(rs.getLong("id"));
-        medicationOrder.setPrescriber(new Reference(rs.getString("prescriber_id"), "Random J Doctor"));
+        medicationOrder.setPrescriber(new Reference(rs.getString("prescriber_id"),
+                rs.getString("prescriber_name")));
         medicationOrder.setDateWritten(toLocalDate(rs.getDate("date_written")));
         medicationOrder.setDosageText(rs.getString("dosage_text"));
         medicationOrder.setPrescriptionId(rs.getString("prescription_id"));
@@ -181,4 +194,5 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
                 .executeUpdate();
         }
     }
+
 }

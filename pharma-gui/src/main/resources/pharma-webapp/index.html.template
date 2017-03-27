@@ -6,19 +6,34 @@
 <body>
 
 	<form>
+		<h2>Ekspeder</h2>
 		<label>
 			Fødselsnummer
 			<input type="text" name="nationalId" placeholder="Fødselsnummer" />
 		</label>
-		<button>Search</button>
+		<button name="action" value="dispense">Search</button>
 	</form>
 
 	<form method="post">
 		<div id="results"></div>
 		
-		<button>Ekspeder</button>
+		<button name="action" value="dispense">Ekspeder</button>
 	</form>
 
+
+	<form>
+		<h2>Resepthistorikk</h2>
+		<label>
+			Fødselsnummer
+			<input type="text" name="nationalId" placeholder="Fødselsnummer" />
+		</label>
+		<button name="action" value="journal">Search</button>
+	</form>
+
+	<form method="post">
+		<div id="historicalOrders"></div>
+		<button name="action" value="dispense">Vis</button>
+	</form>
 
 </body>
 </html>

@@ -21,12 +21,14 @@ public class FakeReseptFormidler implements PrescriptionsSource {
 
     private final MedicationSource medicationSource;
 
+    private final PharmaTestData testData = new PharmaTestData();
+
     public FakeReseptFormidler(MedicationSource medicationSource) {
         this.medicationSource = medicationSource;
     }
 
     public MedicationOrder addPrescription(String nationalId, Medication product) {
-        MedicationOrder medicationOrder = createMedicationOrder(nationalId, product);
+        MedicationOrder medicationOrder = createMedicationOrder(product);
         this.prescriptionsForPerson.computeIfAbsent(nationalId, s -> new ArrayList<>())
             .add(medicationOrder);
         this.prescriptionsById.put(medicationOrder.getPrescriptionId(), medicationOrder);
@@ -34,8 +36,9 @@ public class FakeReseptFormidler implements PrescriptionsSource {
         return medicationOrder;
     }
 
-    private MedicationOrder createMedicationOrder(String nationalId, Medication product) {
-        MedicationOrder medicationOrder = new MedicationOrder(nationalId, product);
+    private MedicationOrder createMedicationOrder(Medication product) {
+        MedicationOrder medicationOrder = new MedicationOrder(product);
+        medicationOrder.setPrescriber(testData.sampleDoctor());
         medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
         medicationOrder.setDateWritten(LocalDate.now().minusDays(PharmaTestData.random(14)));
         return medicationOrder;
