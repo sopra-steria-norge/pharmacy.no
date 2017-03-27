@@ -32,4 +32,8 @@ public class MedicationDispenseAction {
         return warning.getCode();
     }
 
+    public String getInteractionId() {
+        return warning.getInteraction().getId();
+    }
+
 }

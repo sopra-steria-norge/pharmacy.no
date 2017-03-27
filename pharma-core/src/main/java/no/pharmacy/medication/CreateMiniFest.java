@@ -50,7 +50,14 @@ public class CreateMiniFest {
             includeLegemiddelpakning(pakning.find("Legemiddelpakning", "Id").first().text());
         }
 
-        includeLegemiddelpakning("ID_7C2C731D-2C88-4435-8C10-3107AAC4C135"); // Paracetduo
+        String[] varenrMedByttegruppe = {
+                "038397", "048788", "048797", "089497", "438175", "010965", "022113", "183039", "458492", "088656", "043175", "023949", "164606", "587209", "397520", "414533", "004752", "011054", "578081", "004741", "038407", "081825", "159558", "071712", "164617", "114740", "022175", "079261", "423739", "038507", "010288", "088645", "435610", "500038", "164628", "403219", "595422", "384157", "509091", "184839"
+        };
+        for (String id : varenrMedByttegruppe) {
+            includeLegemiddelpakningByVarenummer(id);
+        }
+
+        includeLegemiddelpakning("ID_0819AD27-301D-4A53-8ED6-CB46F0A67770"); // Paracetduo
         includeLegemiddelpakning("ID_29E9684D-3D1D-4C5C-8663-A478297892CD"); // NovoRapid Flexpen
         includeLegemiddelpakning("ID_99C4A44A-0968-48C2-8D59-51F93457EBC7"); // Ritalin
         includeLegemiddelpakning("ID_6312E47E-4874-461B-AA4A-0C27F134A5A8"); // Aurorix - Moklobemid
@@ -71,6 +78,16 @@ public class CreateMiniFest {
                 );
     }
 
+    private void includeLegemiddelpakningByVarenummer(String varenummer) {
+        for (Element oppfLegemiddelpakning : festDoc.find("KatLegemiddelpakning", "OppfLegemiddelpakning")) {
+            if (varenummer.equals(oppfLegemiddelpakning.find("Legemiddelpakning", "Varenr").first().text())) {
+                includeLegemiddelpakning(oppfLegemiddelpakning);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Can't find OppfLegemiddelpakning with Legemiddelpakning > Varenr " + varenummer);
+    }
+
     private void includeInteraksjoner() {
         outer: for (Element oppfInteraksjon : festDoc.find("KatInteraksjon", "OppfInteraksjon")) {
             ElementSet substansgrupper = oppfInteraksjon.find("Interaksjon", "Substansgruppe");
@@ -86,13 +103,15 @@ public class CreateMiniFest {
         }
     }
 
-    private void includeLegemiddelpakning(String pakningId) {
-        if (!includedIds.contains(pakningId)) {
+    private void includeLegemiddelpakning(String id) {
+        if (!includedIds.contains(id)) {
             for (Element oppfLegemiddelpakning : festDoc.find("KatLegemiddelpakning", "OppfLegemiddelpakning")) {
-                if (pakningId.equals(oppfLegemiddelpakning.find("Legemiddelpakning", "Id").first().text())) {
+                if (id.equals(oppfLegemiddelpakning.find("Legemiddelpakning", "Id").first().text())) {
                     includeLegemiddelpakning(oppfLegemiddelpakning);
+                    return;
                 }
             }
+            throw new IllegalArgumentException("Can't find OppfLegemiddelpakning with Legemiddelpakning > Id " + id);
         }
     }
 
@@ -114,7 +133,8 @@ public class CreateMiniFest {
             includedAtcCodes.add(atcCode.substring(0, 1));
             includedAtcCodes.add(atcCode.substring(0, 3));
             includedAtcCodes.add(atcCode.substring(0, 4));
-            includedAtcCodes.add(atcCode.substring(0, 5 ));
+            includedAtcCodes.add(atcCode.substring(0, 5));
+            includedAtcCodes.add(atcCode);
         }
     }
 
