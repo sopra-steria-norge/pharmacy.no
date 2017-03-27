@@ -6,22 +6,14 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
-import ch.qos.logback.classic.Level;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseAction;
-import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.test.JdbcMedicationDispenseRepository;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.TestDataSource;
 
 public class MedicationDispenseRepositoryTest {
-
-    private static LogConfiguration logConfiguration = new LogConfiguration();
-    static {
-        logConfiguration.setLevel("org.flywaydb", Level.INFO);
-        logConfiguration.setLevel("no.pharmacy", Level.INFO);
-    }
 
     private DataSource dataSource = TestDataSource.pharmacistInstance();
     private PharmaTestData testData = new PharmaTestData();

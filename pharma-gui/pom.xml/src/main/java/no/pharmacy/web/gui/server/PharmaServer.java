@@ -1,6 +1,5 @@
 package no.pharmacy.web.gui.server;
 
-import java.io.File;
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Handler;
@@ -12,6 +11,8 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
 import no.pharmacy.infrastructure.logging.LogConfiguration;
@@ -30,6 +31,8 @@ import no.pharmacy.web.test.ReceiptTestCaseController;
 public class PharmaServer {
 
     private static final String SHUTDOWN_TOKEN = "c5d4a90d-e4be-414c-ad8a-2a172c31a230";
+
+    private static final Logger logger = LoggerFactory.getLogger(PharmaServer.class);
 
     private LogConfiguration logConfiguration = new LogConfiguration();
     private Server server;
@@ -58,7 +61,7 @@ public class PharmaServer {
         DataSource pharmaDataSource = createPharmaDataSource();
 
         JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(medicationDataSource);
-        medicationRepository.refresh(FestMedicationImporter.FEST_URL);
+        medicationRepository.refresh(FestMedicationImporter.FEST_URL.toString());
 
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository);
 
@@ -69,10 +72,7 @@ public class PharmaServer {
     }
 
     private DataSource createPharmaDataSource() {
-        File currentDir = new File(System.getProperty("user.dir"));
-        File dbFile = new File(currentDir, "target/db/pharmacist");
-        String url = "jdbc:h2:file:" + dbFile.getAbsolutePath();
-        JdbcConnectionPool dataSource = JdbcConnectionPool.create(url, "sa", "");
+        JdbcConnectionPool dataSource = JdbcConnectionPool.create("jdbc:h2:file:./target/db/pharmacist", "sa", "");
 
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);
@@ -83,10 +83,9 @@ public class PharmaServer {
     }
 
     private JdbcConnectionPool createMedicationDataSource() {
-        File currentDir = new File(System.getProperty("user.dir"));
-        File dbFile = new File(currentDir, "target/db/medications");
-        String url = "jdbc:h2:file:" + dbFile.getAbsolutePath();
-        JdbcConnectionPool dataSource = JdbcConnectionPool.create(url, "sa", "");
+        String jdbcUrl = "jdbc:h2:file:./target/db/medications";
+        JdbcConnectionPool dataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
+        logger.info("Initializing {}", jdbcUrl);
 
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);

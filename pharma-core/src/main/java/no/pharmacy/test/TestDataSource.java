@@ -4,15 +4,22 @@ import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestDataSource {
+
+    private static final Logger logger = LoggerFactory.getLogger(TestDataSource.class);
 
     private static DataSource medicationsDataSource;
     private static DataSource pharmacistDataSource;
 
     public synchronized static DataSource medicationInstance() {
         if (medicationsDataSource == null) {
-            medicationsDataSource = JdbcConnectionPool.create("jdbc:h2:mem:medications", "sa", "");
+            String jdbcUrl = "jdbc:h2:mem:medications";
+            medicationsDataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
+            logger.info("Initializing {}", jdbcUrl);
+
             Flyway flyway = new Flyway();
             flyway.setDataSource(medicationsDataSource);
             flyway.setLocations("db/db-medications/");
@@ -24,7 +31,10 @@ public class TestDataSource {
 
     public synchronized static DataSource pharmacistInstance() {
         if (pharmacistDataSource == null) {
-            pharmacistDataSource = JdbcConnectionPool.create("jdbc:h2:mem:medications", "sa", "");
+            String jdbcUrl = "jdbc:h2:mem:pharmacist";
+            pharmacistDataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
+            logger.info("Initializing {}", jdbcUrl);
+
             Flyway flyway = new Flyway();
             flyway.setDataSource(pharmacistDataSource);
             flyway.setLocations("db/db-pharmacist/");
