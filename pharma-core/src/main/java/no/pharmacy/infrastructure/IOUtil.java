@@ -32,6 +32,11 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import no.pharmacy.infrastructure.rest.RestException;
+import no.pharmacy.infrastructure.rest.RestHttpException;
+import no.pharmacy.infrastructure.rest.RestHttpNotFoundException;
+import no.pharmacy.infrastructure.rest.RestInvalidUserException;
+
 public class IOUtil {
 
     public static void post(String content, URL url) throws IOException {

@@ -1,8 +1,8 @@
-package no.pharmacy.web.prescriptions;
+package no.pharmacy.web.dispense;
 
 import java.util.List;
 
-import no.pharmacy.order.MedicationOrder;
+import no.pharmacy.dispense.MedicationOrder;
 
 public interface PrescriptionsSource {
 

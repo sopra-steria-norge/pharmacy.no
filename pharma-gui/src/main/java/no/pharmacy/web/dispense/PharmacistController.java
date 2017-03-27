@@ -1,4 +1,4 @@
-package no.pharmacy.web.prescriptions;
+package no.pharmacy.web.dispense;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -10,11 +10,11 @@ import org.eaxy.Document;
 import org.eaxy.Element;
 import org.eaxy.Xml;
 
+import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseAction;
+import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationOrderWarning;
-import no.pharmacy.order.DispenseOrder;
-import no.pharmacy.order.MedicationDispenseRepository;
 
 
 public class PharmacistController extends HttpServlet {

@@ -1,10 +1,12 @@
-package no.pharmacy.infrastructure;
+package no.pharmacy.infrastructure.rest;
 
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+
+import no.pharmacy.infrastructure.IOUtil;
 
 public class RestHttpException extends RestException {
 

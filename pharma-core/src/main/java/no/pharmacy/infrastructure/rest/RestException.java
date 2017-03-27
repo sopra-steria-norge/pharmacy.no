@@ -1,4 +1,4 @@
-package no.pharmacy.infrastructure;
+package no.pharmacy.infrastructure.rest;
 
 import java.io.IOException;
 import java.net.URL;

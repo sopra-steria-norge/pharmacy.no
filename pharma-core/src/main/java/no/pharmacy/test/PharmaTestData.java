@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 import lombok.Getter;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.Practitioner;
+import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.Medication;
-import no.pharmacy.order.MedicationOrder;
 
 public class PharmaTestData {
 
@@ -84,19 +84,6 @@ public class PharmaTestData {
 
     public static int random(int i) {
         return random.nextInt(i);
-    }
-
-    public List<Medication> sampleMedications(int count, FakeMedicationSource fakeMedicationSource) {
-        List<Medication> medications = new ArrayList<>();
-        for (int i=0; i<count; i++) {
-            medications.add(sampleMedication(fakeMedicationSource));
-        }
-        medications.sort((a, b) -> a.getDisplay().compareTo(b.getDisplay()));
-        return medications;
-    }
-
-    public Medication sampleMedication(FakeMedicationSource fakeMedicationSource) {
-        return fakeMedicationSource.pickOne();
     }
 
     public static <T> T pickOneOf(T... options) {
@@ -163,7 +150,7 @@ public class PharmaTestData {
         return sampleMedicationOrder(sampleDoctor(), samplePastDate(), sampleMedication());
     }
 
-    public Medication sampleMedication(String productId) {
+    public Medication getMedication(String productId) {
         if (medicationCache.isEmpty()) {
             medicationCache.addAll(medicationRepository.list());
         }
@@ -176,7 +163,7 @@ public class PharmaTestData {
         throw new IllegalArgumentException("Can't find medication " + productId);
     }
 
-    private Medication sampleMedication() {
+    public Medication sampleMedication() {
         if (medicationCache.isEmpty()) {
             medicationCache.addAll(medicationRepository.list());
         }

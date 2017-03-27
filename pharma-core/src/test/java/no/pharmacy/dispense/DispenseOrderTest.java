@@ -1,8 +1,9 @@
-package no.pharmacy.order;
+package no.pharmacy.dispense;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
+import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.test.PharmaTestData;
@@ -14,8 +15,8 @@ public class DispenseOrderTest {
     @Test
     public void shouldListDrugInteractions() {
         DispenseOrder dispenseOrder = new DispenseOrder();
-        Medication ritalin = testData.sampleMedication("500595");
-        Medication aurorix = testData.sampleMedication("466813");
+        Medication ritalin = testData.getMedication("500595");
+        Medication aurorix = testData.getMedication("466813");
         MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
         ritalinDispense.setMedication(ritalin);
         dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(aurorix)).setMedication(aurorix);
@@ -29,7 +30,7 @@ public class DispenseOrderTest {
     @Test
     public void shouldNotGiveInteractionsOnSimpleOrder() {
         DispenseOrder dispenseOrder = new DispenseOrder();
-        Medication ritalin = testData.sampleMedication("500595");
+        Medication ritalin = testData.getMedication("500595");
         MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
         ritalinDispense.setMedication(ritalin);
         dispenseOrder.createWarnings();

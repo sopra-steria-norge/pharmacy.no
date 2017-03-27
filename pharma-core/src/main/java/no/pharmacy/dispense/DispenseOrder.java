@@ -1,4 +1,4 @@
-package no.pharmacy.order;
+package no.pharmacy.dispense;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,9 +10,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import no.pharmacy.core.Money;
-import no.pharmacy.dispense.MedicationDispense;
-import no.pharmacy.dispense.MedicationHistory;
-import no.pharmacy.refund.RefundGroup;
 
 @ToString(of = { "identifier" })
 public class DispenseOrder implements MedicationHistory {

@@ -14,7 +14,6 @@ import no.pharmacy.core.Money;
 import no.pharmacy.infrastructure.CryptoUtil;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationInteraction;
-import no.pharmacy.order.MedicationOrder;
 
 @EqualsAndHashCode(of={"id", "medication", "authorizingPrescription" })
 public class MedicationDispense {

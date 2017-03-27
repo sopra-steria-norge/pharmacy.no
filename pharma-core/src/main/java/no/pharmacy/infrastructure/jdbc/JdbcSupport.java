@@ -17,8 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.pharmacy.core.Money;
+import no.pharmacy.core.Reference;
 import no.pharmacy.infrastructure.ExceptionUtil;
-import no.pharmacy.order.Reference;
 
 public class JdbcSupport {
 
@@ -77,10 +77,6 @@ public class JdbcSupport {
         } finally {
             logger.trace("executeUpdate {}: {}ms", query, System.currentTimeMillis()-startTime);
         }
-    }
-
-    private RuntimeException soften(String query, SQLException e) {
-        return ExceptionUtil.softenException(e);
     }
 
     private void setParameters(PreparedStatement stmt, List<Object> parameters) throws SQLException {
@@ -163,6 +159,10 @@ public class JdbcSupport {
 
     protected UpdateBuilder update(String tableName) {
         return new UpdateBuilder(this, tableName);
+    }
+
+    private RuntimeException soften(String query, SQLException e) {
+        return ExceptionUtil.softenException(e);
     }
 
     private void logExecution(String method, String query, long startTime) {

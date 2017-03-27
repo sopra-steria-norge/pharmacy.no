@@ -1,6 +1,5 @@
-package no.pharmacy.test;
+package no.pharmacy.web.test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -30,14 +29,8 @@ public class FakeMedicationSource implements MedicationSource {
         }
     }
 
-
     @Override
     public Optional<Medication> getMedication(String productId) {
         return Optional.ofNullable(medications.get(productId));
     }
-
-    public Medication pickOne() {
-        return PharmaTestData.pickOne(new ArrayList<>(medications.values()));
-    }
-
 }

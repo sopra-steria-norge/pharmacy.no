@@ -1,4 +1,4 @@
-package no.pharmacy.test;
+package no.pharmacy.dispense;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,15 +10,9 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import no.pharmacy.core.Money;
-import no.pharmacy.dispense.MedicationDispense;
-import no.pharmacy.dispense.MedicationDispenseAction;
-import no.pharmacy.dispense.MedicationOrderWarning;
+import no.pharmacy.core.Reference;
 import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 import no.pharmacy.medication.MedicationRepository;
-import no.pharmacy.order.DispenseOrder;
-import no.pharmacy.order.MedicationDispenseRepository;
-import no.pharmacy.order.MedicationOrder;
-import no.pharmacy.order.Reference;
 
 public class JdbcMedicationDispenseRepository extends JdbcSupport implements MedicationDispenseRepository {
 

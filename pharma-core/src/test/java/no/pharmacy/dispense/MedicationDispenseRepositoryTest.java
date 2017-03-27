@@ -1,4 +1,4 @@
-package no.pharmacy.order;
+package no.pharmacy.dispense;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,10 +6,13 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
+import no.pharmacy.dispense.DispenseOrder;
+import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseAction;
+import no.pharmacy.dispense.MedicationDispenseRepository;
+import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
-import no.pharmacy.test.JdbcMedicationDispenseRepository;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.TestDataSource;
 
@@ -93,8 +96,8 @@ public class MedicationDispenseRepositoryTest {
     @Test
     public void shouldSaveInteractionWarnings() {
         DispenseOrder dispenseOrder = new DispenseOrder();
-        Medication ritalin = testData.sampleMedication("500595");
-        Medication aurorix = testData.sampleMedication("466813");
+        Medication ritalin = testData.getMedication("500595");
+        Medication aurorix = testData.getMedication("466813");
         MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
         ritalinDispense.setMedication(ritalin);
         dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(aurorix)).setMedication(aurorix);
@@ -112,8 +115,8 @@ public class MedicationDispenseRepositoryTest {
     @Test
     public void shouldUpdateDispenseActions() {
         DispenseOrder dispenseOrder = new DispenseOrder();
-        Medication ritalin = testData.sampleMedication("500595");
-        Medication aurorix = testData.sampleMedication("466813");
+        Medication ritalin = testData.getMedication("500595");
+        Medication aurorix = testData.getMedication("466813");
         MedicationDispense ritalinDispense = dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(ritalin));
         ritalinDispense.setMedication(ritalin);
         dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(aurorix)).setMedication(aurorix);
@@ -131,7 +134,6 @@ public class MedicationDispenseRepositoryTest {
         MedicationDispense retrieved = repository.getDispenseOrderById(dispenseOrder.getIdentifier())
             .getMedicationDispenses().get(0);
         assertThat(retrieved).isEqualToComparingFieldByField(ritalinDispense);
-
     }
 
 }

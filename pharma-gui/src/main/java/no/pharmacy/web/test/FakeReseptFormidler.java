@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationSource;
-import no.pharmacy.order.MedicationOrder;
 import no.pharmacy.test.PharmaTestData;
-import no.pharmacy.web.prescriptions.PrescriptionsSource;
+import no.pharmacy.web.dispense.PrescriptionsSource;
 
 public class FakeReseptFormidler implements PrescriptionsSource {
 

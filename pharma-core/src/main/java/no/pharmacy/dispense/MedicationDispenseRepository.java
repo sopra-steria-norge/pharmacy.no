@@ -1,8 +1,6 @@
-package no.pharmacy.order;
+package no.pharmacy.dispense;
 
 import java.util.List;
-
-import no.pharmacy.dispense.MedicationDispense;
 
 public interface MedicationDispenseRepository {
 

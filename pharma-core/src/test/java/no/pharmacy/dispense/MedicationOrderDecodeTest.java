@@ -1,4 +1,4 @@
-package no.pharmacy.order;
+package no.pharmacy.dispense;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -8,8 +8,8 @@ import org.eaxy.Namespace;
 import org.eaxy.Xml;
 import org.junit.Test;
 
+import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
-import no.pharmacy.test.FakeMedicationSource;
 import no.pharmacy.test.PharmaTestData;
 
 public class MedicationOrderDecodeTest {
@@ -20,7 +20,7 @@ public class MedicationOrderDecodeTest {
     @Test
     public void decodesM1() throws Exception {
         PharmaTestData testData = new PharmaTestData();
-        Medication medication = testData.sampleMedication(new FakeMedicationSource());
+        Medication medication = testData.sampleMedication();
         Document prescriptionDocument = Xml.doc(ERESEPT.el("Resept",
                 ERESEPT.el("Forskrivningsdato", LocalDate.now().toString()),
                 ERESEPT.el("Utloper", LocalDate.now().plusDays(14).toString()),

@@ -1,4 +1,4 @@
-package no.pharmacy.refund;
+package no.pharmacy.dispense;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,10 +7,10 @@ import org.junit.Test;
 
 import no.pharmacy.core.Money;
 import no.pharmacy.core.Practitioner;
+import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispense;
+import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
-import no.pharmacy.order.DispenseOrder;
-import no.pharmacy.order.MedicationOrder;
 import no.pharmacy.test.PharmaTestData;
 
 public class RefundCalculationTest {

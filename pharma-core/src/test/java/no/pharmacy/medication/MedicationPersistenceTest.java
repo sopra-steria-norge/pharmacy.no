@@ -11,7 +11,6 @@ import javax.sql.DataSource;
 import org.eaxy.Xml;
 import org.junit.Test;
 
-import no.pharmacy.test.FakeMedicationSource;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.TestDataSource;
 
@@ -35,7 +34,8 @@ public class MedicationPersistenceTest {
         Medication medication = sampleMedication();
 
         repository.save(medication);
-        assertThat(repository.list(0, 100)).extracting(Medication::getProductId)
+        assertThat(repository.list(0, 100))
+            .extracting(Medication::getProductId)
             .contains(medication.getProductId());
     }
 
@@ -87,10 +87,12 @@ public class MedicationPersistenceTest {
     }
 
     private Medication sampleMedication() {
-        Medication medication = new FakeMedicationSource().pickOne();
+        PharmaTestData testData = new PharmaTestData();
+        Medication medication = testData.sampleMedication();
         medication.setSubstitutionGroup(UUID.randomUUID().toString());
         medication.setGtin(PharmaTestData.sampleGtin());
         medication.setSubstance(PharmaTestData.pickOneOf("A12AX", "N01BB02", "J06BA01", "J01CA08"));
+        medication.setTrinnPrice(testData.samplePrice());
         medication.setXml(Xml.el("testElement", "Hello world").toXML());
         return medication;
     }

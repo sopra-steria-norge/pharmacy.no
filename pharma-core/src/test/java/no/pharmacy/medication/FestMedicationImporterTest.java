@@ -16,7 +16,7 @@ import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Test;
 
-import no.pharmacy.order.Reference;
+import no.pharmacy.core.Reference;
 
 public class FestMedicationImporterTest {
 

@@ -1,4 +1,4 @@
-package no.pharmacy.order;
+package no.pharmacy.dispense;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import no.pharmacy.core.Reference;
 import no.pharmacy.medication.Medication;
 
 @EqualsAndHashCode(of={"id", "prescriber", "dateWritten", "medication"})

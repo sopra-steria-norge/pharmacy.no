@@ -1,11 +1,10 @@
-package no.pharmacy.refund;
+package no.pharmacy.dispense;
 
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.ToString;
 import no.pharmacy.core.Money;
-import no.pharmacy.dispense.MedicationDispense;
 
 @ToString
 public class RefundGroup {

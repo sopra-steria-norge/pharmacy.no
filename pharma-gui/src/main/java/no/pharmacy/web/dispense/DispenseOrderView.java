@@ -1,4 +1,4 @@
-package no.pharmacy.web.prescriptions;
+package no.pharmacy.web.dispense;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -8,10 +8,10 @@ import org.eaxy.Element;
 import org.eaxy.Xml;
 
 import no.pharmacy.core.Money;
+import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispense;
+import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
-import no.pharmacy.order.DispenseOrder;
-import no.pharmacy.order.MedicationOrder;
 
 public class DispenseOrderView implements HtmlView {
 

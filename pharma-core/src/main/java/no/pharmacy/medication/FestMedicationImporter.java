@@ -19,9 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.pharmacy.core.Money;
+import no.pharmacy.core.Reference;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.infrastructure.IOUtil;
-import no.pharmacy.order.Reference;
 import no.pharmacy.test.PharmaTestData;
 
 public class FestMedicationImporter {

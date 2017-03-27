@@ -6,6 +6,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ShutdownHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -15,16 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
+import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
+import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
-import no.pharmacy.order.MedicationDispenseRepository;
-import no.pharmacy.test.JdbcMedicationDispenseRepository;
-import no.pharmacy.web.prescriptions.DispenseOrderController;
-import no.pharmacy.web.prescriptions.PharmacistController;
-import no.pharmacy.web.prescriptions.PrescriptionsController;
-import no.pharmacy.web.prescriptions.PrescriptionsSource;
+import no.pharmacy.web.dispense.DispenseOrderController;
+import no.pharmacy.web.dispense.PharmacistController;
+import no.pharmacy.web.dispense.PrescriptionsController;
+import no.pharmacy.web.dispense.PrescriptionsSource;
+import no.pharmacy.web.infrastructure.logging.LogDisplayServlet;
 import no.pharmacy.web.test.FakeReseptFormidler;
 import no.pharmacy.web.test.ReceiptTestCaseController;
 
@@ -37,9 +39,12 @@ public class PharmaServer {
     private LogConfiguration logConfiguration = new LogConfiguration();
     private Server server;
 
+    private LogDisplayServlet logServlet;
+
     public PharmaServer() {
         logConfiguration.setLevel("org.eclipse.jetty", Level.WARN);
         logConfiguration.setLevel("org.flywaydb", Level.WARN);
+        logServlet = new LogDisplayServlet(logConfiguration.getContext());
 
         server = new Server(8080);
     }
@@ -65,6 +70,7 @@ public class PharmaServer {
 
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository);
 
+        handlers.addHandler(createOpsHandler());
         handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository));
         handlers.addHandler(createPharmaGui(reseptFormidler, pharmaDataSource, medicationRepository));
 
@@ -114,6 +120,13 @@ public class PharmaServer {
 
         handler.addServlet(new ServletHolder(new ReceiptTestCaseController(reseptFormidler, medicationRepository)), "/");
 
+        return handler;
+    }
+
+    private Handler createOpsHandler() {
+        ServletContextHandler handler = new ServletContextHandler();
+        handler.setContextPath("/ops");
+        handler.addServlet(new ServletHolder(logServlet), "/log/*");
         return handler;
     }
 

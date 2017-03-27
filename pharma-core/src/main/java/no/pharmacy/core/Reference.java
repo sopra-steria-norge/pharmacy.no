@@ -1,4 +1,4 @@
-package no.pharmacy.order;
+package no.pharmacy.core;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
