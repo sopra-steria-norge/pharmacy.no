@@ -1,5 +1,6 @@
 package no.pharmacy.medication;
 
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,6 +87,7 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         return medication;
     }
 
+    @Override
     public void save(Medication medication) {
         executeUpdate("delete from medications where product_id = ?",
                 Arrays.asList(medication.getProductId()));
@@ -131,21 +133,19 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcMedicationRepository.class);
 
-    public void refresh() {
+    public void refresh(URL festUrl) {
         if (isEmpty()) {
-            if (System.getProperty("pharmacy.disable_fest_refresh") != null) {
-                throw new IllegalStateException("Database empty, but FEST refresh is disabled");
-            }
-
             logger.info("Refreshing medications from FEST");
             try (Connection conn = dataSource.getConnection()) {
-                new DownloadMedicationsFromFest(this).downloadFestFile();
+                FestMedicationImporter importer = new FestMedicationImporter();
+                importer.saveFest(festUrl, this);
             } catch (Exception e) {
                 throw ExceptionUtil.softenException(e);
             }
         }
     }
 
+    @Override
     public void save(MedicationInteraction interaction) {
         insertInto("medication_interactions")
             .value("id", interaction.getId())

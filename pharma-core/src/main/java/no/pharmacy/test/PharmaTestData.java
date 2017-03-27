@@ -17,6 +17,7 @@ import org.h2.jdbcx.JdbcConnectionPool;
 import lombok.Getter;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.Practitioner;
+import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.order.MedicationOrder;
@@ -33,12 +34,11 @@ public class PharmaTestData {
     private static JdbcConnectionPool medicationTestDatasource;
 
     public PharmaTestData() {
-        this.medicationRepository = new JdbcMedicationRepository(createMedicationDataSource());
-        medicationRepository.refresh();
+        this.medicationRepository = new JdbcMedicationRepository(medicationDataSource());
+        medicationRepository.refresh(FestMedicationImporter.FEST_URL);
     }
 
-
-    private static synchronized DataSource createMedicationDataSource() {
+    public static synchronized DataSource medicationDataSource() {
         if (medicationTestDatasource == null) {
             File currentDir = new File(System.getProperty("user.dir"));
             File dbFile = new File(currentDir, "target/db/medications");

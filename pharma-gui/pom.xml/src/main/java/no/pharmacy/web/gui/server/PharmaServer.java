@@ -1,7 +1,6 @@
 package no.pharmacy.web.gui.server;
 
 import java.io.File;
-
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Handler;
@@ -16,6 +15,7 @@ import org.h2.jdbcx.JdbcConnectionPool;
 
 import ch.qos.logback.classic.Level;
 import no.pharmacy.infrastructure.logging.LogConfiguration;
+import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.order.MedicationDispenseRepository;
@@ -58,7 +58,7 @@ public class PharmaServer {
         DataSource pharmaDataSource = createPharmaDataSource();
 
         JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(medicationDataSource);
-        medicationRepository.refresh();
+        medicationRepository.refresh(FestMedicationImporter.FEST_URL);
 
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository);
 

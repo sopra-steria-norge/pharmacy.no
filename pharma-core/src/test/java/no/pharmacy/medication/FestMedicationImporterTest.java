@@ -2,6 +2,7 @@ package no.pharmacy.medication;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.File;
 import java.time.Instant;
 import java.util.Random;
 
@@ -21,6 +22,7 @@ public class FestMedicationImporterTest {
 
     private static final Namespace M30 = new Namespace("http://www.kith.no/xmlstds/eresept/m30/2014-12-01", "m30");
     private static final Namespace F = new Namespace("http://www.kith.no/xmlstds/eresept/forskrivning/2014-12-01", "f");
+
     private FestMedicationImporter importer = new FestMedicationImporter();
     private Validator validator = Xml.validatorFromResource("R1808-eResept-M30-2014-12-01/ER-M30-2014-12-01.xsd");
     private Random random = new Random();
@@ -173,7 +175,7 @@ public class FestMedicationImporterTest {
                 el);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:testFest", "sa", "");
 
         Flyway flyway  = new Flyway();
@@ -182,6 +184,7 @@ public class FestMedicationImporterTest {
         flyway.migrate();
 
         JdbcMedicationRepository repository = new JdbcMedicationRepository(dataSource);
-        repository.refresh();
+        FestMedicationImporter importer = new FestMedicationImporter();
+        importer.saveFest(new File("fest-mini.xml").toURI().toURL(), repository);
     }
 }

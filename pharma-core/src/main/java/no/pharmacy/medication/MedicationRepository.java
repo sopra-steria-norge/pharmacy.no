@@ -17,4 +17,8 @@ public interface MedicationRepository {
 
     MedicationInteraction getInteraction(String id);
 
+    void save(MedicationInteraction interaction);
+
+    void save(Medication medication);
+
 }

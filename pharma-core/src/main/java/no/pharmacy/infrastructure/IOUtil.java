@@ -29,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class IOUtil {
 
@@ -284,5 +286,23 @@ public class IOUtil {
 
     public static byte[] base64Decode(String base64String) {
         return Base64.getDecoder().decode(base64String);
+    }
+
+    public static InputStream zipEntry(ZipInputStream zip, String fileName) throws IOException {
+        ZipEntry zipEntry;
+        while((zipEntry = zip.getNextEntry()) != null) {
+            if (zipEntry.getName().equals(fileName)) {
+                return zip;
+            }
+        }
+        throw new IllegalArgumentException("Can't find " + fileName + " in " + zip);
+    }
+
+    public static URL url(String string) {
+        try {
+            return new URL(string);
+        } catch (IOException e) {
+            throw ExceptionUtil.softenException(e);
+        }
     }
 }
