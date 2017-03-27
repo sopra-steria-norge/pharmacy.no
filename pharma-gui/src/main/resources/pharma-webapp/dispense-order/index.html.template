@@ -5,6 +5,8 @@
 	<style>
 		.medicationPrice { display: none; }
 		.medicationDescription { display: none; }
+		
+		.disabled { text-decoration: line-through; }
 	</style>
 <script
   src="https://code.jquery.com/jquery-3.1.1.js"
@@ -51,7 +53,7 @@
 
 		<h4>Kanseller</h4>
 		<ul>
-			<li><label><input type='radio' name='productId'/>Kanseller</label></li>
+			<li><label><input type='radio' name='cancelMedicationOrder' class='productSelect' value=""/>Kanseller</label></li>
 		</ul>
 	</div>
 	</script>
@@ -63,6 +65,12 @@
 	
 		<div id="medicationOrders"></div>
 		
+		<h2>Velg varer</h2>
+		
+		<div>
+			<button>Velg vare</button>
+		</div>
+		
 		<div id="price">
 		<h2>Pris</h2>		
 			<ul>
@@ -71,18 +79,24 @@
 				<li><strong>Mellomlegg pasient:</strong> <span id='uncoveredAmount'></span></li>
 				<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
 			</ul>
-			
-			<button>Velg vare</button>
 		</div>
 	</form>
 
-	<a id="technicalControl" href="#">
-		<button>✓ Teknisk kontroll</button>
-	</a>
-
-	<a href="/pharmacist/">
-		<button>✓ Farmasøytkontroll</button>
-	</a>
+	<div>
+		<a id="technicalControl" href="#">
+			Teknisk kontroll
+		</a>
+	</div>
+	<div>
+		<a id="pharmacistControl" href="/pharmacist/">
+			Farmasøytkontroll
+		</a>
+	</div>
+	<div>
+		<a id="dispenseAction" href="#">
+			Utlever
+		</a>
+	</div>
 
 <script>
 $(function() {

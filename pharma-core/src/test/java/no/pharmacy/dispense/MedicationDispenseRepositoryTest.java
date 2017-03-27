@@ -6,12 +6,14 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
+import ch.qos.logback.classic.Level;
 import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseAction;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationOrder;
+import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.TestDataSource;
@@ -30,6 +32,7 @@ public class MedicationDispenseRepositoryTest {
         MedicationDispense dispense = order.addMedicationOrder(testData.sampleMedicationOrder());
         dispense.setPrice(testData.samplePrice());
         dispense.setPrintedDosageText("Corrected text");
+        order.setCustomerSignature(testData.samplePng());
 
         repository.saveDispenseOrder(order);
 
@@ -129,11 +132,48 @@ public class MedicationDispenseRepositoryTest {
             action.setAction("2");
             action.setRemark("Test remark");
         }
+        ritalinDispense.setConfirmedByPharmacist(true);
+        ritalinDispense.setPackagingControlled(true);
         repository.update(ritalinDispense);
 
-        MedicationDispense retrieved = repository.getDispenseOrderById(dispenseOrder.getIdentifier())
-            .getMedicationDispenses().get(0);
-        assertThat(retrieved).isEqualToComparingFieldByField(ritalinDispense);
+        DispenseOrder retrievedDispenseOrder = repository.getDispenseOrderById(dispenseOrder.getIdentifier());
+        assertThat(retrievedDispenseOrder.getMedicationDispenses().get(0))
+            .isEqualToComparingFieldByField(ritalinDispense);
+    }
+
+    private LogConfiguration logConfig = new LogConfiguration();
+
+    @Test
+    public void shouldDispenseOrder() {
+        logConfig.setLevel("no.pharmacy", Level.TRACE);
+
+        DispenseOrder dispenseOrder = new DispenseOrder();
+        dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(testData.sampleMedication()));
+
+        repository.saveDispenseOrder(dispenseOrder);
+        assertThat(repository.getDispenseOrderById(dispenseOrder.getIdentifier()))
+            .isEqualToComparingFieldByField(dispenseOrder);
+
+        MedicationDispense dispense = dispenseOrder.getDispenses().get(0);
+        dispense.setMedication(dispense.getAuthorizingPrescription().getMedication());
+        dispense.setPrice(testData.samplePrice());
+
+        repository.update(dispense);
+        assertThat(repository.getDispenseOrderById(dispenseOrder.getIdentifier()))
+            .isEqualToComparingFieldByField(dispenseOrder);
+
+        dispense.setConfirmedByPharmacist(true);
+        dispense.setPackagingControlled(true);
+
+        assertThat(dispenseOrder.isReadyToDispense()).isTrue();
+
+        dispenseOrder.setCustomerSignature(testData.samplePng());
+        dispenseOrder.setDispensed();
+
+        repository.update(dispenseOrder);
+
+        assertThat(repository.getDispenseOrderById(dispenseOrder.getIdentifier()))
+            .isEqualToComparingFieldByField(dispenseOrder);
     }
 
 }

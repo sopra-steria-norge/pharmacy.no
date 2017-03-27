@@ -16,7 +16,7 @@ public class TestDataSource {
 
     public synchronized static DataSource medicationInstance() {
         if (medicationsDataSource == null) {
-            String jdbcUrl = "jdbc:h2:mem:medications";
+            String jdbcUrl = System.getProperty("test.medication.jdbc.url", "jdbc:h2:mem:medication");
             medicationsDataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
             logger.info("Initializing {}", jdbcUrl);
 
@@ -31,7 +31,7 @@ public class TestDataSource {
 
     public synchronized static DataSource pharmacistInstance() {
         if (pharmacistDataSource == null) {
-            String jdbcUrl = "jdbc:h2:mem:pharmacist";
+            String jdbcUrl = System.getProperty("test.pharmacist.jdbc.url", "jdbc:h2:mem:pharmacist");
             pharmacistDataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
             logger.info("Initializing {}", jdbcUrl);
 

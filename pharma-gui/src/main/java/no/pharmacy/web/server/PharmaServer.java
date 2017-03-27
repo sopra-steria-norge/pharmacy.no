@@ -1,4 +1,4 @@
-package no.pharmacy.web.gui.server;
+package no.pharmacy.web.server;
 
 import javax.sql.DataSource;
 
@@ -78,26 +78,22 @@ public class PharmaServer {
     }
 
     private DataSource createPharmaDataSource() {
-        JdbcConnectionPool dataSource = JdbcConnectionPool.create("jdbc:h2:file:./target/db/pharmacist", "sa", "");
-
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
-        flyway.setLocations("db/db-pharmacist");
-        flyway.migrate();
-
-        return dataSource;
+        return createDataSource("jdbc:h2:file:./target/db/pharmacist", "db/db-pharmacist");
     }
 
-    private JdbcConnectionPool createMedicationDataSource() {
-        String jdbcUrl = "jdbc:h2:file:./target/db/medications";
+    private DataSource createMedicationDataSource() {
+        return createDataSource("jdbc:h2:file:./target/db/medications", "db/db-medications");
+    }
+
+    private DataSource createDataSource(String jdbcUrl, String migrations) {
         JdbcConnectionPool dataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
         logger.info("Initializing {}", jdbcUrl);
-
+    
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);
-        flyway.setLocations("db/db-medications");
+        flyway.setLocations(migrations);
         flyway.migrate();
-
+    
         return dataSource;
     }
 

@@ -30,14 +30,24 @@ public class DispenseOrderController extends HttpServlet {
         String[] parts = req.getPathInfo().split("/");
         DispenseOrder dispenseOrder = prescriptionRepository.getDispenseOrderById(parts[1]);
 
-        if (parts.length > 2 && parts[2].equals("technicalControl")) {
-            TechnicalControlView view = new TechnicalControlView(dispenseOrder);
+        if (dispenseOrder.isDispensed()) {
+            HistoricalDispenseView view = new HistoricalDispenseView(dispenseOrder);
             resp.setContentType("text/html");
             view.createView().writeTo(resp.getWriter());
-        } else {
+        } else if (parts.length <= 2) {
             DispenseOrderView view = new DispenseOrderView(dispenseOrder);
             resp.setContentType("text/html");
             view.createView().writeTo(resp.getWriter());
+        } else if (parts[2].equals("technicalControl")) {
+            PackagingControlView view = new PackagingControlView(dispenseOrder);
+            resp.setContentType("text/html");
+            view.createView().writeTo(resp.getWriter());
+        } else if (parts[2].equals("dispense")) {
+            DispenseView view = new DispenseView(dispenseOrder);
+            resp.setContentType("text/html");
+            view.createView().writeTo(resp.getWriter());
+        } else {
+            super.doGet(req, resp);
         }
     }
 
@@ -46,8 +56,37 @@ public class DispenseOrderController extends HttpServlet {
         String[] parts = req.getPathInfo().split("/");
         DispenseOrder order = prescriptionRepository.getDispenseOrderById(parts[1]);
 
-        if (parts.length > 2 && parts[2].equals("technicalControl")) {
-            TechnicalControlView view = new TechnicalControlView(order);
+        if (parts.length <= 2) {
+            for (MedicationDispense medicationDispense : order.getMedicationDispenses()) {
+                String dosageText = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][printedDosageText]");
+                medicationDispense.setPrintedDosageText(dosageText);
+
+                String productId = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][productId]");
+                if (productId == null) continue;
+
+                if (productId.isEmpty()) {
+                    medicationDispense.setMedication(null);
+                    medicationDispense.setPrice(null) ;
+                    medicationDispense.setConfirmedByPharmacist(false);
+                    medicationDispense.setPackagingControlled(false);
+                } else {
+                    String price = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][" + productId + "][price]");
+                    Medication medication = medicationRepository.findByProductId(productId).get();
+                    medicationDispense.setMedication(medication);
+                    medicationDispense.setPrice(Money.from(price));
+                    medicationDispense.setConfirmedByPharmacist(false);
+                    medicationDispense.setPackagingControlled(false);
+                }
+            }
+
+            order.createWarnings();
+            for (MedicationDispense medicationDispense : order.getMedicationDispenses()) {
+                prescriptionRepository.update(medicationDispense);
+            }
+
+            resp.sendRedirect(req.getRequestURI());
+        } else if (parts[2].equals("technicalControl")) {
+            PackagingControlView view = new PackagingControlView(order);
 
             for (MedicationDispense dispense : order.getMedicationDispenses()) {
                 String dosageTextBarcode = req.getParameter("dispense[" + dispense.getId() + "][dosageTextBarcode]");
@@ -62,31 +101,22 @@ public class DispenseOrderController extends HttpServlet {
                 resp.setContentType("text/html");
                 doc.writeTo(resp.getWriter());
             } else {
+                for (MedicationDispense dispense : order.getMedicationDispenses()) {
+                    dispense.setPackagingControlled(true);
+                    prescriptionRepository.update(dispense);
+                }
+
                 String uri = req.getRequestURI();
                 resp.sendRedirect(uri.substring(0,  uri.lastIndexOf('/')));
             }
+        } else if (parts[2].equals("dispense")) {
+            order.setCustomerSignature(req.getParameter("customerSignature"));
+            order.setDispensed();
+
+            prescriptionRepository.update(order);
         } else {
-            for (MedicationDispense medicationDispense : order.getMedicationDispenses()) {
-                String dosageText = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][printedDosageText]");
-                medicationDispense.setPrintedDosageText(dosageText);
 
-                String productId = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][productId]");
-                if (productId == null) continue;
-
-                String price = req.getParameter("medicationOrder[" + medicationDispense.getId() + "][" + productId + "][price]");
-
-                Medication medication = medicationRepository.findByProductId(productId).get();
-
-                medicationDispense.setMedication(medication);
-                medicationDispense.setPrice(Money.from(price));
-            }
-
-            order.createWarnings();
-            for (MedicationDispense medicationDispense : order.getMedicationDispenses()) {
-                prescriptionRepository.update(medicationDispense);
-            }
-
-            resp.sendRedirect(req.getRequestURI());
+            super.doPost(req, resp);
         }
     }
 

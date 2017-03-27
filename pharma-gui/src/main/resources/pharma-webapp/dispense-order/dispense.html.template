@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Utlevering | pharmacy.no</title>
+	<style>
+		.medicationPrice { display: none; }
+		.medicationDescription { display: none; }
+		.error { border: 2px solid red; }
+
+#signature-pad { border: 1px solid black; }
+
+.m-signature-pad--body
+  canvas {
+    border-radius: 4px;
+    border: 1px solid black;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.02) inset;
+  }
+  	</style>
+<script src="https://code.jquery.com/jquery-3.1.1.js"> </script>
+</head>
+<body>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"> </script>
+
+	<script id="medicationDispenseTemplate" type="template">
+	<div>
+		<h3 class='dispensedMedication'></h3>
+
+		<ul>
+			<li>Forskrevet: <span class='prescribedMedication'></span></li>
+			<li>Forskrevet av: <span class='prescriber'></span></li>
+			<li>Forskrevet dato: <span class='dateWritten'></span></li>
+		</ul>
+
+		<h4>Doseringstekst</h4>
+
+		<table>
+			<tr>
+				<td><textarea class="dosageText" cols="25" rows="6" tabindex="-1" disabled="disabled">dummy</textarea></td>
+				<td><textarea class="printedDosageText" cols="25" rows="6" tabindex="-1">dummy</textarea></td>
+			</tr>
+		</table>
+	</div>
+	</script>
+
+
+	<form method="post">
+		<input type='hidden' name='orderId' id='orderId' />
+		<h2 id='patient'>Pasient: </h2>
+	
+		<div id="medicationDispenses"></div>
+
+		<h2>Pris</h2>		
+			<ul>
+				<li><strong>Refusjon:</strong> <span id='totalRefund'></span></li>
+				<li><strong>Egenandel:</strong> <span id='copay'></span></li>
+				<li><strong>Mellomlegg pasient:</strong> <span id='uncoveredAmount'></span></li>
+				<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
+			</ul>
+
+		<h2>Mottakers signatur</h2>
+		
+		  <div id="signature-pad" class="m-signature-pad">
+		    <div class="m-signature-pad--body">
+		      <canvas></canvas>
+		    </div>
+		    <div class="m-signature-pad--footer">
+		      <div class="description">Mottakers signatur</div>
+		      <button type="button" id="clearSignatureButton">Prøv igjen</button>
+		    </div>
+		  </div>
+		<input type="hidden" name="customerSignature" id="customerSignature" />
+		<button id="confirm">Bekreft utlevering</button>
+	</form>
+<script>
+$(function() {
+	var canvas = document.querySelector("#signature-pad canvas");
+	var signaturePad = new SignaturePad(canvas);
+	
+	document.getElementById("clearSignatureButton").addEventListener("click", function() {
+		signaturePad.clear();
+	});
+
+	document.getElementById("confirm").addEventListener("click", function() {
+		$("#customerSignature").val(signaturePad.toDataURL());
+	});
+});
+</script>
+</body>
+</html>

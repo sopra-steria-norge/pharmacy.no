@@ -27,15 +27,38 @@ public class DispenseOrderView implements HtmlView {
 
         String medicationOrderTemplate = doc.find("...", "#medicationOrderTemplate").first().elements().iterator().next().toXML();
 
-
         Element medicationOrders = doc.find("...", "#medicationOrders").first();
-
         for (MedicationDispense dispense : dispenseOrder.getMedicationDispenses()) {
             medicationOrders.add(displayMedicationDispense(medicationOrderTemplate, dispense));
         }
 
         displayPrices(doc);
-        doc.find("...", "#technicalControl").first().attr("href", "./" + dispenseOrder.getIdentifier() + "/technicalControl");
+
+        if (dispenseOrder.isPharmacistControlComplete()) {
+            Element action = doc.find("...", "#pharmacistControl").first();
+            action.text("✓ " + action.text());
+        }
+        if (dispenseOrder.isPackagingControlComplete()) {
+            Element action = doc.find("...", "#technicalControl").first();
+            action.text("✓ " + action.text());
+        }
+
+        Element pharmacist = doc.find("...", "#pharmacistControl").first();
+        Element technical = doc.find("...", "#technicalControl").first();
+        technical.attr("href", "./" + dispenseOrder.getIdentifier() + "/technicalControl");
+        if (!dispenseOrder.isSelectionComplete()) {
+            pharmacist.addClass("disabled");
+            pharmacist.attr("onclick", "return false");
+            technical.addClass("disabled");
+            technical.attr("onclick", "return false");
+        }
+
+        Element action = doc.find("...", "#dispenseAction").first();
+        action.attr("href", "./" + dispenseOrder.getIdentifier() + "/dispense");
+        if (!dispenseOrder.isReadyToDispense()) {
+            action.text("✓ " + action.text());
+            action.attr("onclick", "return false");
+        }
         return doc;
     }
 
@@ -45,6 +68,8 @@ public class DispenseOrderView implements HtmlView {
             doc.find("...", "#totalRefund").first().text(refundTotal.toString());
             doc.find("...", "#copay").first().text(dispenseOrder.getPatientTotal().toString());
             doc.find("...", "#uncoveredAmount").first().text(dispenseOrder.getUncoveredTotal().toString());
+        } else {
+            doc.find("...", "#price").attr("style", "display:none");
         }
     }
 
@@ -63,14 +88,15 @@ public class DispenseOrderView implements HtmlView {
         orderElement.find("...", ".printedDosageText").first().name(dosageTextName).text(dispense.getPrintedDosageText());
         Element alternativeMedications = orderElement.find("...", ".alternativeMedications").first();
         for (Medication alternativeMedication : medicationOrder.getAlternatives()) {
-            alternativeMedications.add(createMedicationOption(dispense.getId(), dispense, alternativeMedication));
+            alternativeMedications.add(createMedicationOption(dispense, alternativeMedication));
         }
+        orderElement.find("...", "[name=cancelMedicationOrder]").first().name("medicationOrder[" + dispense.getId() + "][productId]");
         return orderElement;
     }
 
-    protected Element createMedicationOption(Long dispenseId, MedicationDispense dispense, Medication medication) {
+    protected Element createMedicationOption(MedicationDispense dispense, Medication medication) {
         Element productIdField = Xml.el("input")
-                .type("radio").name("medicationOrder[" + dispenseId + "][productId]")
+                .type("radio").name("medicationOrder[" + dispense.getId() + "][productId]")
                 .addClass("productSelect")
                 .val(medication.getProductId());
         Element productName = Xml.el("a", "[info]")
@@ -78,13 +104,15 @@ public class DispenseOrderView implements HtmlView {
                 .attr("href", "#");
         Element priceInput = Xml.el("input")
             .type("number")
-            .name("medicationOrder[" + dispenseId + "][" + medication.getProductId() + "][price]")
+            .name("medicationOrder[" + dispense.getId() + "][" + medication.getProductId() + "][price]")
             .attr("step", "any");
         Element productDetails = Xml.el("div", "Details for " + medication.getDisplay())
                 .addClass("medicationDescription");
         if (Objects.equals(dispense.getMedication(), medication)) {
             productIdField.checked(true);
-            priceInput.val(dispense.getPrice().format());
+            if (dispense.getPrice() != null) {
+                priceInput.val(dispense.getPrice().format());
+            }
         }
         return Xml.el("li",
                 Xml.el("label",

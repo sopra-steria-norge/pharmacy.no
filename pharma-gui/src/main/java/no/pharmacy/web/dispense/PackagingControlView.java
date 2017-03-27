@@ -11,14 +11,14 @@ import org.eaxy.Xml;
 import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispense;
 
-public class TechnicalControlView implements HtmlView {
+public class PackagingControlView implements HtmlView {
 
     private DispenseOrder order;
     private Map<MedicationDispense, String> dosageTextBarcodes = new HashMap<>();
     private Map<MedicationDispense, String> packagingBarcodes = new HashMap<>();
     private boolean failed;
 
-    public TechnicalControlView(DispenseOrder order) {
+    public PackagingControlView(DispenseOrder order) {
         this.order = order;
     }
 

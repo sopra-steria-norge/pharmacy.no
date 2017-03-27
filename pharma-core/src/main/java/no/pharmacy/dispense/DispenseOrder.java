@@ -23,6 +23,12 @@ public class DispenseOrder implements MedicationHistory {
     @Getter
     private List<MedicationDispense> medicationDispenses = new ArrayList<>();
 
+    @Getter @Setter
+    private String customerSignature;
+
+    @Getter
+    private boolean dispensed;
+
     @Override
     public List<MedicationDispense> getDispenses() {
         return medicationDispenses;
@@ -82,19 +88,53 @@ public class DispenseOrder implements MedicationHistory {
         return coveredTotal != null ? coveredTotal.minus(getPatientTotal()) : null;
     }
 
-    public boolean isAllWarningsAddressed() {
+    public void createWarnings() {
         for (MedicationDispense dispense : medicationDispenses) {
-            if (!dispense.isAllWarningsAddressed()) {
+            dispense.createWarnings(this);
+        }
+    }
+
+    public boolean isPharmacistControlComplete() {
+        for (MedicationDispense dispense : medicationDispenses) {
+            if (!dispense.isPharmacistControlComplete()) {
                 return false;
             }
         }
         return true;
     }
 
-    public void createWarnings() {
+    public boolean isPackagingControlComplete() {
         for (MedicationDispense dispense : medicationDispenses) {
-            dispense.createWarnings(this);
+            if (!dispense.isPackagingControlled()) {
+                return false;
+            }
         }
+        return true;
+    }
+
+    public boolean isSelectionComplete() {
+        for (MedicationDispense dispense : medicationDispenses) {
+            if (dispense.getMedication() == null || dispense.getPrice() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isReadyToDispense() {
+        return !dispensed && isSelectionComplete() && isPharmacistControlComplete() && isPackagingControlComplete();
+    }
+
+    public void setDispensed() {
+        this.dispensed = true;
+
+        for (MedicationDispense medicationDispense : medicationDispenses) {
+            medicationDispense.setDispensed();
+        }
+    }
+
+    void setDispensed(boolean dispensed) {
+        this.dispensed = dispensed;
     }
 
 }

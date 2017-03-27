@@ -60,7 +60,7 @@ public class Money {
     }
 
     public static Money from(String amount) {
-        return from(new BigDecimal(amount));
+        return amount != null && !amount.isEmpty() ? from(new BigDecimal(amount)) : null;
     }
 
     public String format() {

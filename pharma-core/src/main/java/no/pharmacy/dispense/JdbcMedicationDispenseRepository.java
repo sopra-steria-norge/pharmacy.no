@@ -25,7 +25,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
 
     @Override
     public List<DispenseOrder> listReadyForPharmacist() {
-        return queryForList("select * from dispense_orders", new ArrayList<>(),
+        return queryForList("select * from dispense_orders where dispensed = ?", Arrays.asList(false),
                 this::read);
         // TODO Return DispenseOrderSummary
     }
@@ -35,6 +35,8 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         order.setIdentifier(UUID.randomUUID().toString());
         insertInto("dispense_orders")
             .value("id", order.getIdentifier())
+            .value("customer_signature", order.getCustomerSignature())
+            .value("dispensed", order.isDispensed())
             .executeUpdate();
 
         for (MedicationOrder medicationOrder : order.getMedicationOrders()) {
@@ -55,10 +57,24 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
                 .value("price", dispense.getPrice())
                 .value("printed_dosage_text", dispense.getPrintedDosageText())
                 .value("authorizing_prescription_id", dispense.getAuthorizingPrescription().getId())
+                .value("confirmed_by_pharmacist", dispense.isConfirmedByPharmacist())
+                .value("packaging_controlled", dispense.isPackagingControlled())
                 .executeInsert();
             dispense.setId(id);
         }
+    }
 
+    @Override
+    public void update(DispenseOrder order) {
+        update("dispense_orders")
+            .where("id", order.getIdentifier())
+            .set("customer_signature", order.getCustomerSignature())
+            .set("dispensed", order.isDispensed())
+            .executeUpdate();
+
+        for (MedicationDispense dispense : order.getMedicationDispenses()) {
+            update(dispense);
+        }
     }
 
     @Override
@@ -71,6 +87,8 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
     private DispenseOrder read(ResultSet rs) throws SQLException {
         DispenseOrder result = new DispenseOrder();
         result.setIdentifier(rs.getString("id"));
+        result.setCustomerSignature(rs.getString("customer_signature"));
+        result.setDispensed(rs.getBoolean("dispensed"));
 
         result.getMedicationOrders().addAll(findMedicationOrders(result.getIdentifier()));
         result.getMedicationDispenses().addAll(findMedicationDispenses(result.getIdentifier(),
@@ -100,6 +118,8 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
                 dispense.setPrintedDosageText(rs.getString("printed_dosage_text"));
                 dispense.setMedication(medicationRepository.findByProductId(rs.getString("medication_id"))
                         .orElse(null));
+                dispense.setConfirmedByPharmacist(rs.getBoolean("confirmed_by_pharmacist"));
+                dispense.setPackagingControlled(rs.getBoolean("packaging_controlled"));
                 result.add(dispense);
 
                 previousId = prescriptionId;
@@ -145,6 +165,8 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
             .set("price", dispense.getPrice())
             .set("printed_dosage_text", dispense.getPrintedDosageText())
             .set("medication_id", dispense.getMedicationId())
+            .set("confirmed_by_pharmacist", dispense.isConfirmedByPharmacist())
+            .set("packaging_controlled", dispense.isPackagingControlled())
             .executeUpdate();
 
         executeUpdate("delete from medication_dispense_actions where dispense_id = ?", Arrays.asList(dispense.getId()));

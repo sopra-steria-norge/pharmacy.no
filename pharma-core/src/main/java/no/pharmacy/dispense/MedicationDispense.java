@@ -44,6 +44,15 @@ public class MedicationDispense {
 
     private Map<String, MedicationDispenseAction> actions = new HashMap<>();
 
+    @Getter @Setter
+    private boolean confirmedByPharmacist = false;
+
+    @Getter @Setter
+    private boolean packagingControlled;
+
+    @Getter
+    private boolean dispensed;
+
     @Override
     public String toString() {
         return getClass().getSimpleName()
@@ -82,13 +91,13 @@ public class MedicationDispense {
         actions.put(warning.getInteraction().getId(), new MedicationDispenseAction(warning, remark, action));
     }
 
-    public boolean isAllWarningsAddressed() {
+    public boolean isPharmacistControlComplete() {
         for (MedicationDispenseAction action : this.actions.values()) {
             if (!action.isAddressed()) {
                 return false;
             }
         }
-        return true;
+        return confirmedByPharmacist;
     }
 
     public void createWarnings(MedicationHistory history) {
@@ -115,7 +124,12 @@ public class MedicationDispense {
 
     public String getDosageBarcode() {
         byte[] hash = CryptoUtil.sha256(getPrintedDosageText());
-        int i = (hash[0]&0x8f) << 24 | (hash[1]&0xff) << 16 | (hash[2]&0xff) << 8 | (hash[3]&0xff);
+        int i = (hash[0]&0x7f) << 24 | (hash[1]&0xff) << 16 | (hash[2]&0xff) << 8 | (hash[3]&0xff);
         return String.valueOf(i);
     }
+
+    public void setDispensed() {
+        this.dispensed = true;
+    }
+
 }

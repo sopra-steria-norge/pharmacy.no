@@ -95,6 +95,8 @@ public class JdbcSupport {
     }
 
     protected <T> Optional<T> retrieveSingle(String query, List<Object> parameters, ResultSetMapper<T> mapper) {
+        long startTime = System.currentTimeMillis();
+        logger.trace("retrieveSingle {} {}", query, parameters);
         try (Connection conn = dataSource.getConnection()) {
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 setParameters(stmt, parameters);
@@ -108,13 +110,15 @@ public class JdbcSupport {
             }
         } catch (SQLException e) {
             throw ExceptionUtil.softenException(e);
+        } finally {
+            logExecution("retrieveSingle", query, startTime);
         }
     }
 
     protected <T> List<T> queryForResultSet(String query, List<Object> parameters, ResultSetListMapper<T> mapper) {
         long startTime = System.currentTimeMillis();
+        logger.trace("queryForResultSet {} {}", query, parameters);
         try (Connection conn = dataSource.getConnection()) {
-            logger.trace("queryForResultSet {} {}", query, parameters);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 setParameters(stmt, parameters);
                 try (ResultSet rs = stmt.executeQuery()) {

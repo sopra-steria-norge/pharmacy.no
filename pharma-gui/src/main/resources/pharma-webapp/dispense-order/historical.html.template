@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Utlevering | pharmacy.no</title>
+	<style>
+		.medicationPrice { display: none; }
+		.medicationDescription { display: none; }
+		.error { border: 2px solid red; }
+
+  	</style>
+<script src="https://code.jquery.com/jquery-3.1.1.js"> </script>
+</head>
+<body>
+	<script id="medicationDispenseTemplate" type="template">
+	<div>
+		<h3 class='dispensedMedication'></h3>
+
+		<ul>
+			<li>Forskrevet: <span class='prescribedMedication'></span></li>
+			<li>Forskrevet av: <span class='prescriber'></span></li>
+			<li>Forskrevet dato: <span class='dateWritten'></span></li>
+		</ul>
+
+		<h4>Doseringstekst</h4>
+
+		<table>
+			<tr>
+				<td><textarea class="dosageText" cols="25" rows="6" tabindex="-1" disabled="disabled">dummy</textarea></td>
+				<td><textarea class="printedDosageText" cols="25" rows="6" tabindex="-1">dummy</textarea></td>
+			</tr>
+		</table>
+	</div>
+	</script>
+
+
+	<form method="post">
+		<input type='hidden' name='orderId' id='orderId' />
+		<h2 id='patient'>Pasient: </h2>
+	
+		<div id="medicationDispenses"></div>
+
+		<h2>Pris</h2>		
+			<ul>
+				<li><strong>Refusjon:</strong> <span id='totalRefund'></span></li>
+				<li><strong>Egenandel:</strong> <span id='copay'></span></li>
+				<li><strong>Mellomlegg pasient:</strong> <span id='uncoveredAmount'></span></li>
+				<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
+			</ul>
+
+		<h2>Mottakers signatur</h2>
+		
+		  <div id="signature-pad">
+		  	<img id="customerSignature" />
+		  </div>
+	</form>
+</body>
+</html>

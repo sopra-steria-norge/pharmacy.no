@@ -31,12 +31,15 @@ public class PharmacistController extends HttpServlet {
             String orderId = req.getPathInfo().substring(1);
             DispenseOrder dispenseOrder = repository.getDispenseOrderById(orderId);
 
+            if (dispenseOrder.isDispensed() || !dispenseOrder.isSelectionComplete()) {
+                resp.sendError(404);
+                return;
+            }
+
             resp.setContentType("text/html");
             new PharmacistDispenseOrderView(dispenseOrder).createView().writeTo(resp.getWriter());
         } else {
-
             Document doc = Xml.readResource("/pharma-webapp/pharmacist/index.html.template");
-
 
             Element results = doc.find("...", "#dispenseOrders").first();
             for (DispenseOrder dispenseOrder : repository.listReadyForPharmacist()) {
@@ -65,10 +68,11 @@ public class PharmacistController extends HttpServlet {
                     String action = req.getParameter(warningId + "[action]");
                     dispense.setAction(warning, remark, action);
                 }
+                dispense.setConfirmedByPharmacist(true);
                 repository.update(dispense);
             }
 
-            if (!dispenseOrder.isAllWarningsAddressed()) {
+            if (!dispenseOrder.isPharmacistControlComplete()) {
                 resp.setContentType("text/html");
                 PharmacistDispenseOrderView view = new PharmacistDispenseOrderView(dispenseOrder);
                 view.setDisplayMissingActions(true);

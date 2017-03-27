@@ -61,6 +61,6 @@ public class PrescriptionsController extends HttpServlet {
         }
 
         medicationDispenseRepository.saveDispenseOrder(collection);
-        resp.sendRedirect("/medicationDispenseCollections/" + collection.getIdentifier());
+        resp.sendRedirect("/dispenseOrder/" + collection.getIdentifier());
     }
 }

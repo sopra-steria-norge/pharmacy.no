@@ -6,5 +6,7 @@ create table medication_dispenses (
 	printed_dosage_text text,
 	date_dispensed date,
 	medication_id varchar(30),
+	confirmed_by_pharmacist boolean,
+	packaging_controlled boolean,
 	price decimal
 );
