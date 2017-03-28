@@ -7,7 +7,6 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ShutdownHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -132,8 +131,9 @@ public class PharmaServer {
     }
 
     private Handler createOpsHandler() {
-        ServletContextHandler handler = new ServletContextHandler();
-        handler.setContextPath("/ops");
+        WebAppContext handler = new WebAppContext(null, "/ops");
+        handler.setBaseResource(Resource.newClassPathResource("/pharma-ops-webapp"));
+
         handler.addServlet(new ServletHolder(logServlet), "/log/*");
         return handler;
     }
