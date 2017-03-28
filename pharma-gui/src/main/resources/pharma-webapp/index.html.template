@@ -9,7 +9,7 @@
 		<h2>Ekspeder</h2>
 		<label>
 			Fødselsnummer
-			<input type="text" name="nationalId" placeholder="Fødselsnummer" />
+			<input type="text" name="nationalId" id="prescriptionsForNationalId" placeholder="Fødselsnummer" />
 		</label>
 		<button name="action" value="dispense">Search</button>
 	</form>
@@ -25,7 +25,7 @@
 		<h2>Resepthistorikk</h2>
 		<label>
 			Fødselsnummer
-			<input type="text" name="nationalId" placeholder="Fødselsnummer" />
+			<input type="text" name="nationalId" id="historyForNationalId" placeholder="Fødselsnummer" />
 		</label>
 		<button name="action" value="journal">Search</button>
 	</form>

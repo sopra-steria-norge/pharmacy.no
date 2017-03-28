@@ -40,7 +40,7 @@ public class PrescriptionsController extends HttpServlet {
         String nationalId = req.getParameter("nationalId");
         if ("journal".equals(req.getParameter("action"))) {
             Reference patient = patientRepository.findPatientByNationalId(nationalId);
-            Document doc = showDispenseHistoryView(patient,
+            Document doc = showDispenseHistoryView(nationalId, patient,
                     medicationDispenseRepository.historicalDispensesForPerson(patient));
             resp.setContentType("text/html");
             doc.writeTo(resp.getWriter());
@@ -52,12 +52,14 @@ public class PrescriptionsController extends HttpServlet {
         }
     }
 
-    private Document showDispenseHistoryView(Reference patient, List<DispenseOrder> dispenseOrders) throws IOException {
+    private Document showDispenseHistoryView(String nationalId, Reference patient, List<DispenseOrder> dispenseOrders) throws IOException {
         Document doc = Xml.readResource("/pharma-webapp/index.html.template");
 
         if (patient != null) {
+            doc.find("...", "#historyForNationalId").first().val(nationalId);
+
             Element results = doc.find("...", "#historicalOrders").first();
-            results.text("Results for " + patient);
+            results.add(Xml.el("div", "Resepthistorikk for for " + patient.getDisplay()));
 
             for (DispenseOrder order : dispenseOrders) {
                 results.add(Xml.el("div",
@@ -73,10 +75,12 @@ public class PrescriptionsController extends HttpServlet {
     private Document showDispenseCreationView(String nationalId, List<MedicationOrder> orders) throws IOException {
         Document doc = Xml.readResource("/pharma-webapp/index.html.template");
 
-
         if (nationalId != null) {
+            Reference patient = patientRepository.findPatientByNationalId(nationalId);
+            doc.find("...", "#prescriptionsForNationalId").first().val(nationalId);
+
             Element results = doc.find("...", "#results").first();
-            results.text("Results for " + nationalId);
+            results.add(Xml.el("div", "Resepter for for " + patient.getDisplay()));
 
             results.add(Xml.el("input").name("nationalId").val(nationalId).type("hidden"));
 
