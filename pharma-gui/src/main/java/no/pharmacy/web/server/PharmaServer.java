@@ -1,5 +1,6 @@
 package no.pharmacy.web.server;
 
+import javax.crypto.SecretKey;
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Handler;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationDispenseRepository;
+import no.pharmacy.infrastructure.CryptoUtil;
 import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
@@ -72,9 +74,11 @@ public class PharmaServer {
 
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository);
 
+        SecretKey secretKey = CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes());
+
         handlers.addHandler(createOpsHandler());
         handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository));
-        handlers.addHandler(createPharmaGui(reseptFormidler, medicationRepository));
+        handlers.addHandler(createPharmaGui(reseptFormidler, medicationRepository, secretKey));
 
         return handlers;
     }
@@ -86,8 +90,6 @@ public class PharmaServer {
     private DataSource createPatientDataSource() {
         return createDataSource("jdbc:h2:file:./target/db/patient", "db/db-patient");
     }
-
-
 
     private DataSource createMedicationDataSource() {
         return createDataSource("jdbc:h2:file:./target/db/medications", "db/db-medications");
@@ -105,12 +107,12 @@ public class PharmaServer {
         return dataSource;
     }
 
-    private Handler createPharmaGui(PrescriptionsSource reseptFormidler, MedicationRepository medicationRepository) {
+    private Handler createPharmaGui(PrescriptionsSource reseptFormidler, MedicationRepository medicationRepository, SecretKey secretKey) {
         WebAppContext handler = new WebAppContext(null, "/");
         handler.setBaseResource(Resource.newClassPathResource("/pharma-webapp"));
 
         MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(createPharmaDataSource(), medicationRepository);
-        PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName());
+        PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName(), secretKey);
 
         handler.addServlet(new ServletHolder(new PrescriptionsController(reseptFormidler, medicationDispenseRepository, patientRepository)), "/");
         handler.addServlet(new ServletHolder(new DispenseOrderController(medicationDispenseRepository, medicationRepository)), "/medicationDispenseCollections/*");

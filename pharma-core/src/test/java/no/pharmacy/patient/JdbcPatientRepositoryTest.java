@@ -2,11 +2,17 @@ package no.pharmacy.patient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+
+import javax.crypto.spec.SecretKeySpec;
 import javax.sql.DataSource;
 
 import org.junit.Test;
 
 import no.pharmacy.core.Reference;
+import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.test.MockPersonGateway;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.TestDataSource;
@@ -16,7 +22,17 @@ public class JdbcPatientRepositoryTest {
     private PharmaTestData testData = new PharmaTestData();
     private DataSource dataSource = TestDataSource.patientInstance();
     private MockPersonGateway personGateway = new MockPersonGateway();
-    private JdbcPatientRepository repository = new JdbcPatientRepository(dataSource, personGateway);
+    private JdbcPatientRepository repository = new JdbcPatientRepository(dataSource, personGateway, createEncryptionKey());
+
+    public static SecretKeySpec createEncryptionKey() {
+        try {
+            MessageDigest sha = MessageDigest.getInstance("SHA-1");
+            byte[] key = PharmaTestData.lorum().getBytes();
+            return new SecretKeySpec(Arrays.copyOf(sha.digest(key), 16), "AES");
+        } catch (NoSuchAlgorithmException e) {
+            throw ExceptionUtil.softenException(e);
+        }
+    }
 
     @Test
     public void shouldFindSavedPerson() throws Exception {
@@ -38,6 +54,16 @@ public class JdbcPatientRepositoryTest {
 
         assertThat(repository.findPatientByNationalId(nationalId).getDisplay())
             .isEqualTo(patientName);
+    }
+
+    @Test
+    public void shouldDecodeNationalId() {
+        String nationalId = testData.unusedNationalId();
+        String patientName = PharmaTestData.sampleName();
+
+        Reference patient = repository.savePatient(nationalId, patientName);
+        assertThat(repository.lookupPatientNationalId(patient))
+            .isEqualTo(nationalId);
     }
 
 }
