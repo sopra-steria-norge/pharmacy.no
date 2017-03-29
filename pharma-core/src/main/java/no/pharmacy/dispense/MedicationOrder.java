@@ -14,7 +14,7 @@ import no.pharmacy.core.Reference;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medicationorder.MedicationOrderSummary;
 
-@EqualsAndHashCode(of={"id", "prescriber", "dateWritten", "medication"})
+@EqualsAndHashCode(of={"id", "prescriber", "dateWritten", "medication"}, callSuper=true)
 @ToString
 public class MedicationOrder extends MedicationOrderSummary {
 

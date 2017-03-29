@@ -13,14 +13,17 @@ import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationRepository;
+import no.pharmacy.medicationorder.PrescriptionGateway;
 
 public class DispenseOrderController extends HttpServlet {
 
     private MedicationDispenseRepository prescriptionRepository;
     MedicationRepository medicationRepository;
+    private PrescriptionGateway prescriptionGateway;
 
-    public DispenseOrderController(MedicationDispenseRepository medicationDispenseRepository,
+    public DispenseOrderController(PrescriptionGateway prescriptionGateway, MedicationDispenseRepository medicationDispenseRepository,
             MedicationRepository medicationRepository) {
+        this.prescriptionGateway = prescriptionGateway;
         this.prescriptionRepository = medicationDispenseRepository;
         this.medicationRepository = medicationRepository;
     }
@@ -114,6 +117,13 @@ public class DispenseOrderController extends HttpServlet {
             order.setDispensed();
 
             prescriptionRepository.update(order);
+
+            for (MedicationDispense dispense : order.getDispenses()) {
+                prescriptionGateway.completeDispense(dispense, "123");
+            }
+
+            String uri = req.getRequestURI();
+            resp.sendRedirect(uri.substring(0,  uri.lastIndexOf('/')));
         } else {
 
             super.doPost(req, resp);

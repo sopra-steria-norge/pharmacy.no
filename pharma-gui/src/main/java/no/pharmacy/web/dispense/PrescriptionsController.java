@@ -16,22 +16,22 @@ import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.medicationorder.MedicationOrderSummary;
-import no.pharmacy.medicationorder.PrescriptionsSource;
+import no.pharmacy.medicationorder.PrescriptionGateway;
 import no.pharmacy.patient.PatientRepository;
 
 public class PrescriptionsController extends HttpServlet {
 
 
-    private PrescriptionsSource prescriptionsSource;
+    private PrescriptionGateway prescriptionsGateway;
     private MedicationDispenseRepository medicationDispenseRepository;
     private PatientRepository patientRepository;
 
 
     public PrescriptionsController(
-            PrescriptionsSource prescriptionsSource,
+            PrescriptionGateway prescriptionsGateway,
             MedicationDispenseRepository medicationDispenseRepository,
             PatientRepository patientRepository) {
-        this.prescriptionsSource = prescriptionsSource;
+        this.prescriptionsGateway = prescriptionsGateway;
         this.medicationDispenseRepository = medicationDispenseRepository;
         this.patientRepository = patientRepository;
     }
@@ -47,7 +47,7 @@ public class PrescriptionsController extends HttpServlet {
             doc.writeTo(resp.getWriter());
         } else {
             Document doc = showDispenseCreationView(nationalId,
-                    prescriptionsSource.prescriptionsForPerson(nationalId));
+                    prescriptionsGateway.requestMedicationOrdersToDispense(null, nationalId, "1234"));
             resp.setContentType("text/html");
             doc.writeTo(resp.getWriter());
         }
@@ -108,7 +108,7 @@ public class PrescriptionsController extends HttpServlet {
             dispenseOrder.setPatient(patient);
 
             for (String id : req.getParameterValues("prescriptionId")) {
-                dispenseOrder.addMedicationOrder(prescriptionsSource.getById(id));
+                dispenseOrder.addMedicationOrder(prescriptionsGateway.startMedicationOrderDispense(id, null, "124"));
             }
 
             medicationDispenseRepository.saveDispenseOrder(dispenseOrder);

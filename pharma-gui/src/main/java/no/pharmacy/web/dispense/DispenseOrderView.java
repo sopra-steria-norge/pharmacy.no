@@ -56,7 +56,7 @@ public class DispenseOrderView implements HtmlView {
         Element action = doc.find("...", "#dispenseAction").first();
         action.attr("href", "./" + dispenseOrder.getIdentifier() + "/dispense");
         if (!dispenseOrder.isReadyToDispense()) {
-            action.text("✓ " + action.text());
+            action.addClass("disabled");
             action.attr("onclick", "return false");
         }
         return doc;
