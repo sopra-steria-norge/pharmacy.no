@@ -15,7 +15,8 @@ import org.eaxy.Xml;
 import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispenseRepository;
-import no.pharmacy.dispense.MedicationOrder;
+import no.pharmacy.medicationorder.MedicationOrderSummary;
+import no.pharmacy.medicationorder.PrescriptionsSource;
 import no.pharmacy.patient.PatientRepository;
 
 public class PrescriptionsController extends HttpServlet {
@@ -72,7 +73,7 @@ public class PrescriptionsController extends HttpServlet {
         return doc;
     }
 
-    private Document showDispenseCreationView(String nationalId, List<MedicationOrder> orders) throws IOException {
+    private Document showDispenseCreationView(String nationalId, List<? extends MedicationOrderSummary> orders) throws IOException {
         Document doc = Xml.readResource("/pharma-webapp/index.html.template");
 
         if (nationalId != null) {
@@ -84,13 +85,13 @@ public class PrescriptionsController extends HttpServlet {
 
             results.add(Xml.el("input").name("nationalId").val(nationalId).type("hidden"));
 
-            for (MedicationOrder order : orders) {
+            for (MedicationOrderSummary order : orders) {
                 results.add(Xml.el("div",
                         Xml.el("label",
                             Xml.el("input")
                                 .type("checkbox").name("prescriptionId").val(order.getPrescriptionId()),
                             //Xml.el("a", order.getPrescriber().getDisplay()).attr("href", "/practitioner/" + order.getPrescriber().getReference()),
-                            Xml.el("span", order.getMedication().getDisplay()))));
+                            Xml.el("span", order.getMedicationName()))));
             }
         }
         return doc;

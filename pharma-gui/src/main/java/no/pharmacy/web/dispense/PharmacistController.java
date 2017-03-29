@@ -15,9 +15,12 @@ import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseAction;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationOrderWarning;
+import no.pharmacy.medicationorder.PrescriptionGateway;
 
 
 public class PharmacistController extends HttpServlet {
+
+    private PrescriptionGateway prescriptionGateway;
 
     private MedicationDispenseRepository repository;
 

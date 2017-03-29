@@ -15,7 +15,7 @@ Endret path schemaLocation til m274
 -->
 <schema xmlns:m92="http://www.kith.no/xmlstds/eresept/m92/2013-10-08" xmlns:xsd="http://www.w3.org/2001/XMLSchema.xsd" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:kith="http://www.kith.no/xmlstds" xmlns:fk1="http://www.kith.no/xmlstds/felleskomponent1" xmlns:m274="http://www.kith.no/xmlstds/eresept/m274/2012-06-11" targetNamespace="http://www.kith.no/xmlstds/eresept/m92/2013-10-08" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<import namespace="http://www.kith.no/xmlstds" schemaLocation="../felles/kith.xsd"/>
-	<import namespace="http://www.kith.no/xmlstds/eresept/m274/2012-06-11" schemaLocation="../R1608-eResept-M25-2014-04-07/ER-M274-2012-06-11.xsd"/>
+	<import namespace="http://www.kith.no/xmlstds/eresept/m274/2012-06-11" schemaLocation="../R1608-eResept-M25-2015-09-22/ER-M274-2012-06-11.xsd"/>
 	<import namespace="http://www.kith.no/xmlstds/felleskomponent1" schemaLocation="../felles/felleskomponent1.xsd"/>
 	<element name="Reseptliste">
 		<annotation>

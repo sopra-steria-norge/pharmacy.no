@@ -18,6 +18,7 @@ import org.eaxy.Xml;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationRepository;
+import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
 
 public class ReceiptTestCaseController extends HttpServlet {

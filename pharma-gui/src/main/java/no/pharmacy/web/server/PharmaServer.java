@@ -23,16 +23,18 @@ import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
+import no.pharmacy.medicationorder.PrescriptionsSource;
 import no.pharmacy.patient.JdbcPatientRepository;
 import no.pharmacy.patient.PatientRepository;
+import no.pharmacy.test.FakePrescriptionGateway;
+import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.web.dispense.DispenseOrderController;
 import no.pharmacy.web.dispense.PharmacistController;
 import no.pharmacy.web.dispense.PrescriptionsController;
-import no.pharmacy.web.dispense.PrescriptionsSource;
 import no.pharmacy.web.infrastructure.logging.LogDisplayServlet;
-import no.pharmacy.web.test.FakeReseptFormidler;
 import no.pharmacy.web.test.ReceiptTestCaseController;
+import no.pharmacy.web.test.ReseptFormidlerLogTestController;
 
 public class PharmaServer {
 
@@ -58,11 +60,11 @@ public class PharmaServer {
     }
 
     private void start() throws Exception {
-        server.setHandler(createHandler());
+        server.setHandler(createHandlers());
         server.start();
     }
 
-    private Handler createHandler() {
+    private Handler createHandlers() {
         HandlerList handlers = new HandlerList();
         handlers.addHandler(new ShutdownHandler(SHUTDOWN_TOKEN, true, true));
 
@@ -77,7 +79,7 @@ public class PharmaServer {
 
         handlers.addHandler(createOpsHandler());
         handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository));
-        handlers.addHandler(createPharmaGui(reseptFormidler, medicationRepository, secretKey));
+        handlers.addHandler(createPharmaGui(new FakePrescriptionGateway(reseptFormidler), medicationRepository, secretKey));
 
         return handlers;
     }
@@ -126,6 +128,7 @@ public class PharmaServer {
         handler.setBaseResource(Resource.newClassPathResource("/pharma-testrig-webapp"));
 
         handler.addServlet(new ServletHolder(new ReceiptTestCaseController(reseptFormidler, medicationRepository)), "/");
+        handler.addServlet(new ServletHolder(new ReseptFormidlerLogTestController(reseptFormidler)), "/log");
 
         return handler;
     }
