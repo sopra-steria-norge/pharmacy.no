@@ -137,8 +137,9 @@ public class PharmaTestData {
         return sampleMedicationOrder(sampleDoctor(), samplePastDate(), medication);
     }
 
-    public static MedicationOrder sampleMedicationOrder(PersonReference prescriber, LocalDate dateWritten, Medication medication) {
+    public MedicationOrder sampleMedicationOrder(PersonReference prescriber, LocalDate dateWritten, Medication medication) {
         MedicationOrder medicationOrder = new MedicationOrder();
+        medicationOrder.setSubject(samplePatient());
         medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
         medicationOrder.setPrescriber(prescriber);
         medicationOrder.setDateWritten(dateWritten);

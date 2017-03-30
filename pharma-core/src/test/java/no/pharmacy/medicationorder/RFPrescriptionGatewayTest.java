@@ -27,7 +27,7 @@ public class RFPrescriptionGatewayTest {
     private String employeeId = testData.samplePractitioner().getReference().getReference();
 
     @Test
-    public void shouldRetrievePrescriptionList() throws Exception {
+    public void shouldRetrievePrescriptionList() {
         String nationalId = testData.unusedNationalId();
         MedicationOrder medicationOrder = fakeReseptFormidler.addPrescription(nationalId, testData.sampleMedication());
 
@@ -36,17 +36,18 @@ public class RFPrescriptionGatewayTest {
             .extracting(o -> o.getMedicationName())
             .contains(medicationOrder.getMedication().getDisplay());
 
-        assertThat(orders.get(0)).hasNoNullFieldsOrProperties();
+        assertThat(orders.get(0))
+            .hasNoNullFieldsOrPropertiesExcept("subject");
     }
 
     @Test
-    public void shouldStartPrescriptionDispense() throws Exception {
+    public void shouldStartPrescriptionDispense() {
         MedicationOrder medicationOrder = fakeReseptFormidler.addPrescription(testData.unusedNationalId(), testData.sampleMedication());
 
         MedicationOrder orderForDispense = gateway.startMedicationOrderDispense(medicationOrder.getPrescriptionId(), null, employeeId);
 
         assertThat(orderForDispense)
-            .isEqualToComparingFieldByField(medicationOrder);
+            .isEqualToIgnoringGivenFields(medicationOrder, "subject");
     }
 
     @Test

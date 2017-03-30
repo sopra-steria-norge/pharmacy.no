@@ -100,7 +100,7 @@ public class RefundCalculationTest {
     private void addMedicationDispense(DispenseOrder order,
             PersonReference practitioner, LocalDate firstDate,
             Medication medication, Money retailPrice) {
-        MedicationOrder prescription = PharmaTestData.sampleMedicationOrder(practitioner, firstDate, medication);
+        MedicationOrder prescription = testData.sampleMedicationOrder(practitioner, firstDate, medication);
         MedicationDispense dispense = order.addMedicationOrder(prescription);
         dispense.setPrice(retailPrice);
         dispense.setMedication(medication);

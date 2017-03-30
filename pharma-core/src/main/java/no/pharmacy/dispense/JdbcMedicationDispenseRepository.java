@@ -52,11 +52,18 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
             .executeUpdate();
 
         for (MedicationOrder medicationOrder : order.getMedicationOrders()) {
+            String patientName = medicationOrder.getSubject().getDisplay();
+            int lastNamePos = patientName.lastIndexOf(' ');
+            String patientFirstName = patientName.substring(0, lastNamePos);
+            String patientLastName = patientName.substring(lastNamePos + 1);
             long id = insertInto("medication_orders")
                 .value("dispense_order_id", order.getIdentifier())
                 .value("prescriber_id", medicationOrder.getPrescriber().getReference())
                 .value("prescriber_name", medicationOrder.getPrescriber().getDisplay())
                 .value("prescription_id", medicationOrder.getPrescriptionId())
+                .value("patient_id", medicationOrder.getSubject().getReference())
+                .value("patient_first_name", patientFirstName)
+                .value("patient_last_name", patientLastName)
                 .value("date_written", medicationOrder.getDateWritten())
                 .value("medication_id", medicationOrder.getMedication().getProductId())
                 .value("dosage_text", medicationOrder.getDosageText())
@@ -161,10 +168,16 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         medicationOrder.setDateWritten(toLocalDate(rs.getDate("date_written")));
         medicationOrder.setDosageText(rs.getString("dosage_text"));
         medicationOrder.setPrescriptionId(rs.getString("prescription_id"));
+        medicationOrder.setSubject(readPerson(rs, "patient_"));
         medicationOrder.setMedication(medicationRepository.findByProductId(rs.getString("medication_id")).get());
         medicationOrder.setAlternatives(medicationRepository.listAlternatives(medicationOrder.getMedication()));
 
         return medicationOrder;
+    }
+
+    private Reference readPerson(ResultSet rs, String prefix) throws SQLException {
+        return new Reference(rs.getString(prefix + "id"),
+                rs.getString(prefix + "first_name") + " " + rs.getString(prefix + "last_name"));
     }
 
     private List<MedicationOrder> findMedicationOrders(String identifier) {

@@ -42,8 +42,6 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
         }
         Element orderListRequest = createOrderListRequest(purpose, nationalId, employeeId);
         Element orderListResponse = messageGateway.processRequest(orderListRequest);
-
-
         return decodeMedicationOrderListResponse(orderListResponse);
     }
 

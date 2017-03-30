@@ -75,6 +75,7 @@ public class FakeReseptFormidler implements MessageGateway {
 
         // TODO: Lookup nationalId in patient repository
         MedicationOrder medicationOrder = createMedicationOrder(product);
+        medicationOrder.setSubject(patient);
         this.prescriptionsForPerson.computeIfAbsent(nationalId, s -> new ArrayList<>())
             .add(medicationOrder);
         this.prescriptionsById.put(medicationOrder.getPrescriptionId(), medicationOrder);
@@ -119,8 +120,8 @@ public class FakeReseptFormidler implements MessageGateway {
             for (MedicationOrder medicationOrder : prescriptionsForPerson.getOrDefault(nationalId, new ArrayList<>())) {
                 prescriptionList.add(M92.el("Reseptinfo",
                         M92.el("Forskrivningsdato", medicationOrder.getDateWritten().toString()),
-                        M92.el("Fornavn", "fornavn"),
-                        M92.el("Etternavn", "etternavn"),
+                        M92.el("Fornavn", medicationOrder.getSubject().getDisplay()),
+                        M92.el("Etternavn", medicationOrder.getSubject().getDisplay()),
                         M92.el("RekvirentId", medicationOrder.getPrescriber().getReference()),
                         M92.el("NavnRekvirent", medicationOrder.getPrescriber().getDisplay()),
                         M92.el("NavnFormStyrke", medicationOrder.getMedication().getDisplay()),

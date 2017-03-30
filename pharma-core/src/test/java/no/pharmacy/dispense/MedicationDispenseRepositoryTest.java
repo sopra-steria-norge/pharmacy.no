@@ -72,6 +72,8 @@ public class MedicationDispenseRepositoryTest {
         DispenseOrder order = new DispenseOrder();
 
         MedicationOrder medicationOrder = testData.sampleMedicationOrder();
+        assertThat(medicationOrder)
+            .hasNoNullFieldsOrPropertiesExcept("id", "alternatives");
         order.addMedicationOrder(medicationOrder);
 
         assertThat(order.getMedicationDispenses()).hasSize(1);
