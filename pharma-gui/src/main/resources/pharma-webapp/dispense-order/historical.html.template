@@ -35,7 +35,7 @@
 
 	<form method="post">
 		<input type='hidden' name='orderId' id='orderId' />
-		<h2 id='patient'>Pasient: </h2>
+		<h2>Pasient: <span id='patient'></span></h2>
 	
 		<div id="medicationDispenses"></div>
 

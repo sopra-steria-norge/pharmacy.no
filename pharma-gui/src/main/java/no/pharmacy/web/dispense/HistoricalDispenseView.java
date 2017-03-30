@@ -22,6 +22,9 @@ public class HistoricalDispenseView implements HtmlView {
     @Override
     public Document createView() throws IOException {
         Document doc = Xml.readResource("/pharma-webapp/dispense-order/historical.html.template");
+
+        doc.find("...", "#patient").first().text(dispenseOrder.getPatient().getDisplay());
+
         String medicationOrderTemplate = doc.find("...", "#medicationDispenseTemplate").first().elements().iterator().next().toXML();
 
         Element medicationOrders = doc.find("...", "#medicationDispenses").first();

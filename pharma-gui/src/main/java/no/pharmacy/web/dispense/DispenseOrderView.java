@@ -27,6 +27,8 @@ public class DispenseOrderView implements HtmlView {
 
         String medicationOrderTemplate = doc.find("...", "#medicationOrderTemplate").first().elements().iterator().next().toXML();
 
+        doc.find("...", "#patient").first().text(dispenseOrder.getPatient().getDisplay());
+
         Element medicationOrders = doc.find("...", "#medicationOrders").first();
         for (MedicationDispense dispense : dispenseOrder.getMedicationDispenses()) {
             medicationOrders.add(displayMedicationDispense(medicationOrderTemplate, dispense));
