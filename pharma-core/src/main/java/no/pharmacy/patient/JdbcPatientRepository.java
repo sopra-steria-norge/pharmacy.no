@@ -44,7 +44,7 @@ public class JdbcPatientRepository implements PatientRepository {
         return personGateway.nameByNationalId(nationalId);
     }
 
-    public Reference savePatient(String nationalId, String name) {
+    Reference savePatient(String nationalId, String name) {
         UUID id = UUID.randomUUID();
         table.insertInto("patients")
             .value("id", id.toString())
@@ -55,7 +55,7 @@ public class JdbcPatientRepository implements PatientRepository {
         return new Reference(id.toString(), name);
     }
 
-    public String lookupPatientNationalId(Reference patient) {
+    String lookupPatientNationalId(Reference patient) {
         // TODO: Logging!
         return table.retrieveSingle("select encrypted_national_id from patients where id = ?",
                 Arrays.asList(patient.getReference()),
@@ -72,7 +72,7 @@ public class JdbcPatientRepository implements PatientRepository {
         }
     }
 
-    String encrypt(String plainText) {
+    private String encrypt(String plainText) {
         try {
             Cipher encryptCipher = Cipher.getInstance("AES");
             encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey);

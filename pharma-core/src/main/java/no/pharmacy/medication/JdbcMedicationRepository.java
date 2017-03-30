@@ -173,7 +173,7 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         return interactionsById.get(id);
     }
 
-    public synchronized List<MedicationInteraction> listInteractions(String atcCode) {
+    synchronized List<MedicationInteraction> listInteractions(String atcCode) {
         ensureInteractionCache();
 
         String anatomicalGroup = atcCode.substring(0, 1);

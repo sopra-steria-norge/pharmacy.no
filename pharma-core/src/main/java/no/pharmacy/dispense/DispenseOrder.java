@@ -19,7 +19,7 @@ public class DispenseOrder implements MedicationHistory {
     private String identifier;
 
     @Getter
-    protected List<MedicationOrder> medicationOrders = new ArrayList<>();
+    private List<MedicationOrder> medicationOrders = new ArrayList<>();
 
     @Getter
     private List<MedicationDispense> medicationDispenses = new ArrayList<>();

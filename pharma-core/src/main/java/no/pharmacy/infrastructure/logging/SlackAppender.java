@@ -16,7 +16,7 @@ public class SlackAppender extends AsyncAppender {
 
     private String slackWebhook;
 
-    public SlackAppender(LoggerContext context, String slackWebhook, Filter<ILoggingEvent> filter) {
+    SlackAppender(LoggerContext context, String slackWebhook, Filter<ILoggingEvent> filter) {
         this.slackWebhook = slackWebhook;
         setContext(context);
         setName(slackWebhook);

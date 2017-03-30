@@ -18,7 +18,7 @@ public class MedicationDispenseAction {
     @Getter @Setter
     private String action;
 
-    public MedicationDispenseAction(MedicationOrderWarning warning, String remark, String action) {
+    MedicationDispenseAction(MedicationOrderWarning warning, String remark, String action) {
         this.warning = warning;
         this.remark = remark;
         this.action = action;

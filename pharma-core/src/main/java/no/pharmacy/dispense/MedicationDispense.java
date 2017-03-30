@@ -100,7 +100,7 @@ public class MedicationDispense {
         return confirmedByPharmacist;
     }
 
-    public void createWarnings(MedicationHistory history) {
+    void createWarnings(MedicationHistory history) {
         for (MedicationDispense historicalDispense : history.getDispenses()) {
             if (historicalDispense.equals(this)) continue;
             for (MedicationInteraction interaction : getInteractions(historicalDispense)) {
@@ -110,7 +110,7 @@ public class MedicationDispense {
         }
     }
 
-    public void addMedicationDispenseAction(MedicationDispenseAction action) {
+    void addMedicationDispenseAction(MedicationDispenseAction action) {
         this.actions.put(action.getWarningCode(), action);
     }
 

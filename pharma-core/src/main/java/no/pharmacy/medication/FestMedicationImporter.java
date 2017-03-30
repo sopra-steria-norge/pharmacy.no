@@ -31,7 +31,7 @@ public class FestMedicationImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(FestMedicationImporter.class);
 
-    public void saveFest(URL url, JdbcMedicationRepository repository) {
+    void saveFest(URL url, JdbcMedicationRepository repository) {
         try {
             if (url.getProtocol().startsWith("http")) {
                 saveFest(downloadFestDoc(url), repository);
@@ -44,7 +44,7 @@ public class FestMedicationImporter {
     }
 
 
-    public static Document downloadFestDoc(URL url) {
+    static Document downloadFestDoc(URL url) {
         if (System.getProperty("pharmacy.disable_fest_refresh") != null) {
             throw new IllegalStateException("FEST refresh is disabled");
         }

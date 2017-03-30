@@ -17,7 +17,7 @@ public class MedicationOrderWarning {
     @Getter
     private final Long interactingDispenseId;
 
-    public MedicationOrderWarning(MedicationDispense interactingDispense, MedicationInteraction interaction) {
+    MedicationOrderWarning(MedicationDispense interactingDispense, MedicationInteraction interaction) {
         this.interaction = interaction;
         this.interactingDispenseId = interactingDispense.getId();
         this.interactingDispenseDisplay =
@@ -26,7 +26,7 @@ public class MedicationOrderWarning {
                 + " den " + interactingDispense.getAuthorizingPrescription().getDateWritten();
     }
 
-    public MedicationOrderWarning(Long interactingDispenseId, String interactionDispenseDisplay, MedicationInteraction interaction) {
+    MedicationOrderWarning(Long interactingDispenseId, String interactionDispenseDisplay, MedicationInteraction interaction) {
         this.interactingDispenseId = interactingDispenseId;
         this.interaction = interaction;
         this.interactingDispenseDisplay = interactionDispenseDisplay;

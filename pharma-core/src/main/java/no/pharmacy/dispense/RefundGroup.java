@@ -13,7 +13,7 @@ public class RefundGroup {
     @Getter
     private List<MedicationDispense> medicationDispense = new ArrayList<>();
 
-    public void add(MedicationDispense dispense) {
+    void add(MedicationDispense dispense) {
         medicationDispense.add(dispense);
     }
 

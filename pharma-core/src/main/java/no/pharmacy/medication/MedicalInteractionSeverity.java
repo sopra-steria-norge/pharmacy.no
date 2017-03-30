@@ -15,7 +15,7 @@ public enum MedicalInteractionSeverity {
         this.description = description;
     }
 
-    public static MedicalInteractionSeverity byValue(String code) {
+    static MedicalInteractionSeverity byValue(String code) {
         for (MedicalInteractionSeverity severity : values()) {
             if (severity.code.equals(code)) {
                 return severity;

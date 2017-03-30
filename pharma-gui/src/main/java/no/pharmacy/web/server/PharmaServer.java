@@ -17,21 +17,15 @@ import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
 import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
-import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.infrastructure.CryptoUtil;
 import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
-import no.pharmacy.medicationorder.PrescriptionGateway;
 import no.pharmacy.patient.JdbcPatientRepository;
-import no.pharmacy.patient.PatientRepository;
 import no.pharmacy.test.FakePrescriptionGateway;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
-import no.pharmacy.web.dispense.DispenseOrderController;
-import no.pharmacy.web.dispense.PharmacistController;
-import no.pharmacy.web.dispense.PrescriptionsController;
 import no.pharmacy.web.infrastructure.logging.LogDisplayServlet;
 import no.pharmacy.web.test.ReceiptTestCaseController;
 import no.pharmacy.web.test.ReseptFormidlerLogTestController;
@@ -113,20 +107,6 @@ public class PharmaServer {
         flyway.migrate();
 
         return dataSource;
-    }
-
-    private Handler createPharmaGui(PrescriptionGateway prescriptionGateway, MedicationRepository medicationRepository, SecretKey secretKey) {
-        WebAppContext handler = new WebAppContext(null, "/");
-        handler.setBaseResource(Resource.newClassPathResource("/pharma-webapp"));
-
-        MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(createPharmaDataSource(), medicationRepository);
-        PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName(), secretKey);
-
-        handler.addServlet(new ServletHolder(new PrescriptionsController(prescriptionGateway, medicationDispenseRepository, patientRepository)), "/prescriptions/");
-        handler.addServlet(new ServletHolder(new DispenseOrderController(prescriptionGateway, medicationDispenseRepository, medicationRepository)), "/dispenseOrder/*");
-        handler.addServlet(new ServletHolder(new PharmacistController(medicationDispenseRepository)), "/pharmacist/*");
-
-        return handler;
     }
 
     private Handler createPharmaTestRig(FakeReseptFormidler reseptFormidler, MedicationRepository medicationRepository) {

@@ -43,7 +43,7 @@ public class MedicationOrder extends MedicationOrderSummary {
         // TODO Auto-generated constructor stub
     }
 
-    public MedicationOrder(Document d) {
+    MedicationOrder(Document d) {
 //        this.identifier;
 //        this.prescriber;
 //        this.medication;

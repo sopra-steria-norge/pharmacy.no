@@ -12,7 +12,7 @@ public class InsertBuilder {
 
     private JdbcSupport jdbcSupport;
 
-    public InsertBuilder(JdbcSupport jdbcSupport, String tableName) {
+    InsertBuilder(JdbcSupport jdbcSupport, String tableName) {
         this.jdbcSupport = jdbcSupport;
         this.tableName = tableName;
     }

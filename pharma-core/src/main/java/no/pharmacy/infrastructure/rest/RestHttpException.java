@@ -21,7 +21,7 @@ public class RestHttpException extends RestException {
         }
     }
 
-    public RestHttpException(int responseCode, String responseMessage, URL url) {
+    private RestHttpException(int responseCode, String responseMessage, URL url) {
         super(responseCode + " " + responseMessage, url);
         this.responseCode = responseCode;
         this.responseMessage = responseMessage;

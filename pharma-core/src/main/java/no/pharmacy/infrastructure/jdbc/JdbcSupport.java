@@ -57,7 +57,7 @@ public class JdbcSupport {
         }
     }
 
-    public long executeInsert(String query, List<Object> parameters) {
+    long executeInsert(String query, List<Object> parameters) {
         long startTime = System.currentTimeMillis();
         try (Connection conn = dataSource.getConnection()) {
             logger.trace("executeInsert {} {}", query, parameters);

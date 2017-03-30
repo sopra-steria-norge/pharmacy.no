@@ -14,11 +14,11 @@ public class LogConfiguration {
 
     private LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-    public void addSlackAppender(String slackWebhook) {
+    void addSlackAppender(String slackWebhook) {
         addAppender(new SlackAppender(context, slackWebhook, createThresholdFilter(Level.WARN)));
     }
 
-    public static Filter<ILoggingEvent> createThresholdFilter(Level level) {
+    static Filter<ILoggingEvent> createThresholdFilter(Level level) {
         ThresholdFilter filter = new ThresholdFilter();
         filter.setLevel(level.levelStr);
         filter.start();

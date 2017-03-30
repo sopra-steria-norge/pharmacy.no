@@ -13,7 +13,7 @@ public class UpdateBuilder {
     private JdbcSupport jdbcSupport;
     private String tableName;
 
-    public UpdateBuilder(JdbcSupport jdbcSupport, String tableName) {
+    UpdateBuilder(JdbcSupport jdbcSupport, String tableName) {
         this.jdbcSupport = jdbcSupport;
         this.tableName = tableName;
     }

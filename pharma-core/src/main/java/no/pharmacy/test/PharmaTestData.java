@@ -87,6 +87,7 @@ public class PharmaTestData {
         return random.nextInt(i);
     }
 
+    @SafeVarargs
     public static <T> T pickOneOf(T... options) {
         return options[random(options.length)];
     }
