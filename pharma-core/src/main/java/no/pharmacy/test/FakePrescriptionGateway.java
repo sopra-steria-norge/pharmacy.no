@@ -10,48 +10,40 @@ import org.eaxy.Element;
 import org.eaxy.Namespace;
 import org.eaxy.Xml;
 
+import no.pharmacy.core.MessageGateway;
 import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.medicationorder.MedicationOrderSummary;
 import no.pharmacy.medicationorder.PrescriptionGateway;
-import no.pharmacy.medicationorder.PrescriptionsSource;
 
-public class FakePrescriptionGateway implements PrescriptionGateway, PrescriptionsSource {
+public class FakePrescriptionGateway implements PrescriptionGateway {
 
+    private static final Namespace M1 = new Namespace("http://www.kith.no/xmlstds/eresept/m1/2013-10-08", "M1");
     private static final Namespace M91 = new Namespace("http://www.kith.no/xmlstds/eresept/m91/2013-10-08", "M91");
     private static final Namespace M93 = new Namespace("http://www.kith.no/xmlstds/eresept/m93/2010-06-04", "M93");
     private static final Namespace M10 = new Namespace("http://www.kith.no/xmlstds/eresept/m10/2013-10-08", "M10");
+    private static final Namespace F = new Namespace("http://www.kith.no/xmlstds/eresept/forskrivning/2013-10-08", "F");
     private static final Namespace UTL = new Namespace("http://www.kith.no/xmlstds/eresept/utlevering/2013-10-08", "UTL");
     private static final Namespace KITH = new Namespace("http://www.kith.no/xmlstds/felleskomponent1", "KITH");
 
-    private FakeReseptFormidler fakeReseptFormidler;
+    private MessageGateway messageGateway;
 
     private MedicationRepository medicationRepository;
 
-    public FakePrescriptionGateway(FakeReseptFormidler fakeReseptFormidler, MedicationRepository medicationRepository) {
-        this.fakeReseptFormidler = fakeReseptFormidler;
+    public FakePrescriptionGateway(MessageGateway messageGateway, MedicationRepository medicationRepository) {
+        this.messageGateway = messageGateway;
         this.medicationRepository = medicationRepository;
     }
 
     @Override
-    public List<? extends MedicationOrderSummary> prescriptionsForPerson(String nationalId) {
+    public List<MedicationOrderSummary> requestMedicationOrdersToDispense(String purpose, String nationalId, String employeeId) {
         if (nationalId == null) {
             return new ArrayList<>();
         }
-        return requestMedicationOrdersToDispense(null, nationalId, "12342");
-    }
-
-    @Override
-    public MedicationOrder getById(String id) {
-        return startMedicationOrderDispense(id, null, "1234");
-    }
-
-    @Override
-    public List<MedicationOrderSummary> requestMedicationOrdersToDispense(String purpose, String nationalId, String employeeId) {
         Element orderListRequest = createOrderListRequest(purpose, nationalId, employeeId);
-        Element orderListResponse = fakeReseptFormidler.processRequest(orderListRequest);
+        Element orderListResponse = messageGateway.processRequest(orderListRequest);
 
 
         return decodeMedicationOrderListResponse(orderListResponse);
@@ -110,7 +102,7 @@ public class FakePrescriptionGateway implements PrescriptionGateway, Prescriptio
             String employeeId) {
         Element dispenseMedicationOrderRequest = createDispenseMedicationOrderRequest(prescriptionId, employeeId);
 
-        Element medicationOrderResponse = fakeReseptFormidler.processRequest(dispenseMedicationOrderRequest);
+        Element medicationOrderResponse = messageGateway.processRequest(dispenseMedicationOrderRequest);
         Document prescriptionDocument = findPrescriptionDocument(medicationOrderResponse);
         MedicationOrder medicationOrder = new MedicationOrder();
         String productId = prescriptionDocument.find("Document", "RefDoc", "Content", "Resept", "ReseptDokLegemiddel", "Forskrivning", "Legemiddelpakning", "Varenr").first().text();
@@ -142,9 +134,7 @@ public class FakePrescriptionGateway implements PrescriptionGateway, Prescriptio
     public void completeDispense(MedicationDispense dispense, String employeeId) {
         Element request = createMedicationDispenseRequest(dispense, employeeId);
 
-        fakeReseptFormidler.processRequest(request);
-
-        fakeReseptFormidler.addDispense(dispense);
+        messageGateway.processRequest(request);
     }
 
     private Element createMedicationDispenseRequest(MedicationDispense dispense, String employeeId) {
@@ -153,6 +143,17 @@ public class FakePrescriptionGateway implements PrescriptionGateway, Prescriptio
                         UTL.el("ReseptId", dispense.getAuthorizingPrescription().getPrescriptionId()),
                         UTL.el("Utleveringsdato", LocalDate.now().toString()),
                         UTL.el("Annullering", "false"),
+                        M1.el("ReseptDokLegemiddel",
+                                M1.el("Varegruppekode").attr("V", "L"),
+                                M1.el("Reiterasjon", "1"),
+                                F.el("Forskrivning",
+                                        F.el("DosVeiledEnkel", dispense.getPrintedDosageText()),
+                                        F.el("Legemiddelpakning",
+                                                F.el("NavnFormStyrke", dispense.getMedication().getDisplay()),
+                                                F.el("Reseptgruppe"),
+                                                F.el("Varenr", dispense.getMedication().getProductId())
+                                                ))
+                                ),
                         UTL.el("Utleverer",
                                 UTL.el("HerId", KITH.el("Id", "3454"), KITH.el("TypeId")),
                                 UTL.el("Navn"))),

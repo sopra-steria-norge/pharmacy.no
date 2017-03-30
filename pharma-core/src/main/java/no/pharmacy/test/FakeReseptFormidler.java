@@ -9,19 +9,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.eaxy.Element;
 import org.eaxy.Namespace;
 import org.eaxy.Validator;
 
 import lombok.Getter;
+import no.pharmacy.core.MessageGateway;
 import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationSource;
-import no.pharmacy.medicationorder.PrescriptionsSource;
 
-public class FakeReseptFormidler implements PrescriptionsSource {
+public class FakeReseptFormidler implements MessageGateway {
 
     private static final Namespace F = new Namespace("http://www.kith.no/xmlstds/eresept/forskrivning/2013-10-08", "F");
 
@@ -50,17 +52,21 @@ public class FakeReseptFormidler implements PrescriptionsSource {
 
     private final Map<String, List<MedicationDispense>> dispensesForPrescription = new HashMap<>();
 
+    private Map<String, List<String>> printedDosageTexts = new HashMap<>();
+
     private final Map<String, MedicationOrder> prescriptionsById = new HashMap<>();
 
     private final MedicationSource medicationSource;
 
     private final PharmaTestData testData = new PharmaTestData();
 
+
     public FakeReseptFormidler(MedicationSource medicationSource) {
         this.medicationSource = medicationSource;
     }
 
     public MedicationOrder addPrescription(String nationalId, Medication product) {
+        // TODO: Lookup nationalId in patient repository
         MedicationOrder medicationOrder = createMedicationOrder(product);
         this.prescriptionsForPerson.computeIfAbsent(nationalId, s -> new ArrayList<>())
             .add(medicationOrder);
@@ -77,21 +83,12 @@ public class FakeReseptFormidler implements PrescriptionsSource {
         return medicationOrder;
     }
 
-    @Override
-    public List<? extends MedicationOrder> prescriptionsForPerson(String nationalId) {
-        return this.prescriptionsForPerson.getOrDefault(nationalId, new ArrayList<>());
-    }
-
-    @Override
-    public MedicationOrder getById(String id) {
-        return this.prescriptionsById.get(id);
-    }
-
     public MedicationOrder addPrescription(String nationalId, String productId) {
         return addPrescription(nationalId,
                 this.medicationSource.getMedication(productId).orElseThrow(() -> new IllegalArgumentException(productId)));
     }
 
+    @Override
     public Element processRequest(Element request) {
         return logResponse(validator.validate(createResponse(logRequest(validator.validate(request)))));
     }
@@ -112,7 +109,7 @@ public class FakeReseptFormidler implements PrescriptionsSource {
             String nationalId = request.find("Fnr").first().text();
 
             Element prescriptionList = M92.el("Reseptliste");
-            for (MedicationOrder medicationOrder : prescriptionsForPerson(nationalId)) {
+            for (MedicationOrder medicationOrder : prescriptionsForPerson.getOrDefault(nationalId, new ArrayList<>())) {
                 prescriptionList.add(M92.el("Reseptinfo",
                         M92.el("Forskrivningsdato", medicationOrder.getDateWritten().toString()),
                         M92.el("Fornavn", "fornavn"),
@@ -128,7 +125,7 @@ public class FakeReseptFormidler implements PrescriptionsSource {
             }
             return prescriptionList;
         } else if (request.tagName().equals("M93")) {
-            MedicationOrder order = getById(request.find("ReseptId").first().text());
+            MedicationOrder order = prescriptionsById.get(request.find("ReseptId").first().text());
 
             Element prescription = M1.el("Resept",
                     M1.el("Forskrivningsdato", order.getDateWritten().toString()),
@@ -154,6 +151,13 @@ public class FakeReseptFormidler implements PrescriptionsSource {
                     includedDocument(M94.el("ReseptNedlasting", M94.el("Status"))),
                     encodedDocument(prescriptionDoc));
         } else if (request.tagName().equals("Utleveringsrapport")) {
+            String prescriptionId = request.find("Utlevering", "ReseptId").first().text();
+            String dosageText = request.find("Utlevering", "ReseptDokLegemiddel", "Forskrivning").check().find("DosVeiledEnkel").firstTextOrNull();
+            printedDosageTexts
+                .computeIfAbsent(prescriptionId, s -> new ArrayList<>())
+                .add(dosageText);
+
+
             return HEAD.el("MsgHead",
                     msgInfo("M10", null),
                     HEAD.el("Document",
@@ -206,8 +210,12 @@ public class FakeReseptFormidler implements PrescriptionsSource {
                         HEAD.el("Ident", HEAD.el("Id", "80624"), HEAD.el("TypeId").attr("V", "HER")))));
     }
 
-    public List<MedicationDispense> getDispensesFor(MedicationOrder medicationOrder) {
-        return getDispensesFor(medicationOrder.getPrescriptionId());
+    public List<String> getPrintedDosageTexts(MedicationOrder medicationOrder) {
+
+        getDispensesFor(medicationOrder.getPrescriptionId()).stream()
+                .map(MedicationDispense::getPrintedDosageText)
+                .collect(Collectors.toList());
+        return printedDosageTexts.get(medicationOrder.getPrescriptionId());
     }
 
     private List<MedicationDispense> getDispensesFor(String prescriptionId) {

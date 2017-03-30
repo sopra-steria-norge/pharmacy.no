@@ -51,15 +51,15 @@ public class FakePrescriptionGatewayTest {
         MedicationDispense dispense = new MedicationDispense(medicationOrder);
         dispense.setMedication(dispense.getAuthorizingPrescription().getMedication());
         dispense.setPrice(testData.samplePrice());
+        dispense.setPrintedDosageText("Updated dosage text");
         dispense.setConfirmedByPharmacist(true);
         dispense.setPackagingControlled(true);
         dispense.setDispensed();
 
         gateway.completeDispense(dispense, employeeId);
 
-        assertThat(fakeReseptFormidler.getDispensesFor(medicationOrder))
-            .extracting(MedicationDispense::getPrice)
-            .contains(dispense.getPrice());
+        assertThat(fakeReseptFormidler.getPrintedDosageTexts(medicationOrder))
+            .contains(dispense.getPrintedDosageText());
     }
 
 }
