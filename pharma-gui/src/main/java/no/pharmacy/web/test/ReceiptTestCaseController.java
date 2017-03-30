@@ -15,6 +15,7 @@ import org.eaxy.Document;
 import org.eaxy.Element;
 import org.eaxy.Xml;
 
+import no.pharmacy.core.PersonReference;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationRepository;
@@ -51,6 +52,13 @@ public class ReceiptTestCaseController extends HttpServlet {
         for (String nationalId : testData.unusedNationalIds(50)) {
             unusedIds.add(Xml.el("option", Xml.attr("value", nationalId), Xml.attr("label", nationalId)));
         }
+
+        Element prescriber = doc.find("...", "#prescriber").first();
+        for (PersonReference doctor : testData.listDoctors()) {
+            prescriber.add(Xml.el("option").val(doctor.getReference())
+                    .text(doctor.getDisplay() + " (" + doctor.getReference() + ")"));
+        }
+        PharmaTestData.pickOne(prescriber.elements()).selected(true);
 
         Element medicationSelect = doc.find("...", "[name=productId]").first();
         List<Medication> sampleMedications = sampleMedications();

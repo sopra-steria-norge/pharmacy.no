@@ -65,6 +65,7 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
             MedicationOrderSummary medicationOrderSummary = new MedicationOrderSummary();
             medicationOrderSummary.setPrescriptionId(prescriptionInfo.find("ReseptId").first().text());
             medicationOrderSummary.setMedicationName(prescriptionInfo.find("NavnFormStyrke").first().text());
+            medicationOrderSummary.setPrescriberName(prescriptionInfo.find("NavnRekvirent").first().text());
             summary.add(medicationOrderSummary);
         }
         return summary;

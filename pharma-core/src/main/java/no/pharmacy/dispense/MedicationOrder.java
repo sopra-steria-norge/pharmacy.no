@@ -7,12 +7,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import no.pharmacy.core.PersonReference;
+import no.pharmacy.core.Reference;
 import no.pharmacy.medication.Medication;
-import no.pharmacy.medicationorder.MedicationOrderSummary;
 
-@EqualsAndHashCode(of={"id", "prescriber", "dateWritten", "medication"}, callSuper=true)
+@EqualsAndHashCode(of={"id", "prescriber", "dateWritten", "medication"})
 @ToString
-public class MedicationOrder extends MedicationOrderSummary {
+public class MedicationOrder implements MedicationOrderInfo {
 
     @Getter @Setter
     private Long id;
@@ -26,8 +26,11 @@ public class MedicationOrder extends MedicationOrderSummary {
     @Getter @Setter
     private LocalDate dateWritten;
 
-    @Getter
+    @Getter @Setter
     private Medication medication;
+
+    @Getter @Setter
+    private Reference subject;
 
     @Getter @Setter
     private List<Medication> alternatives;
@@ -41,15 +44,13 @@ public class MedicationOrder extends MedicationOrderSummary {
 
     public MedicationOrder(Medication product) {
         this.medication = product;
-        setMedicationName(product.getDisplay());
     }
 
     public String getRefundGroup() {
         return dateWritten + "/" + prescriber.getReference();
     }
 
-    public void setMedication(Medication medication) {
-        this.medication = medication;
-        setMedicationName(medication.getDisplay());
+    public String getMedicationName() {
+        return medication.getDisplay();
     }
 }

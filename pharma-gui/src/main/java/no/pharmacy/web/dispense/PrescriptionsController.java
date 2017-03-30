@@ -94,7 +94,7 @@ public class PrescriptionsController extends HttpServlet {
                         Xml.el("label",
                             Xml.el("input")
                                 .type("checkbox").name("prescriptionId").val(order.getPrescriptionId()),
-                            //Xml.el("a", order.getPrescriber().getDisplay()).attr("href", "/practitioner/" + order.getPrescriber().getReference()),
+                            Xml.el("span", order.getPrescriberName() + ": "),
                             Xml.el("span", order.getMedicationName()))));
             }
         }
