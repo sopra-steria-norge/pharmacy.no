@@ -7,17 +7,16 @@ import org.junit.Test;
 
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
-import no.pharmacy.test.FakePrescriptionGateway;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
 
-public class FakePrescriptionGatewayTest {
+public class RFPrescriptionGatewayTest {
 
     private PharmaTestData testData = new PharmaTestData();
 
     private FakeReseptFormidler fakeReseptFormidler = new FakeReseptFormidler(testData.getMedicationRepository());
 
-    private PrescriptionGateway gateway = new FakePrescriptionGateway(fakeReseptFormidler, testData.getMedicationRepository());
+    private PrescriptionGateway gateway = new RFPrescriptionGateway(fakeReseptFormidler, testData.getMedicationRepository());
 
     private String employeeId = testData.samplePractitioner().getReference().getReference();
 

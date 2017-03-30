@@ -22,8 +22,8 @@ import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
+import no.pharmacy.medicationorder.RFPrescriptionGateway;
 import no.pharmacy.patient.JdbcPatientRepository;
-import no.pharmacy.test.FakePrescriptionGateway;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.web.infrastructure.logging.LogDisplayServlet;
@@ -77,7 +77,7 @@ public class PharmaServer {
         PharmaGuiHandler guiHandler = new PharmaGuiHandler();
         guiHandler.setMedicationRepository(medicationRepository);
         guiHandler.setPatientRepository(new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName(), secretKey));
-        guiHandler.setPrescriptionGateway(new FakePrescriptionGateway(reseptFormidler, medicationRepository));
+        guiHandler.setPrescriptionGateway(new RFPrescriptionGateway(reseptFormidler, medicationRepository));
         guiHandler.setRepository(new JdbcMedicationDispenseRepository(createPharmaDataSource(), medicationRepository));
 
         handlers.addHandler(guiHandler.createHandler());

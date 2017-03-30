@@ -1,4 +1,4 @@
-package no.pharmacy.test;
+package no.pharmacy.medicationorder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,10 +15,8 @@ import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.MedicationRepository;
-import no.pharmacy.medicationorder.MedicationOrderSummary;
-import no.pharmacy.medicationorder.PrescriptionGateway;
 
-public class FakePrescriptionGateway implements PrescriptionGateway {
+public class RFPrescriptionGateway implements PrescriptionGateway {
 
     private static final Namespace M1 = new Namespace("http://www.kith.no/xmlstds/eresept/m1/2013-10-08", "M1");
     private static final Namespace M91 = new Namespace("http://www.kith.no/xmlstds/eresept/m91/2013-10-08", "M91");
@@ -32,7 +30,7 @@ public class FakePrescriptionGateway implements PrescriptionGateway {
 
     private MedicationRepository medicationRepository;
 
-    public FakePrescriptionGateway(MessageGateway messageGateway, MedicationRepository medicationRepository) {
+    public RFPrescriptionGateway(MessageGateway messageGateway, MedicationRepository medicationRepository) {
         this.messageGateway = messageGateway;
         this.medicationRepository = medicationRepository;
     }
