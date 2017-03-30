@@ -17,11 +17,13 @@ import org.eaxy.Validator;
 
 import lombok.Getter;
 import no.pharmacy.core.MessageGateway;
+import no.pharmacy.core.PersonReference;
 import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationSource;
+import no.pharmacy.patient.PatientRepository;
 
 public class FakeReseptFormidler implements MessageGateway {
 
@@ -56,22 +58,27 @@ public class FakeReseptFormidler implements MessageGateway {
 
     private final Map<String, MedicationOrder> prescriptionsById = new HashMap<>();
 
+    private final PatientRepository patientRepository;
+
     private final MedicationSource medicationSource;
 
     private final PharmaTestData testData = new PharmaTestData();
 
 
-    public FakeReseptFormidler(MedicationSource medicationSource) {
+    public FakeReseptFormidler(MedicationSource medicationSource, PatientRepository patientRepository) {
         this.medicationSource = medicationSource;
+        this.patientRepository = patientRepository;
     }
 
     public MedicationOrder addPrescription(String nationalId, Medication product) {
+        Reference patient = patientRepository.findPatientByNationalId(nationalId);
+
         // TODO: Lookup nationalId in patient repository
         MedicationOrder medicationOrder = createMedicationOrder(product);
         this.prescriptionsForPerson.computeIfAbsent(nationalId, s -> new ArrayList<>())
             .add(medicationOrder);
         this.prescriptionsById.put(medicationOrder.getPrescriptionId(), medicationOrder);
-        medicationOrder.setDosageText(product.getDisplay() + "\n\n2 piller, morgen og kveld");
+        medicationOrder.setDosageText(patient.getDisplay() + "\n\n2 piller, morgen og kveld");
         return medicationOrder;
     }
 
@@ -187,15 +194,14 @@ public class FakeReseptFormidler implements MessageGateway {
                                 prescriptionDownload)));
     }
 
-    private Element msgInfo(String type, Reference prescriber) {
+    private Element msgInfo(String type, PersonReference prescriber) {
         Element senderOrganization = HEAD.el("Organisation",
                 HEAD.el("OrganisationName", "Reseptformidleren (test)"),
                 HEAD.el("Ident", HEAD.el("Id", "965336796"), HEAD.el("TypeId").attr("V", "ENH")));
         if (prescriber != null) {
-            int lastNamePos = prescriber.getDisplay().lastIndexOf(" ");
             senderOrganization.add(HEAD.el("HealthcareProfessional",
-                    HEAD.el("FamilyName", prescriber.getDisplay().substring(lastNamePos+1)),
-                    HEAD.el("GivenName", prescriber.getDisplay().substring(0, lastNamePos)),
+                    HEAD.el("FamilyName", prescriber.getFirstName()),
+                    HEAD.el("GivenName", prescriber.getLastName()),
                     HEAD.el("Ident", HEAD.el("Id", prescriber.getReference()), HEAD.el("TypeId"))
                     ));
         }

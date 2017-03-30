@@ -11,7 +11,7 @@ import org.eaxy.Namespace;
 import org.eaxy.Xml;
 
 import no.pharmacy.core.MessageGateway;
-import no.pharmacy.core.Reference;
+import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.MedicationRepository;
@@ -109,8 +109,10 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
         medicationOrder.setDosageText(prescriptionDocument.find("Document", "RefDoc", "Content", "Resept", "ReseptDokLegemiddel", "Forskrivning", "DosVeiledEnkel").first().text());
         medicationOrder.setPrescriptionId(prescriptionId);
         Element prescriber = prescriptionDocument.find("MsgInfo", "Sender", "Organisation", "HealthcareProfessional").first();
-        medicationOrder.setPrescriber(new Reference(prescriber.find("Ident", "Id").first().text(),
-                prescriber.find("GivenName").first().text() + " " + prescriber.find("FamilyName").first().text()));
+        medicationOrder.setPrescriber(new PersonReference(
+                prescriber.find("Ident", "Id").first().text(),
+                prescriber.find("GivenName").first().text(),
+                prescriber.find("FamilyName").first().text()));
 
         return medicationOrder;
     }

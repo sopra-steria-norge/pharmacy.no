@@ -35,7 +35,7 @@ public class MedicationOrderDecodeTest {
                         ),
                 ERESEPT.el("OppdatertFest", Instant.now().toString())
                 ));
-        MedicationOrder order = new MedicationOrder(prescriptionDocument);
+        MedicationOrder order = new MedicationOrder();
 
         // Is in the message envelope!
 //        Assertions.assertThat(order.getPrescriber().getReference())

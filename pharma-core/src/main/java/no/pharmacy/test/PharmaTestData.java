@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import lombok.Getter;
 import no.pharmacy.core.Money;
+import no.pharmacy.core.PersonReference;
 import no.pharmacy.core.Practitioner;
 import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.MedicationOrder;
@@ -123,8 +124,9 @@ public class PharmaTestData {
         return random(100) < percent;
     }
 
-    public Reference sampleDoctor() {
-        return new Reference(String.valueOf(randomId()), sampleName());
+    public PersonReference sampleDoctor() {
+        return new PersonReference(String.valueOf(randomId()),
+                sampleFirstName(), sampleLastName());
     }
 
     public static long randomId() {
@@ -135,7 +137,7 @@ public class PharmaTestData {
         return sampleMedicationOrder(sampleDoctor(), samplePastDate(), medication);
     }
 
-    public static MedicationOrder sampleMedicationOrder(Reference prescriber, LocalDate dateWritten, Medication medication) {
+    public static MedicationOrder sampleMedicationOrder(PersonReference prescriber, LocalDate dateWritten, Medication medication) {
         MedicationOrder medicationOrder = new MedicationOrder();
         medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
         medicationOrder.setPrescriber(prescriber);

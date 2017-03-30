@@ -7,14 +7,20 @@ import org.junit.Test;
 
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
+import no.pharmacy.infrastructure.CryptoUtil;
+import no.pharmacy.patient.JdbcPatientRepository;
+import no.pharmacy.patient.PatientRepository;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
+import no.pharmacy.test.TestDataSource;
 
 public class RFPrescriptionGatewayTest {
 
     private PharmaTestData testData = new PharmaTestData();
 
-    private FakeReseptFormidler fakeReseptFormidler = new FakeReseptFormidler(testData.getMedicationRepository());
+    private PatientRepository patientRepository = new JdbcPatientRepository(TestDataSource.patientInstance(), s -> PharmaTestData.sampleName(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
+
+    private FakeReseptFormidler fakeReseptFormidler = new FakeReseptFormidler(testData.getMedicationRepository(), patientRepository);
 
     private PrescriptionGateway gateway = new RFPrescriptionGateway(fakeReseptFormidler, testData.getMedicationRepository());
 

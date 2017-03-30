@@ -1,6 +1,5 @@
 package no.pharmacy.web.server;
 
-import javax.crypto.SecretKey;
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Handler;
@@ -24,6 +23,7 @@ import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.medicationorder.RFPrescriptionGateway;
 import no.pharmacy.patient.JdbcPatientRepository;
+import no.pharmacy.patient.PatientRepository;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.web.infrastructure.logging.LogDisplayServlet;
@@ -64,19 +64,20 @@ public class PharmaServer {
 
         DataSource medicationDataSource = createMedicationDataSource();
 
+        PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
+
         JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(medicationDataSource);
         medicationRepository.refresh(FestMedicationImporter.FEST_URL.toString());
 
-        FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository);
+        FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository, patientRepository);
 
-        SecretKey secretKey = CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes());
 
         handlers.addHandler(createOpsHandler());
         handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository));
 
         PharmaGuiHandler guiHandler = new PharmaGuiHandler();
         guiHandler.setMedicationRepository(medicationRepository);
-        guiHandler.setPatientRepository(new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName(), secretKey));
+        guiHandler.setPatientRepository(patientRepository);
         guiHandler.setPrescriptionGateway(new RFPrescriptionGateway(reseptFormidler, medicationRepository));
         guiHandler.setRepository(new JdbcMedicationDispenseRepository(createPharmaDataSource(), medicationRepository));
 

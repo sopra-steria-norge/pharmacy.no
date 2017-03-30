@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import org.junit.Test;
 
 import no.pharmacy.core.Money;
-import no.pharmacy.core.Reference;
+import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
@@ -42,8 +42,8 @@ public class RefundCalculationTest {
     public void shouldCalculateCompleteRefund() throws Exception {
         DispenseOrder order = new DispenseOrder();
 
-        Reference doctor1 = testData.sampleDoctor();
-        Reference doctor2 = testData.sampleDoctor();
+        PersonReference doctor1 = testData.sampleDoctor();
+        PersonReference doctor2 = testData.sampleDoctor();
 
         LocalDate firstDate = LocalDate.now().minusDays(100);
         LocalDate secondDate = firstDate.plusDays(7);
@@ -74,7 +74,7 @@ public class RefundCalculationTest {
     public void shouldCalculateRefundGroup() throws Exception {
         DispenseOrder order = new DispenseOrder();
 
-        Reference doctor1 = testData.sampleDoctor();
+        PersonReference doctor1 = testData.sampleDoctor();
 
         LocalDate firstDate = LocalDate.now().minusDays(100);
 
@@ -98,7 +98,7 @@ public class RefundCalculationTest {
     }
 
     private void addMedicationDispense(DispenseOrder order,
-            Reference practitioner, LocalDate firstDate,
+            PersonReference practitioner, LocalDate firstDate,
             Medication medication, Money retailPrice) {
         MedicationOrder prescription = PharmaTestData.sampleMedicationOrder(practitioner, firstDate, medication);
         MedicationDispense dispense = order.addMedicationOrder(prescription);
@@ -110,7 +110,7 @@ public class RefundCalculationTest {
     public void shouldCalculateRefundGroup2() throws Exception {
         DispenseOrder order = new DispenseOrder();
 
-        Reference doctor1 = testData.sampleDoctor();
+        PersonReference doctor1 = testData.sampleDoctor();
 
         LocalDate firstDate = LocalDate.now().minusDays(100);
 

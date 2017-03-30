@@ -10,6 +10,7 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import no.pharmacy.core.Money;
+import no.pharmacy.core.PersonReference;
 import no.pharmacy.core.Reference;
 import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 import no.pharmacy.medication.MedicationRepository;
@@ -155,7 +156,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
     private MedicationOrder readMedicationOrder(ResultSet rs) throws SQLException {
         MedicationOrder medicationOrder = new MedicationOrder();
         medicationOrder.setId(rs.getLong("id"));
-        medicationOrder.setPrescriber(new Reference(rs.getString("prescriber_id"),
+        medicationOrder.setPrescriber(new PersonReference(rs.getString("prescriber_id"),
                 rs.getString("prescriber_name")));
         medicationOrder.setDateWritten(toLocalDate(rs.getDate("date_written")));
         medicationOrder.setDosageText(rs.getString("dosage_text"));

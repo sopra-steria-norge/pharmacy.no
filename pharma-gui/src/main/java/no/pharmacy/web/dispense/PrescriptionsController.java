@@ -21,11 +21,9 @@ import no.pharmacy.patient.PatientRepository;
 
 public class PrescriptionsController extends HttpServlet {
 
-
     private PrescriptionGateway prescriptionsGateway;
     private MedicationDispenseRepository medicationDispenseRepository;
     private PatientRepository patientRepository;
-
 
     public PrescriptionsController(
             PrescriptionGateway prescriptionsGateway,
@@ -39,14 +37,21 @@ public class PrescriptionsController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String nationalId = req.getParameter("nationalId");
+        if (nationalId == null) {
+            Document doc = Xml.readResource("/pharma-webapp/index.html.template");
+            resp.setContentType("text/html");
+            doc.writeTo(resp.getWriter());
+            return;
+        }
+
+        Reference patient = patientRepository.findPatientByNationalId(nationalId);
         if ("journal".equals(req.getParameter("action"))) {
-            Reference patient = patientRepository.findPatientByNationalId(nationalId);
             Document doc = showDispenseHistoryView(nationalId, patient,
                     medicationDispenseRepository.historicalDispensesForPerson(patient));
             resp.setContentType("text/html");
             doc.writeTo(resp.getWriter());
         } else {
-            Document doc = showDispenseCreationView(nationalId,
+            Document doc = showDispenseCreationView(nationalId, patient,
                     prescriptionsGateway.requestMedicationOrdersToDispense(null, nationalId, "1234"));
             resp.setContentType("text/html");
             doc.writeTo(resp.getWriter());
@@ -73,11 +78,10 @@ public class PrescriptionsController extends HttpServlet {
         return doc;
     }
 
-    private Document showDispenseCreationView(String nationalId, List<? extends MedicationOrderSummary> orders) throws IOException {
+    private Document showDispenseCreationView(String nationalId, Reference patient, List<? extends MedicationOrderSummary> orders) throws IOException {
         Document doc = Xml.readResource("/pharma-webapp/index.html.template");
 
         if (nationalId != null) {
-            Reference patient = patientRepository.findPatientByNationalId(nationalId);
             doc.find("...", "#prescriptionsForNationalId").first().val(nationalId);
 
             Element results = doc.find("...", "#results").first();
