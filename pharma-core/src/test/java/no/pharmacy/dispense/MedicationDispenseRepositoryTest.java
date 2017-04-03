@@ -6,14 +6,12 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
-import ch.qos.logback.classic.Level;
 import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseAction;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationOrder;
-import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.TestDataSource;
@@ -150,12 +148,8 @@ public class MedicationDispenseRepositoryTest {
             .isEqualToComparingFieldByField(ritalinDispense);
     }
 
-    private LogConfiguration logConfig = new LogConfiguration();
-
     @Test
     public void shouldDispenseOrder() {
-        logConfig.setLevel("no.pharmacy", Level.TRACE);
-
         DispenseOrder dispenseOrder = new DispenseOrder();
         dispenseOrder.setPatient(testData.samplePatient());
         dispenseOrder.addMedicationOrder(testData.sampleMedicationOrder(testData.sampleMedication()));

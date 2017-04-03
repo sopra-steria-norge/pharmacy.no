@@ -18,6 +18,7 @@ public class TestDataSource {
 
     public synchronized static DataSource medicationInstance() {
         if (medicationsDataSource == null) {
+            // TODO: Inconsistent "medication" vs "medications"
             String jdbcUrl = System.getProperty("test.medication.jdbc.url", "jdbc:h2:mem:medication");
             medicationsDataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
             logger.info("Initializing {}", jdbcUrl);
@@ -33,27 +34,27 @@ public class TestDataSource {
 
     public synchronized static DataSource pharmacistInstance() {
         if (pharmacistDataSource == null) {
-            String jdbcUrl = System.getProperty("test.pharmacist.jdbc.url", "jdbc:h2:mem:pharmacist");
-            pharmacistDataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
-            logger.info("Initializing {}", jdbcUrl);
-
-            Flyway flyway = new Flyway();
-            flyway.setDataSource(pharmacistDataSource);
-            flyway.setLocations("db/db-pharmacist/");
-            flyway.clean();
-            flyway.migrate();
+            pharmacistDataSource = createMemDataSource("pharmacist");
         }
         return pharmacistDataSource;
     }
 
     public static synchronized DataSource patientInstance() {
         if (patientDataSource == null) {
-            patientDataSource = createDataSource("test.patient.jdbc.url", "jdbc:h2:mem:patient", "db/db-patient");
+            patientDataSource = createMemDataSource("patient");
         }
         return patientDataSource;
     }
 
-    private static DataSource createDataSource(String property, String jdbcDefaultUrl, String migrations) {
+    public static DataSource createMemDataSource(String name) {
+        return createDataSource("test." + name + ".jdbc.url", "jdbc:h2:mem:" + name, "db/db-" + name);
+    }
+
+    public static DataSource createFileDataSource(String name) {
+        return createDataSource("test." + name + ".file.jdbc.url", "jdbc:h2:file:./target/db/" + name, "db/db-" + name);
+    }
+
+    public static DataSource createDataSource(String property, String jdbcDefaultUrl, String migrations) {
         String jdbcUrl = System.getProperty(property, jdbcDefaultUrl);
         DataSource dataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
         logger.info("Initializing {}", jdbcUrl);
@@ -61,9 +62,9 @@ public class TestDataSource {
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);
         flyway.setLocations(migrations);
-        flyway.clean();
         flyway.migrate();
         return dataSource;
     }
+
 
 }

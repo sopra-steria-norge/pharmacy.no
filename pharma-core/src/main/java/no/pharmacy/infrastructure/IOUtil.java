@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -309,5 +310,13 @@ public class IOUtil {
         } catch (IOException e) {
             throw ExceptionUtil.softenException(e);
         }
+    }
+
+    public static InputStream dontClose(InputStream input) {
+        return new FilterInputStream(input) {
+            @Override
+            public void close() throws IOException {
+            }
+        };
     }
 }

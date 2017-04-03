@@ -3,7 +3,6 @@ package no.pharmacy.test;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -11,20 +10,20 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import org.flywaydb.core.Flyway;
-import org.h2.jdbcx.JdbcConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import lombok.Getter;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
-import no.pharmacy.core.Practitioner;
 import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.Medication;
+import no.pharmacy.practitioner.JdbcPractitionerRepository;
+import no.pharmacy.practitioner.Practitioner;
+import no.pharmacy.practitioner.PractitionerRepository;
 
 public class PharmaTestData {
 
@@ -36,24 +35,30 @@ public class PharmaTestData {
     @Getter
     private final JdbcMedicationRepository medicationRepository;
 
+    private final PractitionerRepository practitionerRepository;
+
     private static Random random = new Random();
-    private static JdbcConnectionPool medicationTestDatasource;
+    private static DataSource medicationTestDatasource;
+    private static DataSource practitionerTestDatasource;
 
     public PharmaTestData() {
         this.medicationRepository = new JdbcMedicationRepository(medicationDataSource());
         medicationRepository.refresh(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString()));
+
+        this.practitionerRepository = new JdbcPractitionerRepository(practitionerDataSource());
+        //practitionerRepository.refresh(System.getProperty("practitioner.hpr_source", "target/HprExport.L3.csv.v2"));
+    }
+
+    private static synchronized DataSource practitionerDataSource() {
+        if (practitionerTestDatasource == null) {
+            practitionerTestDatasource = TestDataSource.createDataSource("pharmacy.practitioner.jdbc.url", "jdbc:h2:file:./target/db/practitioner", "db/db-practitioner");
+        }
+        return practitionerTestDatasource;
     }
 
     public static synchronized DataSource medicationDataSource() {
         if (medicationTestDatasource == null) {
-            String jdbcUrl = System.getProperty("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications");
-            medicationTestDatasource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
-            logger.info("Initializing {}", jdbcUrl);
-
-            Flyway flyway = new Flyway();
-            flyway.setDataSource(medicationTestDatasource);
-            flyway.setLocations("db/db-medications");
-            flyway.migrate();
+            medicationTestDatasource = TestDataSource.createDataSource("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications", "db/db-medications");
         }
         return medicationTestDatasource;
     }
@@ -223,6 +228,6 @@ public class PharmaTestData {
     }
 
     public List<PersonReference> listDoctors() {
-        return Arrays.asList(sampleDoctor(), sampleDoctor());
+        return practitionerRepository.listDoctors();
     }
 }

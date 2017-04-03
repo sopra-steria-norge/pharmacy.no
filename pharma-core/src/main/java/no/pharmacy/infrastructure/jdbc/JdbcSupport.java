@@ -132,7 +132,7 @@ public class JdbcSupport {
         }
     }
 
-    protected <T> List<T> queryForList(String query, List<Object> parameters, ResultSetMapper<T> mapper) {
+    public <T> List<T> queryForList(String query, List<Object> parameters, ResultSetMapper<T> mapper) {
         long startTime = System.currentTimeMillis();
         try (Connection conn = dataSource.getConnection()) {
             logger.trace("queryForList {} {}", query, parameters);

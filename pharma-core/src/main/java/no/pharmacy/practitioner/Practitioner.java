@@ -1,7 +1,8 @@
-package no.pharmacy.core;
+package no.pharmacy.practitioner;
 
 import lombok.Getter;
 import lombok.Setter;
+import no.pharmacy.core.Reference;
 
 public class Practitioner {
 
