@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.infrastructure.CryptoUtil;
@@ -24,12 +25,14 @@ public class RFPrescriptionGatewayTest {
 
     private PrescriptionGateway gateway = new RFPrescriptionGateway(fakeReseptFormidler, testData.getMedicationRepository());
 
+    private PersonReference prescriber = testData.sampleDoctor();
+
     private String employeeId = testData.samplePractitioner().getReference().getReference();
 
     @Test
     public void shouldRetrievePrescriptionList() {
         String nationalId = testData.unusedNationalId();
-        MedicationOrder medicationOrder = fakeReseptFormidler.addPrescription(nationalId, testData.sampleMedication());
+        MedicationOrder medicationOrder = fakeReseptFormidler.addPrescription(nationalId, testData.sampleMedication(), prescriber);
 
         List<MedicationOrderSummary> orders = gateway.requestMedicationOrdersToDispense(null, nationalId, employeeId);
         assertThat(orders)
@@ -42,7 +45,7 @@ public class RFPrescriptionGatewayTest {
 
     @Test
     public void shouldStartPrescriptionDispense() {
-        MedicationOrder medicationOrder = fakeReseptFormidler.addPrescription(testData.unusedNationalId(), testData.sampleMedication());
+        MedicationOrder medicationOrder = fakeReseptFormidler.addPrescription(testData.unusedNationalId(), testData.sampleMedication(), prescriber);
 
         MedicationOrder orderForDispense = gateway.startMedicationOrderDispense(medicationOrder.getPrescriptionId(), null, employeeId);
 
@@ -52,7 +55,7 @@ public class RFPrescriptionGatewayTest {
 
     @Test
     public void shouldCompleteDispense() {
-        MedicationOrder medicationOrder = fakeReseptFormidler.addPrescription(testData.unusedNationalId(), testData.sampleMedication());
+        MedicationOrder medicationOrder = fakeReseptFormidler.addPrescription(testData.unusedNationalId(), testData.sampleMedication(), prescriber);
 
         MedicationDispense dispense = new MedicationDispense(medicationOrder);
         dispense.setMedication(dispense.getAuthorizingPrescription().getMedication());

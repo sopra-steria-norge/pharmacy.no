@@ -1,16 +1,23 @@
 package no.pharmacy.infrastructure.jdbc;
 
+import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -25,6 +32,8 @@ public class JdbcSupport {
     private static final Logger logger = LoggerFactory.getLogger(JdbcSupport.class);
 
     private final DataSource dataSource;
+
+    private SecretKey secretKey;
 
     public JdbcSupport(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -53,7 +62,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw soften(query, e);
         } finally {
-            logExecution("executeUpdate", query, startTime);
+            logExecution("executeUpdate", query, startTime, parameters);
         }
     }
 
@@ -88,6 +97,10 @@ public class JdbcSupport {
                 stmt.setString(i+1, ((Reference)parameter).getReference());
             } else if (parameter instanceof Enum<?>) {
                 stmt.setString(i+1, ((Enum<?>)parameter).name());
+            } else if (parameter instanceof ZonedDateTime) {
+                stmt.setTimestamp(i+1, new Timestamp(((ZonedDateTime)parameter).toInstant().toEpochMilli()));
+            } else if (parameter instanceof Instant) {
+                stmt.setTimestamp(i+1, new Timestamp(((Instant)parameter).toEpochMilli()));
             } else {
                 stmt.setObject(i+1, parameter);
             }
@@ -111,7 +124,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw ExceptionUtil.softenException(e);
         } finally {
-            logExecution("retrieveSingle", query, startTime);
+            logExecution("retrieveSingle", query, startTime, parameters);
         }
     }
 
@@ -128,7 +141,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw soften(query, e);
         } finally {
-            logExecution("queryForResultSet", query, startTime);
+            logExecution("queryForResultSet", query, startTime, parameters);
         }
     }
 
@@ -149,7 +162,7 @@ public class JdbcSupport {
         } catch (SQLException e) {
             throw soften(query, e);
         } finally {
-            logExecution("queryForList", query, startTime);
+            logExecution("queryForList", query, startTime, parameters);
         }
     }
 
@@ -170,13 +183,46 @@ public class JdbcSupport {
         return ExceptionUtil.softenException(e);
     }
 
-    private void logExecution(String method, String query, long startTime) {
+    private void logExecution(String method, String query, long startTime, List<Object> parameters) {
         long executionTime = System.currentTimeMillis()-startTime;
         if (executionTime > 1000) {
-            logger.warn("SLOW {} {}: {}ms", method, query, executionTime);
+            logger.warn("SLOW {} {}: {}ms {}", method, query, executionTime, parameters);
         } else {
             logger.trace("{} {}: {}ms", method, query, executionTime);
         }
+    }
+
+    public String encrypt(String plainText) {
+        if (plainText == null) {
+            return null;
+        }
+        if (secretKey == null) {
+            throw new IllegalStateException("Initialize " + this + " with setSecretKey to support encrypted columns");
+        }
+        try {
+            Cipher encryptCipher = Cipher.getInstance("AES");
+            encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            return Base64.getEncoder().encodeToString(encryptCipher.doFinal(plainText.getBytes()));
+        } catch (GeneralSecurityException e) {
+            throw ExceptionUtil.softenException(e);
+        }
+    }
+
+    public String decrypt(String cryptoText) {
+        if (secretKey == null) {
+            throw new IllegalStateException("Initialize " + this + " with setSecretKey to support encrypted columns");
+        }
+        try {
+            Cipher encryptCipher = Cipher.getInstance("AES");
+            encryptCipher.init(Cipher.DECRYPT_MODE, secretKey);
+            return new String(encryptCipher.doFinal(Base64.getDecoder().decode(cryptoText.getBytes())));
+        } catch (GeneralSecurityException e) {
+            throw ExceptionUtil.softenException(e);
+        }
+    }
+
+    public void setSecretKey(SecretKey secretKey) {
+        this.secretKey = secretKey;
     }
 
 }

@@ -62,20 +62,21 @@ public class FakeReseptFormidler implements MessageGateway {
 
     private final MedicationSource medicationSource;
 
-    private final PharmaTestData testData = new PharmaTestData();
-
-
     public FakeReseptFormidler(MedicationSource medicationSource, PatientRepository patientRepository) {
         this.medicationSource = medicationSource;
         this.patientRepository = patientRepository;
     }
 
-    public MedicationOrder addPrescription(String nationalId, Medication product) {
+    public MedicationOrder addPrescription(String nationalId, Medication product, PersonReference prescriber) {
         Reference patient = patientRepository.findPatientByNationalId(nationalId);
 
+        MedicationOrder medicationOrder = new MedicationOrder(product);
+        medicationOrder.setPrescriber(prescriber);
+        medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
+        medicationOrder.setDateWritten(LocalDate.now().minusDays(PharmaTestData.random(14)));
         // TODO: Lookup nationalId in patient repository
-        MedicationOrder medicationOrder = createMedicationOrder(product);
         medicationOrder.setSubject(patient);
+
         this.prescriptionsForPerson.computeIfAbsent(nationalId, s -> new ArrayList<>())
             .add(medicationOrder);
         this.prescriptionsById.put(medicationOrder.getPrescriptionId(), medicationOrder);
@@ -83,17 +84,9 @@ public class FakeReseptFormidler implements MessageGateway {
         return medicationOrder;
     }
 
-    private MedicationOrder createMedicationOrder(Medication product) {
-        MedicationOrder medicationOrder = new MedicationOrder(product);
-        medicationOrder.setPrescriber(testData.sampleDoctor());
-        medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
-        medicationOrder.setDateWritten(LocalDate.now().minusDays(PharmaTestData.random(14)));
-        return medicationOrder;
-    }
-
-    public MedicationOrder addPrescription(String nationalId, String productId) {
-        return addPrescription(nationalId,
-                this.medicationSource.getMedication(productId).orElseThrow(() -> new IllegalArgumentException(productId)));
+    public MedicationOrder addPrescription(String nationalId, String productId, PersonReference prescriber) {
+        Medication medication = this.medicationSource.getMedication(productId).orElseThrow(() -> new IllegalArgumentException(productId));
+        return addPrescription(nationalId, medication, prescriber);
     }
 
     @Override

@@ -1,11 +1,7 @@
 package no.pharmacy.web.test;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,9 +12,10 @@ import org.eaxy.Element;
 import org.eaxy.Xml;
 
 import no.pharmacy.core.PersonReference;
-import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationRepository;
+import no.pharmacy.practitioner.Practitioner;
+import no.pharmacy.practitioner.PractitionerRepository;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
 
@@ -26,11 +23,18 @@ public class ReceiptTestCaseController extends HttpServlet {
 
     private FakeReseptFormidler simulatedReseptFormidler;
     private MedicationRepository medicationRepository;
+    private PractitionerRepository practitionerRepository;
+
     private PharmaTestData testData = new PharmaTestData();
 
-    public ReceiptTestCaseController(FakeReseptFormidler simulatedReseptFormidler, MedicationRepository medicationRepository) {
+    public ReceiptTestCaseController(FakeReseptFormidler simulatedReseptFormidler, MedicationRepository medicationRepository, PractitionerRepository practitionerRepository) {
         this.simulatedReseptFormidler = simulatedReseptFormidler;
         this.medicationRepository = medicationRepository;
+        this.practitionerRepository = practitionerRepository;
+    }
+
+    @Override
+    public void init() throws ServletException {
     }
 
     @Override
@@ -54,15 +58,14 @@ public class ReceiptTestCaseController extends HttpServlet {
         }
 
         Element prescriber = doc.find("...", "#prescriber").first();
-        for (PersonReference doctor : testData.listDoctors()) {
+        for (PersonReference doctor : practitionerRepository.listDoctors()) {
             prescriber.add(Xml.el("option").val(doctor.getReference())
                     .text(doctor.getDisplay() + " (" + doctor.getReference() + ")"));
         }
         PharmaTestData.pickOne(prescriber.elements()).selected(true);
 
         Element medicationSelect = doc.find("...", "[name=productId]").first();
-        List<Medication> sampleMedications = sampleMedications();
-        for (Medication medication : sampleMedications) {
+        for (Medication medication : medicationRepository.list(0, 1000)) {
             medicationSelect.add(Xml.el("option", Xml.attr("value", medication.getProductId()),
                     Xml.attr("label", medication.getDisplay())));
         }
@@ -71,24 +74,18 @@ public class ReceiptTestCaseController extends HttpServlet {
         doc.writeTo(resp.getWriter());
     }
 
-    private List<Medication> sampleMedications() {
-        try (Connection conn = medicationRepository.getDataSource().getConnection()) {
-            return medicationRepository.list(0, 1000);
-        } catch (SQLException e) {
-            throw ExceptionUtil.softenException(e);
-        }
-    }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String nationalId = req.getParameter("nationalId");
         String scenario = req.getParameter("scenario");
+        Practitioner prescriber = practitionerRepository.getPractitioner(req.getParameter("prescriber")).get();
+
         HashMap<Object, Object> flash = new HashMap<>();
         if ("drugInteraction".equals(scenario)) {
-            simulatedReseptFormidler.addPrescription(nationalId, "500595");
-            simulatedReseptFormidler.addPrescription(nationalId, "466813");
+            simulatedReseptFormidler.addPrescription(nationalId, "500595", prescriber.getReference());
+            simulatedReseptFormidler.addPrescription(nationalId, "466813", prescriber.getReference());
         } else {
-            simulatedReseptFormidler.addPrescription(nationalId, req.getParameter("productId"));
+            simulatedReseptFormidler.addPrescription(nationalId, req.getParameter("productId"), prescriber.getReference());
         }
         flash.put("message", "La inn resept for " + nationalId);
         flash.put("patient", nationalId);

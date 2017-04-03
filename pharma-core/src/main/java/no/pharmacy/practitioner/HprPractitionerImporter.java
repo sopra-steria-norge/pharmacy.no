@@ -8,8 +8,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -27,15 +34,22 @@ import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 public class HprPractitionerImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(HprPractitionerImporter.class);
-    private Set<Long> existingHprNumbers;
+    private Map<Long, Instant> lastUpdated = new HashMap<>();
     private JdbcPractitionerRepository repository;
     private CSVFormat format = CSVFormat.DEFAULT.withEscape('\\').withDelimiter(';').withFirstRecordAsHeader();
+    private DateTimeFormatter datePattern = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+    private JdbcSupport jdbcSupport;
 
     HprPractitionerImporter(JdbcPractitionerRepository repository, JdbcSupport jdbcSupport) {
         this.repository = repository;
-        existingHprNumbers = new HashSet<>(jdbcSupport.queryForList(
-                "select hpr_number from practitioners",
-                new ArrayList<>(), rs -> rs.getLong(1)));
+        this.jdbcSupport = jdbcSupport;
+        jdbcSupport.queryForList(
+                "select hpr_number, updated_at from practitioners",
+                new ArrayList<>(), rs -> {
+                    lastUpdated.put(rs.getLong("hpr_number"),
+                            rs.getTimestamp("updated_at").toInstant());
+                    return rs.getLong(1);
+                });
     }
 
     public void refresh(String hprLocation) {
@@ -50,8 +64,6 @@ public class HprPractitionerImporter {
                         saveAuthorizations(IOUtil.dontClose(zip));
                     } else if (zipEntry.getName().endsWith("rekvisisjonsretter.csv")) {
                         savePrescriptionAuthorizations(IOUtil.dontClose(zip));
-                    } else {
-                        System.out.println("Huh!");
                     }
                 }
             } catch (IOException e) {
@@ -76,7 +88,7 @@ public class HprPractitionerImporter {
 
     }
 
-    private void savePrescriptionAuthorizations(InputStream dontClose) {
+    private void savePrescriptionAuthorizations(InputStream input) {
         // TODO Auto-generated method stub
 
     }
@@ -88,11 +100,9 @@ public class HprPractitionerImporter {
                     logger.info("Reading persons, line {}", parser.getCurrentLineNumber());
                 }
 
-                Practitioner practitioner = new Practitioner();
-                practitioner.setName(record.get("Fornavn") + " " + record.get("Etternavn"));
-                practitioner.setIdentifier(Long.parseLong(record.get("HPRNummer")));
-                if (!existingHprNumbers.contains(practitioner.getIdentifier())) {
-                    existingHprNumbers.add(practitioner.getIdentifier());
+                Practitioner practitioner = toPractitioner(record);
+                if (shouldSave(practitioner)) {
+                    lastUpdated.put(practitioner.getIdentifier(), practitioner.getUpdatedAt());
                     repository.save(practitioner);
                 }
             }
@@ -104,7 +114,41 @@ public class HprPractitionerImporter {
 
     }
 
+    private boolean shouldSave(Practitioner practitioner) {
+        if (practitioner == null) return false;
+        Instant previousUpdate = lastUpdated.getOrDefault(practitioner.getIdentifier(), Instant.MIN);
+        return practitioner.getUpdatedAt().isAfter(previousUpdate);
+    }
+
+    private Practitioner toPractitioner(CSVRecord record) {
+        try {
+
+            Practitioner practitioner = new Practitioner();
+            practitioner.setFirstName(record.get("Fornavn"));
+            practitioner.setLastName(record.get("Etternavn"));
+            practitioner.setNationalId(record.get("Personnummer"));
+            practitioner.setIdentifier(Long.parseLong(record.get("HPRNummer")));
+            practitioner.setUpdatedAt(
+                    datePattern.parse(record.get("SistOppdatert"), LocalDateTime::from).atZone(ZoneId.systemDefault()).toInstant());
+
+            String dateOfBirth = record.get("Fødselsdato");
+            if (dateOfBirth.isEmpty()) {
+                logger.warn("Problem on {}: no date of birth for {}", record.getRecordNumber(), practitioner);
+                return null;
+            }
+            practitioner.setDateOfBirth(
+                    datePattern.parse(dateOfBirth, LocalDate::from));
+            return practitioner;
+        } catch (RuntimeException e) {
+            logger.warn("Error on " + record.getRecordNumber());
+            throw e;
+        }
+    }
+
     private void saveAuthorizations(InputStream input) {
+        Set<Long> authorizationIds = new HashSet<>(jdbcSupport.queryForList(
+                "select id from practitioner_authorizations",
+                new ArrayList<>(), rs -> rs.getLong(1)));
         try (CSVParser parser = new CSVParser(new InputStreamReader(input, StandardCharsets.UTF_8), format)) {
             for (CSVRecord record : parser) {
                 if (parser.getCurrentLineNumber() % 1000 == 0) {
@@ -114,9 +158,10 @@ public class HprPractitionerImporter {
                 Long hprNumber = Long.parseLong(record.get("HPRNummer"));
                 String authorization = record.get("Helsepersonellkategori");
                 authorization = authorization.substring(authorization.lastIndexOf(":") + 1);
+                long id = Long.parseLong(record.get("Id"));
 
-                if (existingHprNumbers.contains(hprNumber)) {
-                    repository.saveAuthorization(hprNumber, authorization);
+                if (!authorizationIds.contains(id) && lastUpdated.containsKey(hprNumber)) {
+                    repository.saveAuthorization(id, hprNumber, authorization);
                 }
             }
             logger.info("Completed saving authorizations");

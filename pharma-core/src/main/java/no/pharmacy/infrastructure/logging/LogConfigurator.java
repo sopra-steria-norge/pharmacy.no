@@ -32,7 +32,7 @@ public class LogConfigurator extends ContextAwareBase implements Configurator {
         @Override
         public void start() {
             tpc.setContext(getContext());
-            tpc.setOptionList(Arrays.asList("20", "org.eclipse.jetty."));
+            tpc.setOptionList(Arrays.asList("20", "org.eclipse.jetty.", "org.h2.command.Parser", "org.h2.engine.Session"));
             tpc.start();
             super.start();
         }

@@ -24,6 +24,8 @@ import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.medicationorder.RFPrescriptionGateway;
 import no.pharmacy.patient.JdbcPatientRepository;
 import no.pharmacy.patient.PatientRepository;
+import no.pharmacy.practitioner.JdbcPractitionerRepository;
+import no.pharmacy.practitioner.PractitionerRepository;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.web.infrastructure.logging.LogDisplayServlet;
@@ -62,18 +64,20 @@ public class PharmaServer {
         HandlerList handlers = new HandlerList();
         handlers.addHandler(new ShutdownHandler(SHUTDOWN_TOKEN, true, true));
 
-        DataSource medicationDataSource = createMedicationDataSource();
-
         PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
 
-        JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(medicationDataSource);
+        JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(createMedicationDataSource());
         medicationRepository.refresh(FestMedicationImporter.FEST_URL.toString());
+
+        PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(createPractitionerDataSource(),
+                CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
+        practitionerRepository.refresh(System.getProperty("practitioner.hpr_source", "target/HprExport.L3.csv.v2.zip"));
 
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository, patientRepository);
 
 
         handlers.addHandler(createOpsHandler());
-        handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository));
+        handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository, practitionerRepository));
 
         PharmaGuiHandler guiHandler = new PharmaGuiHandler();
         guiHandler.setMedicationRepository(medicationRepository);
@@ -98,6 +102,10 @@ public class PharmaServer {
         return createDataSource("jdbc:h2:file:./target/db/medications", "db/db-medications");
     }
 
+    private DataSource createPractitionerDataSource() {
+        return createDataSource("jdbc:h2:file:./target/db/practitioners", "db/db-practitioners");
+    }
+
     private DataSource createDataSource(String jdbcUrl, String migrations) {
         JdbcConnectionPool dataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
         logger.info("Initializing {}", jdbcUrl);
@@ -110,11 +118,11 @@ public class PharmaServer {
         return dataSource;
     }
 
-    private Handler createPharmaTestRig(FakeReseptFormidler reseptFormidler, MedicationRepository medicationRepository) {
+    private Handler createPharmaTestRig(FakeReseptFormidler reseptFormidler, MedicationRepository medicationRepository, PractitionerRepository practitionerRepository) {
         WebAppContext handler = new WebAppContext(null, "/pharma-test");
         handler.setBaseResource(Resource.newClassPathResource("/pharma-testrig-webapp"));
 
-        handler.addServlet(new ServletHolder(new ReceiptTestCaseController(reseptFormidler, medicationRepository)), "/");
+        handler.addServlet(new ServletHolder(new ReceiptTestCaseController(reseptFormidler, medicationRepository, practitionerRepository)), "/");
         handler.addServlet(new ServletHolder(new ReseptFormidlerLogTestController(reseptFormidler)), "/log");
 
         return handler;

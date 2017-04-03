@@ -10,9 +10,6 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import lombok.Getter;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
@@ -21,13 +18,9 @@ import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.Medication;
-import no.pharmacy.practitioner.JdbcPractitionerRepository;
 import no.pharmacy.practitioner.Practitioner;
-import no.pharmacy.practitioner.PractitionerRepository;
 
 public class PharmaTestData {
-
-    private static final Logger logger = LoggerFactory.getLogger(PharmaTestData.class);
 
     private static int sequence;
     private static final List<Medication> medicationCache = new ArrayList<>();
@@ -35,25 +28,12 @@ public class PharmaTestData {
     @Getter
     private final JdbcMedicationRepository medicationRepository;
 
-    private final PractitionerRepository practitionerRepository;
-
     private static Random random = new Random();
     private static DataSource medicationTestDatasource;
-    private static DataSource practitionerTestDatasource;
 
     public PharmaTestData() {
         this.medicationRepository = new JdbcMedicationRepository(medicationDataSource());
         medicationRepository.refresh(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString()));
-
-        this.practitionerRepository = new JdbcPractitionerRepository(practitionerDataSource());
-        //practitionerRepository.refresh(System.getProperty("practitioner.hpr_source", "target/HprExport.L3.csv.v2"));
-    }
-
-    private static synchronized DataSource practitionerDataSource() {
-        if (practitionerTestDatasource == null) {
-            practitionerTestDatasource = TestDataSource.createDataSource("pharmacy.practitioner.jdbc.url", "jdbc:h2:file:./target/db/practitioner", "db/db-practitioner");
-        }
-        return practitionerTestDatasource;
     }
 
     public static synchronized DataSource medicationDataSource() {
@@ -106,7 +86,8 @@ public class PharmaTestData {
     public Practitioner samplePractitioner() {
         Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier(random(1000000));
-        practitioner.setName(sampleName());
+        practitioner.setFirstName(sampleFirstName());
+        practitioner.setLastName(sampleLastName());
         return practitioner;
     }
 
@@ -225,9 +206,5 @@ public class PharmaTestData {
 
     public static String sampleProductId() {
         return randomNumericString(6);
-    }
-
-    public List<PersonReference> listDoctors() {
-        return practitionerRepository.listDoctors();
     }
 }

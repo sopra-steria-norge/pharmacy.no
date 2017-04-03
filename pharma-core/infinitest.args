@@ -2,5 +2,6 @@
 -Dpharmacy.fest_source=file:src/test/resources/fest-mini.xml
 -Dpharmacy.medication.jdbc.url=jdbc:h2:mem:medications
 
+-Dpharmacy.disable_hpr_refresh
 -Dpharmacy.hpr_source=file:src/test/resources/mini-hpr/
 -Dpharmacy.medication.jdbc.url=jdbc:h2:mem:medications
