@@ -22,6 +22,8 @@ import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.medicationorder.RFPrescriptionGateway;
+import no.pharmacy.organization.HealthcareServiceRepository;
+import no.pharmacy.organization.JdbcHealthcareServiceRepository;
 import no.pharmacy.patient.JdbcPatientRepository;
 import no.pharmacy.patient.PatientRepository;
 import no.pharmacy.practitioner.JdbcPractitionerRepository;
@@ -73,6 +75,9 @@ public class PharmaServer {
                 CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
         practitionerRepository.refresh(System.getProperty("practitioner.hpr_source", "target/HprExport.L3.csv.v2.zip"));
 
+        HealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(createHealthcareServiceDataSource());
+        healthcareServiceRepository.refresh(System.getProperty("healthcareservice.ar_source", "target/AR.xml.gz"));
+
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository, patientRepository);
 
 
@@ -82,12 +87,17 @@ public class PharmaServer {
         PharmaGuiHandler guiHandler = new PharmaGuiHandler();
         guiHandler.setMedicationRepository(medicationRepository);
         guiHandler.setPatientRepository(patientRepository);
+        guiHandler.setHealthcareServiceRepository(healthcareServiceRepository);
         guiHandler.setPrescriptionGateway(new RFPrescriptionGateway(reseptFormidler, medicationRepository));
         guiHandler.setRepository(new JdbcMedicationDispenseRepository(createPharmaDataSource(), medicationRepository));
 
         handlers.addHandler(guiHandler.createHandler());
 
         return handlers;
+    }
+
+    private DataSource createHealthcareServiceDataSource() {
+        return createDataSource("jdbc:h2:file:./target/db/organizations", "db/db-organizations");
     }
 
     private DataSource createPharmaDataSource() {

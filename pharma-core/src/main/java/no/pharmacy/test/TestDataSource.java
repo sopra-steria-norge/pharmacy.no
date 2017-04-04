@@ -16,6 +16,8 @@ public class TestDataSource {
 
     private static DataSource patientDataSource;
 
+    private static DataSource organizationsDataSource;
+
     public synchronized static DataSource medicationInstance() {
         if (medicationsDataSource == null) {
             // TODO: Inconsistent "medication" vs "medications"
@@ -46,6 +48,14 @@ public class TestDataSource {
         return patientDataSource;
     }
 
+    public static synchronized DataSource organizationsDataSource() {
+        if (organizationsDataSource == null) {
+            organizationsDataSource = createMemDataSource("organizations");
+        }
+        return organizationsDataSource;
+    }
+
+
     public static DataSource createMemDataSource(String name) {
         return createDataSource("test." + name + ".jdbc.url", "jdbc:h2:mem:" + name, "db/db-" + name);
     }
@@ -65,6 +75,7 @@ public class TestDataSource {
         flyway.migrate();
         return dataSource;
     }
+
 
 
 }

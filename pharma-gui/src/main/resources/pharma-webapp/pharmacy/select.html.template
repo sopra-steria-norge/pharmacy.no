@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Velg apotek | pharmacy.no</title>
+</head>
+<body>
+
+	<h1>Velg apotek</h1>
+	
+	<div id="healthcareServices"></div>
+
+</body>
+</html>
