@@ -6,8 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.UUID;
 
-import javax.sql.DataSource;
-
 import org.eaxy.Xml;
 import org.junit.Test;
 
@@ -16,8 +14,7 @@ import no.pharmacy.test.TestDataSource;
 
 public class MedicationPersistenceTest {
 
-    private DataSource dataSource = TestDataSource.medicationInstance();
-    private JdbcMedicationRepository repository = new JdbcMedicationRepository(dataSource);
+    private JdbcMedicationRepository repository = new JdbcMedicationRepository(TestDataSource.medicationInstance());
 
     @Test
     public void shouldRetrieveSavedMedication() throws Exception {
@@ -87,14 +84,13 @@ public class MedicationPersistenceTest {
     }
 
     private Medication sampleMedication() {
-        PharmaTestData testData = new PharmaTestData();
         Medication medication = new Medication();
         medication.setProductId(PharmaTestData.sampleProductId());
         medication.setDisplay(PharmaTestData.lorum());
         medication.setSubstitutionGroup(UUID.randomUUID().toString());
         medication.setGtin(PharmaTestData.sampleGtin());
         medication.setSubstance(PharmaTestData.pickOneOf("A12AX", "N01BB02", "J06BA01", "J01CA08"));
-        medication.setTrinnPrice(testData.samplePrice());
+        medication.setTrinnPrice(PharmaTestData.samplePrice());
         medication.setXml(Xml.el("testElement", "Hello world").toXML());
         return medication;
     }

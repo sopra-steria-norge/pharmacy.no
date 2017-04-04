@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import lombok.Getter;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
 import no.pharmacy.core.Reference;
@@ -25,16 +24,18 @@ public class PharmaTestData {
     private static int sequence;
     private static final List<Medication> medicationCache = new ArrayList<>();
 
-    @Getter
-    private final JdbcMedicationRepository medicationRepository;
+    private final static JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(medicationDataSource());
+
+    public JdbcMedicationRepository getMedicationRepository() {
+        return medicationRepository;
+    }
+
+    static {
+        medicationRepository.refresh(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString()));
+    }
 
     private static Random random = new Random();
     private static DataSource medicationTestDatasource;
-
-    public PharmaTestData() {
-        this.medicationRepository = new JdbcMedicationRepository(medicationDataSource());
-        medicationRepository.refresh(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString()));
-    }
 
     public static synchronized DataSource medicationDataSource() {
         if (medicationTestDatasource == null) {
@@ -175,7 +176,7 @@ public class PharmaTestData {
     }
 
 
-    public Money samplePrice() {
+    public static Money samplePrice() {
         return Money.inCents(random(2000) * 10);
     }
 

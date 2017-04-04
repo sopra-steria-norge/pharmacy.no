@@ -164,8 +164,8 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
         interactionsByAtc.clear();
     }
 
-    private static Map<String, List<MedicationInteraction>> interactionsByAtc = new HashMap<>();
-    private static Map<String, MedicationInteraction> interactionsById = new HashMap<>();
+    private Map<String, List<MedicationInteraction>> interactionsByAtc = new HashMap<>();
+    private Map<String, MedicationInteraction> interactionsById = new HashMap<>();
 
     @Override
     public MedicationInteraction getInteraction(String id) {

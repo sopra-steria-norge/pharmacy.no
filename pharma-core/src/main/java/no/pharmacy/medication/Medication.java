@@ -2,6 +2,7 @@ package no.pharmacy.medication;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -51,6 +52,15 @@ public class Medication {
 
     public Money getCoveredAmount(Money retailPrice) {
         return trinnPrice != null && retailPrice.isGreaterThan(trinnPrice) ? trinnPrice : retailPrice;
+    }
+
+    public List<MedicationInteraction> getInteractionsWith(Medication otherMedication) {
+        if (otherMedication == null) {
+            return new ArrayList<>();
+        }
+        return getInteractions().stream()
+            .filter(i -> i.interactsWith(otherMedication.getSubstance()))
+            .collect(Collectors.toList());
     }
 
 

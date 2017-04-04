@@ -28,7 +28,7 @@ public class MedicationDispenseRepositoryTest {
     public void shouldRetrieveSimpleDispenseOrder() {
         DispenseOrder order = new DispenseOrder();
         MedicationDispense dispense = order.addMedicationOrder(testData.sampleMedicationOrder());
-        dispense.setPrice(testData.samplePrice());
+        dispense.setPrice(PharmaTestData.samplePrice());
         dispense.setPrintedDosageText("Corrected text");
 
         order.setPatient(testData.samplePatient());
@@ -91,7 +91,7 @@ public class MedicationDispenseRepositoryTest {
         repository.saveDispenseOrder(order);
 
         MedicationDispense dispense = order.getMedicationDispenses().get(0);
-        dispense.setPrice(testData.samplePrice());
+        dispense.setPrice(PharmaTestData.samplePrice());
         dispense.setMedication(medicationOrder.getMedication());
         dispense.setPrintedDosageText("Updated dosage text");
         repository.update(dispense);
@@ -160,7 +160,7 @@ public class MedicationDispenseRepositoryTest {
 
         MedicationDispense dispense = dispenseOrder.getDispenses().get(0);
         dispense.setMedication(dispense.getAuthorizingPrescription().getMedication());
-        dispense.setPrice(testData.samplePrice());
+        dispense.setPrice(PharmaTestData.samplePrice());
 
         repository.update(dispense);
         assertThat(repository.getDispenseOrderById(dispenseOrder.getIdentifier()))

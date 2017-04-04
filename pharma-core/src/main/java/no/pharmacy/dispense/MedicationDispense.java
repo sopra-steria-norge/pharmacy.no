@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -79,12 +77,10 @@ public class MedicationDispense {
     }
 
     private List<MedicationInteraction> getInteractions(MedicationDispense historicalDispense) {
-        if (medication == null || historicalDispense.getMedication() == null) {
+        if (medication == null) {
             return new ArrayList<>();
         }
-        return medication.getInteractions().stream()
-            .filter(i -> i.interactsWith(historicalDispense.getMedication().getSubstance()))
-            .collect(Collectors.toList());
+        return medication.getInteractionsWith(historicalDispense.getMedication());
     }
 
     public void setAction(MedicationOrderWarning warning, String remark, String action) {

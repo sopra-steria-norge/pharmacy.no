@@ -59,7 +59,7 @@ public class RFPrescriptionGatewayTest {
 
         MedicationDispense dispense = new MedicationDispense(medicationOrder);
         dispense.setMedication(dispense.getAuthorizingPrescription().getMedication());
-        dispense.setPrice(testData.samplePrice());
+        dispense.setPrice(PharmaTestData.samplePrice());
         dispense.setPrintedDosageText("Updated dosage text");
         dispense.setConfirmedByPharmacist(true);
         dispense.setPackagingControlled(true);

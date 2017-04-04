@@ -11,11 +11,9 @@ import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 
 public class JdbcHealthcareServiceRepository implements HealthcareServiceRepository {
 
-    private DataSource dataSource;
     private JdbcSupport jdbcSupport;
 
     public JdbcHealthcareServiceRepository(DataSource dataSource) {
-        this.dataSource = dataSource;
         this.jdbcSupport = new JdbcSupport(dataSource);
     }
 

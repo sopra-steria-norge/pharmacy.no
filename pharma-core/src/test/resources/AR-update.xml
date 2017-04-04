@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArrayOfCommunicationParty xmlns="http://register.nhn.no/CommunicationParty">
+<CommunicationParty xmlns:i="http://www.w3.org/2001/XMLSchema-instance" i:type="Organization">
+    <Active>true</Active>
+    <DisplayName>Apotek 1 Åkra</DisplayName>
+    <ElectronicAddresses xmlns:d3p1="http://register.nhn.no/Common">
+      <d3p1:ElectronicAddress>
+        <d3p1:Address>04850733</d3p1:Address>
+        <d3p1:Inherited>false</d3p1:Inherited>
+        <d3p1:LastChanged>2012-06-22T14:18:50.657</d3p1:LastChanged>
+        <d3p1:Type>
+          <d3p1:Active>true</d3p1:Active>
+          <d3p1:CodeText>Telefonnummer</d3p1:CodeText>
+          <d3p1:CodeValue>E_TLF</d3p1:CodeValue>
+          <d3p1:OID>9044</d3p1:OID>
+          <d3p1:SimpleType>type_adressekomponeneter</d3p1:SimpleType>
+        </d3p1:Type>
+        <d3p1:TypeCodeValue>E_TLF</d3p1:TypeCodeValue>
+      </d3p1:ElectronicAddress>
+    </ElectronicAddresses>
+    <HerId>90325</HerId>
+    <IsValidCommunicationParty>false</IsValidCommunicationParty>
+    <LastChanged>2016-03-24T20:31:42.04</LastChanged>
+    <Municipality xmlns:d3p1="http://register.nhn.no/Common">
+      <d3p1:Active>true</d3p1:Active>
+      <d3p1:CodeText>KARMØY</d3p1:CodeText>
+      <d3p1:CodeValue>1149</d3p1:CodeValue>
+      <d3p1:OID>3402</d3p1:OID>
+      <d3p1:SimpleType>kommunenummer</d3p1:SimpleType>
+    </Municipality>
+    <Name>APOTEK 1 ÅKRA (endret)</Name>
+    <ParentBusinessType xmlns:d3p1="http://register.nhn.no/Common" i:nil="true" />
+    <ParentHerId>-1</ParentHerId>
+    <ParentName i:nil="true" />
+    <ParentOrganizationNumber>-1</ParentOrganizationNumber>
+    <PhysicalAddresses xmlns:d3p1="http://register.nhn.no/Common">
+      <d3p1:PhysicalAddress>
+        <d3p1:City>ÅKREHAMN</d3p1:City>
+        <d3p1:Country i:nil="true" />
+        <d3p1:Description i:nil="true" />
+        <d3p1:Inherited>false</d3p1:Inherited>
+        <d3p1:LastChanged>2014-03-06T05:30:35.53</d3p1:LastChanged>
+        <d3p1:PostalCode>4270</d3p1:PostalCode>
+        <d3p1:Postbox i:nil="true" />
+        <d3p1:StreetAddress>Tungarden 1</d3p1:StreetAddress>
+        <d3p1:Type>
+          <d3p1:Active>true</d3p1:Active>
+          <d3p1:CodeText>Besøksadresse</d3p1:CodeText>
+          <d3p1:CodeValue>RES</d3p1:CodeValue>
+          <d3p1:OID>3401</d3p1:OID>
+          <d3p1:SimpleType>adressetype</d3p1:SimpleType>
+        </d3p1:Type>
+        <d3p1:TypeCodeValue>RES</d3p1:TypeCodeValue>
+      </d3p1:PhysicalAddress>
+    </PhysicalAddresses>
+    <ServerTime>2017-03-29T14:17:40.6554517+02:00</ServerTime>
+    <Type>Organization</Type>
+    <Valid xmlns:d3p1="http://register.nhn.no/Common">
+      <d3p1:From>2011-06-23T00:00:00</d3p1:From>
+      <d3p1:To>9999-12-31T23:59:59.997</d3p1:To>
+    </Valid>
+    <BusinessType xmlns:d3p1="http://register.nhn.no/Common">
+      <d3p1:Active>true</d3p1:Active>
+      <d3p1:CodeText>Apotek</d3p1:CodeText>
+      <d3p1:CodeValue>108</d3p1:CodeValue>
+      <d3p1:OID>9040</d3p1:OID>
+      <d3p1:SimpleType>helsevirksomhet_type</d3p1:SimpleType>
+    </BusinessType>
+    <Departments />
+    <IndustryCodes xmlns:d3p1="http://register.nhn.no/Common">
+      <d3p1:Code>
+        <d3p1:Active>true</d3p1:Active>
+        <d3p1:CodeText>Butikkhandel med apotekvarer</d3p1:CodeText>
+        <d3p1:CodeValue>47.730</d3p1:CodeValue>
+        <d3p1:OID>0</d3p1:OID>
+        <d3p1:SimpleType>naringskode</d3p1:SimpleType>
+      </d3p1:Code>
+    </IndustryCodes>
+    <OrganizationNumber>973119087</OrganizationNumber>
+    <People />
+    <Properties xmlns:d3p1="http://register.nhn.no/Common" />
+    <Services>
+      <Service>
+        <Active>true</Active>
+        <DisplayName i:nil="true" />
+        <ElectronicAddresses xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:ElectronicAddress>
+            <d5p1:Address>04850733</d5p1:Address>
+            <d5p1:Inherited>true</d5p1:Inherited>
+            <d5p1:LastChanged>2012-06-22T14:18:50.657</d5p1:LastChanged>
+            <d5p1:Type>
+              <d5p1:Active>true</d5p1:Active>
+              <d5p1:CodeText>Telefonnummer</d5p1:CodeText>
+              <d5p1:CodeValue>E_TLF</d5p1:CodeValue>
+              <d5p1:OID>9044</d5p1:OID>
+              <d5p1:SimpleType>type_adressekomponeneter</d5p1:SimpleType>
+            </d5p1:Type>
+            <d5p1:TypeCodeValue>E_TLF</d5p1:TypeCodeValue>
+          </d5p1:ElectronicAddress>
+        </ElectronicAddresses>
+        <HerId>90742</HerId>
+        <IsValidCommunicationParty>true</IsValidCommunicationParty>
+        <LastChanged>2011-08-10T11:11:50.857</LastChanged>
+        <Municipality xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:Active>true</d5p1:Active>
+          <d5p1:CodeText>KARMØY</d5p1:CodeText>
+          <d5p1:CodeValue>1149</d5p1:CodeValue>
+          <d5p1:OID>3402</d5p1:OID>
+          <d5p1:SimpleType>kommunenummer</d5p1:SimpleType>
+        </Municipality>
+        <Name>Reseptmottak</Name>
+        <ParentBusinessType xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:Active>true</d5p1:Active>
+          <d5p1:CodeText>Apotek</d5p1:CodeText>
+          <d5p1:CodeValue>108</d5p1:CodeValue>
+          <d5p1:OID>9040</d5p1:OID>
+          <d5p1:SimpleType>helsevirksomhet_type</d5p1:SimpleType>
+        </ParentBusinessType>
+        <ParentHerId>90325</ParentHerId>
+        <ParentName>APOTEK 1 ÅKRA</ParentName>
+        <ParentOrganizationNumber>973119087</ParentOrganizationNumber>
+        <PhysicalAddresses xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:PhysicalAddress>
+            <d5p1:City>ÅKREHAMN</d5p1:City>
+            <d5p1:Country i:nil="true" />
+            <d5p1:Description i:nil="true" />
+            <d5p1:Inherited>true</d5p1:Inherited>
+            <d5p1:LastChanged>2014-03-06T05:30:35.53</d5p1:LastChanged>
+            <d5p1:PostalCode>4270</d5p1:PostalCode>
+            <d5p1:Postbox i:nil="true" />
+            <d5p1:StreetAddress>Tungarden 1</d5p1:StreetAddress>
+            <d5p1:Type>
+              <d5p1:Active>true</d5p1:Active>
+              <d5p1:CodeText>Besøksadresse</d5p1:CodeText>
+              <d5p1:CodeValue>RES</d5p1:CodeValue>
+              <d5p1:OID>3401</d5p1:OID>
+              <d5p1:SimpleType>adressetype</d5p1:SimpleType>
+            </d5p1:Type>
+            <d5p1:TypeCodeValue>RES</d5p1:TypeCodeValue>
+          </d5p1:PhysicalAddress>
+        </PhysicalAddresses>
+        <ServerTime>2017-03-29T14:18:10.7563861+02:00</ServerTime>
+        <Type>Service</Type>
+        <Valid xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:From>2011-08-10T00:00:00</d5p1:From>
+          <d5p1:To>9999-12-31T23:59:59.997</d5p1:To>
+        </Valid>
+        <Code xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:Active>true</d5p1:Active>
+          <d5p1:CodeText>Reseptmottak</d5p1:CodeText>
+          <d5p1:CodeValue>PR</d5p1:CodeValue>
+          <d5p1:OID>8664</d5p1:OID>
+          <d5p1:SimpleType>apotek__og_bandagisttjenestetyper</d5p1:SimpleType>
+        </Code>
+        <CoverageAreas i:nil="true" />
+        <Description i:nil="true" />
+        <LocationDescription i:nil="true" />
+        <Properties xmlns:d5p1="http://register.nhn.no/Common" i:nil="true" />
+      </Service>
+      <Service>
+        <Active>true</Active>
+        <DisplayName i:nil="true" />
+        <ElectronicAddresses xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:ElectronicAddress>
+            <d5p1:Address>04850733</d5p1:Address>
+            <d5p1:Inherited>true</d5p1:Inherited>
+            <d5p1:LastChanged>2012-06-22T14:18:50.657</d5p1:LastChanged>
+            <d5p1:Type>
+              <d5p1:Active>true</d5p1:Active>
+              <d5p1:CodeText>Telefonnummer</d5p1:CodeText>
+              <d5p1:CodeValue>E_TLF</d5p1:CodeValue>
+              <d5p1:OID>9044</d5p1:OID>
+              <d5p1:SimpleType>type_adressekomponeneter</d5p1:SimpleType>
+            </d5p1:Type>
+            <d5p1:TypeCodeValue>E_TLF</d5p1:TypeCodeValue>
+          </d5p1:ElectronicAddress>
+        </ElectronicAddresses>
+        <HerId>93509</HerId>
+        <IsValidCommunicationParty>true</IsValidCommunicationParty>
+        <LastChanged>2015-06-08T15:49:59.14</LastChanged>
+        <Municipality xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:Active>true</d5p1:Active>
+          <d5p1:CodeText>KARMØY</d5p1:CodeText>
+          <d5p1:CodeValue>1149</d5p1:CodeValue>
+          <d5p1:OID>3402</d5p1:OID>
+          <d5p1:SimpleType>kommunenummer</d5p1:SimpleType>
+        </Municipality>
+        <Name>E-dose-mottak</Name>
+        <ParentBusinessType xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:Active>true</d5p1:Active>
+          <d5p1:CodeText>Apotek</d5p1:CodeText>
+          <d5p1:CodeValue>108</d5p1:CodeValue>
+          <d5p1:OID>9040</d5p1:OID>
+          <d5p1:SimpleType>helsevirksomhet_type</d5p1:SimpleType>
+        </ParentBusinessType>
+        <ParentHerId>90325</ParentHerId>
+        <ParentName>APOTEK 1 ÅKRA</ParentName>
+        <ParentOrganizationNumber>973119087</ParentOrganizationNumber>
+        <PhysicalAddresses xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:PhysicalAddress>
+            <d5p1:City>ÅKREHAMN</d5p1:City>
+            <d5p1:Country i:nil="true" />
+            <d5p1:Description i:nil="true" />
+            <d5p1:Inherited>true</d5p1:Inherited>
+            <d5p1:LastChanged>2014-03-06T05:30:35.53</d5p1:LastChanged>
+            <d5p1:PostalCode>4270</d5p1:PostalCode>
+            <d5p1:Postbox i:nil="true" />
+            <d5p1:StreetAddress>Tungarden 1</d5p1:StreetAddress>
+            <d5p1:Type>
+              <d5p1:Active>true</d5p1:Active>
+              <d5p1:CodeText>Besøksadresse</d5p1:CodeText>
+              <d5p1:CodeValue>RES</d5p1:CodeValue>
+              <d5p1:OID>3401</d5p1:OID>
+              <d5p1:SimpleType>adressetype</d5p1:SimpleType>
+            </d5p1:Type>
+            <d5p1:TypeCodeValue>RES</d5p1:TypeCodeValue>
+          </d5p1:PhysicalAddress>
+        </PhysicalAddresses>
+        <ServerTime>2017-03-29T14:18:10.7876383+02:00</ServerTime>
+        <Type>Service</Type>
+        <Valid xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:From>2015-06-08T15:49:56.08</d5p1:From>
+          <d5p1:To>9999-12-31T23:59:59.997</d5p1:To>
+        </Valid>
+        <Code xmlns:d5p1="http://register.nhn.no/Common">
+          <d5p1:Active>true</d5p1:Active>
+          <d5p1:CodeText>E-dose-mottak</d5p1:CodeText>
+          <d5p1:CodeValue>PM</d5p1:CodeValue>
+          <d5p1:OID>8664</d5p1:OID>
+          <d5p1:SimpleType>apotek__og_bandagisttjenestetyper</d5p1:SimpleType>
+        </Code>
+        <CoverageAreas i:nil="true" />
+        <Description i:nil="true" />
+        <LocationDescription i:nil="true" />
+        <Properties xmlns:d5p1="http://register.nhn.no/Common" i:nil="true" />
+      </Service>
+    </Services>
+  </CommunicationParty></ArrayOfCommunicationParty>
