@@ -1,11 +1,13 @@
 package no.pharmacy.patient;
 
-import no.pharmacy.core.Reference;
+import no.pharmacy.core.PersonReference;
 
 public interface PatientRepository {
 
-    Reference findPatient(String patientId);
+    PersonReference findPatient(String patientId);
 
-    Reference findPatientByNationalId(String nationalId);
+    PersonReference findPatientByNationalId(String nationalId);
+
+    String lookupPatientNationalId(PersonReference patient);
 
 }

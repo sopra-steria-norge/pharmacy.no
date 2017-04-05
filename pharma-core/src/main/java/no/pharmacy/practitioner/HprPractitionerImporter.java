@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -47,10 +48,13 @@ public class HprPractitionerImporter {
     }
 
     public void refresh(String hprLocation) {
+        logger.info("Reading Practitioners from {}", hprLocation);
         if (hprLocation.endsWith(".zip")) {
             try(ZipFile file = new ZipFile(hprLocation)) {
-                savePeople(file.getInputStream(file.getEntry("normalisert/personer.csv")));
-                saveAuthorizations(file.getInputStream(file.getEntry("normalisert/godkjenninger.csv")));
+                logger.debug("Files in {}: {}", file.getName(), Collections.list(file.entries()));
+
+                savePeople(file.getInputStream(file.getEntry("normalisert\\personer.csv")));
+                saveAuthorizations(file.getInputStream(file.getEntry("normalisert\\godkjenninger.csv")));
             } catch (IOException e) {
                 throw ExceptionUtil.softenException(e);
             }

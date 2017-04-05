@@ -1,14 +1,21 @@
 package no.pharmacy.medicationorder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 
 import no.pharmacy.core.PersonReference;
+import no.pharmacy.dispense.DispenseOrder;
+import no.pharmacy.dispense.DispenseOrderService;
+import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationDispense;
+import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.infrastructure.CryptoUtil;
+import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.patient.JdbcPatientRepository;
 import no.pharmacy.patient.PatientRepository;
 import no.pharmacy.test.FakeReseptFormidler;
@@ -23,7 +30,7 @@ public class RFPrescriptionGatewayTest {
 
     private FakeReseptFormidler fakeReseptFormidler = new FakeReseptFormidler(testData.getMedicationRepository(), patientRepository);
 
-    private PrescriptionGateway gateway = new RFPrescriptionGateway(fakeReseptFormidler, testData.getMedicationRepository());
+    private PrescriptionGateway gateway = new RFPrescriptionGateway(fakeReseptFormidler, testData.getMedicationRepository(), patientRepository);
 
     private PersonReference prescriber = testData.sampleDoctor();
 
@@ -50,7 +57,8 @@ public class RFPrescriptionGatewayTest {
         MedicationOrder orderForDispense = gateway.startMedicationOrderDispense(medicationOrder.getPrescriptionId(), null, employeeId);
 
         assertThat(orderForDispense)
-            .isEqualToIgnoringGivenFields(medicationOrder, "subject");
+            .hasNoNullFieldsOrPropertiesExcept("id", "alternatives")
+            .isEqualToIgnoringGivenFields(medicationOrder);
     }
 
     @Test
@@ -69,6 +77,24 @@ public class RFPrescriptionGatewayTest {
 
         assertThat(fakeReseptFormidler.getPrintedDosageTexts(medicationOrder))
             .contains(dispense.getPrintedDosageText());
+    }
+
+    @Test
+    public void shouldStartDispenseOrder() {
+        MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(TestDataSource.pharmacistInstance(), new JdbcMedicationRepository(TestDataSource.medicationInstance()));
+        DispenseOrderService dispenseOrderService = new DispenseOrderService(gateway, medicationDispenseRepository, patientRepository);
+
+        String nationalId = testData.unusedNationalId();
+        MedicationOrder medicationOrder1 = fakeReseptFormidler.addPrescription(nationalId, testData.sampleMedication(), prescriber);
+        MedicationOrder medicationOrder2 = fakeReseptFormidler.addPrescription(nationalId, testData.sampleMedication(), prescriber);
+
+        DispenseOrder dispenseOrder = dispenseOrderService.startDispenseOrder(nationalId,
+                Arrays.asList(medicationOrder1.getPrescriptionId(), medicationOrder2.getPrescriptionId()));
+
+        assertThat(dispenseOrder.getDispenses())
+            .extracting(MedicationDispense::getAuthorizingPrescription)
+            .extracting(MedicationOrder::getPrescriptionId)
+            .containsOnly(medicationOrder1.getPrescriptionId(), medicationOrder2.getPrescriptionId());
     }
 
 }

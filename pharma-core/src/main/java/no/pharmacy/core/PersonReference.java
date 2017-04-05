@@ -3,9 +3,11 @@ package no.pharmacy.core;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = "reference")
+@ToString(of = {"reference", "firstName", "lastName"})
+@EqualsAndHashCode(of = {"reference", "firstName", "lastName"})
 public class PersonReference {
 
     @Getter

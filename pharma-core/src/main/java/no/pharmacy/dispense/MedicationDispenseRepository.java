@@ -2,7 +2,7 @@ package no.pharmacy.dispense;
 
 import java.util.List;
 
-import no.pharmacy.core.Reference;
+import no.pharmacy.core.PersonReference;
 
 public interface MedicationDispenseRepository {
 
@@ -16,6 +16,6 @@ public interface MedicationDispenseRepository {
 
     void update(DispenseOrder order);
 
-    List<DispenseOrder> historicalDispensesForPerson(Reference patient);
+    List<DispenseOrder> historicalDispensesForPerson(PersonReference patient);
 
 }

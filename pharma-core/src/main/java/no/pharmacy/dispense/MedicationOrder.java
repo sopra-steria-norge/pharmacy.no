@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import no.pharmacy.core.PersonReference;
-import no.pharmacy.core.Reference;
 import no.pharmacy.medication.Medication;
 
 @EqualsAndHashCode(of={"id", "prescriber", "dateWritten", "medication"})
@@ -30,7 +29,7 @@ public class MedicationOrder implements MedicationOrderInfo {
     private Medication medication;
 
     @Getter @Setter
-    private Reference subject;
+    private PersonReference subject;
 
     @Getter @Setter
     private List<Medication> alternatives;

@@ -15,6 +15,7 @@ import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.MedicationRepository;
+import no.pharmacy.patient.PatientRepository;
 
 public class RFPrescriptionGateway implements PrescriptionGateway {
 
@@ -29,10 +30,12 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
     private MessageGateway messageGateway;
 
     private MedicationRepository medicationRepository;
+    private PatientRepository patientRepository;
 
-    public RFPrescriptionGateway(MessageGateway messageGateway, MedicationRepository medicationRepository) {
+    public RFPrescriptionGateway(MessageGateway messageGateway, MedicationRepository medicationRepository, PatientRepository patientRepository) {
         this.messageGateway = messageGateway;
         this.medicationRepository = medicationRepository;
+        this.patientRepository = patientRepository;
     }
 
     @Override
@@ -112,7 +115,9 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
                 prescriber.find("Ident", "Id").first().text(),
                 prescriber.find("GivenName").first().text(),
                 prescriber.find("FamilyName").first().text()));
-
+        String nationalId = prescriptionDocument.find("MsgInfo", "Patient", "Ident", "Id")
+                .first().text();
+        medicationOrder.setSubject(patientRepository.findPatientByNationalId(nationalId));
         return medicationOrder;
     }
 

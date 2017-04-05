@@ -1,6 +1,7 @@
 package no.pharmacy.web.dispense;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -12,8 +13,9 @@ import org.eaxy.Document;
 import org.eaxy.Element;
 import org.eaxy.Xml;
 
-import no.pharmacy.core.Reference;
+import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.DispenseOrder;
+import no.pharmacy.dispense.DispenseOrderService;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.medicationorder.MedicationOrderSummary;
 import no.pharmacy.medicationorder.PrescriptionGateway;
@@ -24,6 +26,7 @@ public class PrescriptionsController extends HttpServlet {
     private PrescriptionGateway prescriptionsGateway;
     private MedicationDispenseRepository medicationDispenseRepository;
     private PatientRepository patientRepository;
+    private DispenseOrderService dispenseOrderService;
 
     public PrescriptionsController(
             PrescriptionGateway prescriptionsGateway,
@@ -32,6 +35,8 @@ public class PrescriptionsController extends HttpServlet {
         this.prescriptionsGateway = prescriptionsGateway;
         this.medicationDispenseRepository = medicationDispenseRepository;
         this.patientRepository = patientRepository;
+
+        dispenseOrderService = new DispenseOrderService(prescriptionsGateway, medicationDispenseRepository, patientRepository);
     }
 
     @Override
@@ -44,7 +49,7 @@ public class PrescriptionsController extends HttpServlet {
             return;
         }
 
-        Reference patient = patientRepository.findPatientByNationalId(nationalId);
+        PersonReference patient = patientRepository.findPatientByNationalId(nationalId);
         if ("journal".equals(req.getParameter("action"))) {
             Document doc = showDispenseHistoryView(nationalId, patient,
                     medicationDispenseRepository.historicalDispensesForPerson(patient));
@@ -58,7 +63,7 @@ public class PrescriptionsController extends HttpServlet {
         }
     }
 
-    private Document showDispenseHistoryView(String nationalId, Reference patient, List<DispenseOrder> dispenseOrders) throws IOException {
+    private Document showDispenseHistoryView(String nationalId, PersonReference patient, List<DispenseOrder> dispenseOrders) throws IOException {
         Document doc = Xml.readResource("/pharma-webapp/index.html.template");
 
         if (patient != null) {
@@ -78,7 +83,7 @@ public class PrescriptionsController extends HttpServlet {
         return doc;
     }
 
-    private Document showDispenseCreationView(String nationalId, Reference patient, List<? extends MedicationOrderSummary> orders) throws IOException {
+    private Document showDispenseCreationView(String nationalId, PersonReference patient, List<? extends MedicationOrderSummary> orders) throws IOException {
         Document doc = Xml.readResource("/pharma-webapp/index.html.template");
 
         if (nationalId != null) {
@@ -106,16 +111,10 @@ public class PrescriptionsController extends HttpServlet {
         if ("journal".equals(req.getParameter("action"))) {
             resp.sendRedirect("/dispenseOrder/" + req.getParameter("dispenseOrderId"));
         } else {
-            Reference patient = patientRepository.findPatientByNationalId(req.getParameter("nationalId"));
-
-            DispenseOrder dispenseOrder = new DispenseOrder();
-            dispenseOrder.setPatient(patient);
-
-            for (String id : req.getParameterValues("prescriptionId")) {
-                dispenseOrder.addMedicationOrder(prescriptionsGateway.startMedicationOrderDispense(id, null, "124"));
-            }
-
-            medicationDispenseRepository.saveDispenseOrder(dispenseOrder);
+            String[] prescriptionIds = req.getParameterValues("prescriptionId");
+            String nationalId = req.getParameter("nationalId");
+            DispenseOrder dispenseOrder = dispenseOrderService
+                    .startDispenseOrder(nationalId, Arrays.asList(prescriptionIds));
             resp.sendRedirect("/dispenseOrder/" + dispenseOrder.getIdentifier());
         }
     }

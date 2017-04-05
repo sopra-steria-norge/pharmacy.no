@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
-import no.pharmacy.core.Reference;
+import no.pharmacy.core.PersonReference;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.test.MockPersonGateway;
 import no.pharmacy.test.PharmaTestData;
@@ -38,7 +38,7 @@ public class JdbcPatientRepositoryTest {
     public void shouldFindSavedPerson() throws Exception {
         String nationalId = testData.unusedNationalId();
         String patientName = PharmaTestData.sampleName();
-        Reference patient = repository.savePatient(nationalId, patientName);
+        PersonReference patient = repository.savePatient(nationalId, patientName);
         assertThat(patient.getDisplay()).isEqualTo(patientName);
         assertThat(repository.findPatient(patient.getReference()))
             .isEqualToComparingFieldByField(patient);
@@ -61,7 +61,7 @@ public class JdbcPatientRepositoryTest {
         String nationalId = testData.unusedNationalId();
         String patientName = PharmaTestData.sampleName();
 
-        Reference patient = repository.savePatient(nationalId, patientName);
+        PersonReference patient = repository.savePatient(nationalId, patientName);
         assertThat(repository.lookupPatientNationalId(patient))
             .isEqualTo(nationalId);
     }

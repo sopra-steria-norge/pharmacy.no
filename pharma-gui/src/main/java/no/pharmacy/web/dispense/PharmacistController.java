@@ -46,7 +46,7 @@ public class PharmacistController extends HttpServlet {
                 results.add(Xml.el("div",
                             Xml.el("a")
                                 .attr("href", dispenseOrder.getIdentifier())
-                                .text(dispenseOrder.getIdentifier())));
+                                .text(dispenseOrder.getPatient().getDisplay())));
             }
 
             resp.setContentType("text/html");

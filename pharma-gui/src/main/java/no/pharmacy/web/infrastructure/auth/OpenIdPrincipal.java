@@ -9,12 +9,10 @@ import no.pharmacy.infrastructure.auth.JwtToken;
 public class OpenIdPrincipal implements Principal {
 
     private String name;
-    private String subject;
     private JwtToken jwt;
 
     public OpenIdPrincipal(JwtToken jwt) {
         this.jwt = jwt;
-        setSubject(jwt.sub());
         setName(jwt.name().orElse(jwt.sub()));
     }
 
@@ -33,10 +31,6 @@ public class OpenIdPrincipal implements Principal {
 
     public String[] getRoles() {
         return new String[0];
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
     }
 
     public JwtToken getToken() {

@@ -18,7 +18,6 @@ import org.eaxy.Validator;
 import lombok.Getter;
 import no.pharmacy.core.MessageGateway;
 import no.pharmacy.core.PersonReference;
-import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
@@ -68,19 +67,16 @@ public class FakeReseptFormidler implements MessageGateway {
     }
 
     public MedicationOrder addPrescription(String nationalId, Medication product, PersonReference prescriber) {
-        Reference patient = patientRepository.findPatientByNationalId(nationalId);
-
         MedicationOrder medicationOrder = new MedicationOrder(product);
         medicationOrder.setPrescriber(prescriber);
         medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
         medicationOrder.setDateWritten(LocalDate.now().minusDays(PharmaTestData.random(14)));
-        // TODO: Lookup nationalId in patient repository
-        medicationOrder.setSubject(patient);
+        medicationOrder.setSubject(patientRepository.findPatientByNationalId(nationalId));
 
         this.prescriptionsForPerson.computeIfAbsent(nationalId, s -> new ArrayList<>())
             .add(medicationOrder);
         this.prescriptionsById.put(medicationOrder.getPrescriptionId(), medicationOrder);
-        medicationOrder.setDosageText(patient.getDisplay() + "\n\n2 piller, morgen og kveld");
+        medicationOrder.setDosageText(patientRepository.findPatientByNationalId(nationalId).getDisplay() + "\n\n2 piller, morgen og kveld");
         return medicationOrder;
     }
 
@@ -145,10 +141,10 @@ public class FakeReseptFormidler implements MessageGateway {
                     M1.el("OppdatertFest", LocalDate.now().minusDays(5).atStartOfDay(ZoneId.systemDefault()).toInstant().toString())
                     );
             Element prescriptionDoc = HEAD.el("MsgHead",
-                    msgInfo("ERM1", order.getPrescriber()), // TODO: Include patient
+                    msgInfo("ERM1", order.getPrescriber(), order.getSubject()),
                     includedDocument(prescription));
             return HEAD.el("MsgHead",
-                    msgInfo("ERM94", null),
+                    msgInfo("ERM94", null, null),
                     includedDocument(M94.el("ReseptNedlasting", M94.el("Status"))),
                     encodedDocument(prescriptionDoc));
         } else if (request.tagName().equals("Utleveringsrapport")) {
@@ -160,7 +156,7 @@ public class FakeReseptFormidler implements MessageGateway {
 
 
             return HEAD.el("MsgHead",
-                    msgInfo("M10", null),
+                    msgInfo("M10", null, null),
                     HEAD.el("Document",
                             HEAD.el("RefDoc",
                                     HEAD.el("MsgType").attr("V", "XML"),
@@ -188,18 +184,18 @@ public class FakeReseptFormidler implements MessageGateway {
                                 prescriptionDownload)));
     }
 
-    private Element msgInfo(String type, PersonReference prescriber) {
+    private Element msgInfo(String type, PersonReference prescriber, PersonReference subject) {
         Element senderOrganization = HEAD.el("Organisation",
                 HEAD.el("OrganisationName", "Reseptformidleren (test)"),
                 HEAD.el("Ident", HEAD.el("Id", "965336796"), HEAD.el("TypeId").attr("V", "ENH")));
         if (prescriber != null) {
             senderOrganization.add(HEAD.el("HealthcareProfessional",
-                    HEAD.el("FamilyName", prescriber.getFirstName()),
-                    HEAD.el("GivenName", prescriber.getLastName()),
+                    HEAD.el("FamilyName", prescriber.getLastName()),
+                    HEAD.el("GivenName", prescriber.getFirstName()),
                     HEAD.el("Ident", HEAD.el("Id", prescriber.getReference()), HEAD.el("TypeId"))
                     ));
         }
-        return HEAD.el("MsgInfo",
+        Element result = HEAD.el("MsgInfo",
                 HEAD.el("Type").attr("V", type),
                 HEAD.el("MIGversion", "v1.2 2006-05-24"),
                 HEAD.el("GenDate", Instant.now().toString()),
@@ -208,6 +204,15 @@ public class FakeReseptFormidler implements MessageGateway {
                 HEAD.el("Receiver", HEAD.el("Organisation",
                         HEAD.el("OrganisationName", "Kjell, Drugs and Rock 'n' Roll "),
                         HEAD.el("Ident", HEAD.el("Id", "80624"), HEAD.el("TypeId").attr("V", "HER")))));
+        if (subject != null) {
+            result.add(HEAD.el("Patient",
+                    HEAD.el("FamilyName", subject.getLastName()),
+                    HEAD.el("GivenName", subject.getFirstName()),
+                    HEAD.el("Ident",
+                            HEAD.el("Id", patientRepository.lookupPatientNationalId(subject)),
+                            HEAD.el("TypeId").attr("V", "FNR"))));
+        }
+        return result;
     }
 
     public List<String> getPrintedDosageTexts(MedicationOrder medicationOrder) {

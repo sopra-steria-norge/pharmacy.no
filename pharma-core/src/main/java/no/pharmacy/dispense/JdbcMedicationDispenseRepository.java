@@ -11,7 +11,6 @@ import javax.sql.DataSource;
 
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
-import no.pharmacy.core.Reference;
 import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 import no.pharmacy.medication.MedicationRepository;
 
@@ -32,7 +31,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
     }
 
     @Override
-    public List<DispenseOrder> historicalDispensesForPerson(Reference patient) {
+    public List<DispenseOrder> historicalDispensesForPerson(PersonReference patient) {
         return queryForList("select * from dispense_orders where dispensed = ?", Arrays.asList(true),
                 this::read);
         // TODO Include nationalId in query
@@ -109,7 +108,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         result.setIdentifier(rs.getString("id"));
         result.setCustomerSignature(rs.getString("customer_signature"));
         result.setDispensed(rs.getBoolean("dispensed"));
-        result.setPatient(new Reference(rs.getString("patient_id"), rs.getString("patient_name")));
+        result.setPatient(new PersonReference(rs.getString("patient_id"), rs.getString("patient_name")));
 
         result.getMedicationOrders().addAll(findMedicationOrders(result.getIdentifier()));
         result.getMedicationDispenses().addAll(findMedicationDispenses(result.getIdentifier(),
@@ -175,9 +174,9 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         return medicationOrder;
     }
 
-    private Reference readPerson(ResultSet rs, String prefix) throws SQLException {
-        return new Reference(rs.getString(prefix + "id"),
-                rs.getString(prefix + "first_name") + " " + rs.getString(prefix + "last_name"));
+    private PersonReference readPerson(ResultSet rs, String prefix) throws SQLException {
+        return new PersonReference(rs.getString(prefix + "id"),
+                rs.getString(prefix + "first_name"), rs.getString(prefix + "last_name"));
     }
 
     private List<MedicationOrder> findMedicationOrders(String identifier) {

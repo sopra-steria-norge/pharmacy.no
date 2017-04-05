@@ -1,10 +1,12 @@
 package no.pharmacy.web.server;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
+import java.util.zip.GZIPInputStream;
 
 import javax.servlet.DispatcherType;
 import javax.sql.DataSource;
@@ -92,17 +94,23 @@ public class PharmaServer {
 
         PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(createPractitionerDataSource(),
                 CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
-
-        File hprFile = new File("../ddata-dump/HprExport.L3.csv.v2.zip");
+        File hprFile = new File("../data-dumps/HprExport.L3.csv.v2.zip");
         if (hprFile.exists()) {
-            practitionerRepository.refresh(hprFile.toString());
+            practitionerRepository.refresh(hprFile.getPath());
         } else {
             practitionerRepository.refresh("classpath:seed/hpr-mini/");
         }
 
         HealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(createHealthcareServiceDataSource());
-        try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
-            healthcareServiceRepository.refresh(input);
+        File arFile = new File("../data-dumps/AR.xml.gz");
+        if (arFile.exists()) {
+            try(InputStream input = new GZIPInputStream(new FileInputStream(arFile), 16*1024*1024)) {
+                healthcareServiceRepository.refresh(input);
+            }
+        } else {
+            try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
+                healthcareServiceRepository.refresh(input);
+            }
         }
 
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository, patientRepository);
@@ -115,7 +123,7 @@ public class PharmaServer {
         guiHandler.setMedicationRepository(medicationRepository);
         guiHandler.setPatientRepository(patientRepository);
         guiHandler.setHealthcareServiceRepository(healthcareServiceRepository);
-        guiHandler.setPrescriptionGateway(new RFPrescriptionGateway(reseptFormidler, medicationRepository));
+        guiHandler.setPrescriptionGateway(new RFPrescriptionGateway(reseptFormidler, medicationRepository, patientRepository));
         guiHandler.setRepository(new JdbcMedicationDispenseRepository(createPharmaDataSource(), medicationRepository));
 
         handlers.addHandler(guiHandler.createHandler());

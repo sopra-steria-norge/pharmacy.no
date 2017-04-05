@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
-import no.pharmacy.core.Reference;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
@@ -201,8 +200,8 @@ public class PharmaTestData {
                 + randomNumericString(11);
     }
 
-    public Reference samplePatient() {
-        return new Reference(UUID.randomUUID().toString(), sampleName());
+    public PersonReference samplePatient() {
+        return new PersonReference(UUID.randomUUID().toString(), sampleFirstName(), sampleLastName());
     }
 
     public static String sampleProductId() {
