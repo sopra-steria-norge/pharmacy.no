@@ -3,9 +3,11 @@ package no.pharmacy.test;
 import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
-import org.h2.jdbcx.JdbcConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 public class TestDataSource {
 
@@ -20,16 +22,7 @@ public class TestDataSource {
 
     public synchronized static DataSource medicationInstance() {
         if (medicationsDataSource == null) {
-            // TODO: Inconsistent "medication" vs "medications"
-            String jdbcUrl = System.getProperty("test.medication.jdbc.url", "jdbc:h2:mem:medication");
-            medicationsDataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
-            logger.info("Initializing {}", jdbcUrl);
-
-            Flyway flyway = new Flyway();
-            flyway.setDataSource(medicationsDataSource);
-            flyway.setLocations("db/db-medications/");
-            flyway.clean();
-            flyway.migrate();
+            medicationsDataSource = createMemDataSource("medications");
         }
         return medicationsDataSource;
     }
@@ -66,7 +59,13 @@ public class TestDataSource {
 
     public static DataSource createDataSource(String property, String jdbcDefaultUrl, String migrations) {
         String jdbcUrl = System.getProperty(property, jdbcDefaultUrl);
-        DataSource dataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
+
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(jdbcUrl); // config.setJdbcUrlFromProperty(property, jdbcDefault);
+        config.setUsername("sa");
+        config.setPassword("");
+
+        DataSource dataSource = new HikariDataSource(config);
         logger.info("Initializing {}", jdbcUrl);
 
         Flyway flyway = new Flyway();

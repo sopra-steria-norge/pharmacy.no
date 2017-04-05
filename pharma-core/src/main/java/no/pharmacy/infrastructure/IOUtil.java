@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -318,5 +319,16 @@ public class IOUtil {
             public void close() throws IOException {
             }
         };
+    }
+
+    public static InputStream resource(String resourcePath) throws IOException {
+        InputStream resourceStream = IOUtil.class.getClassLoader().getResourceAsStream(resourcePath);
+        if (resourceStream == null) {
+            throw new IllegalArgumentException("Not found: " + resourcePath);
+        }
+        if (resourcePath.endsWith(".gz")) {
+            return new GZIPInputStream(resourceStream);
+        }
+        return resourceStream;
     }
 }

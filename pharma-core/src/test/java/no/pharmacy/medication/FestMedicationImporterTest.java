@@ -2,18 +2,13 @@ package no.pharmacy.medication;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.time.Instant;
 import java.util.Random;
-
-import javax.sql.DataSource;
 
 import org.eaxy.Element;
 import org.eaxy.Namespace;
 import org.eaxy.Validator;
 import org.eaxy.Xml;
-import org.flywaydb.core.Flyway;
-import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Test;
 
 import no.pharmacy.core.Reference;
@@ -173,18 +168,5 @@ public class FestMedicationImporterTest {
                 M30.el("Tidspunkt", Instant.now().toString()),
                 M30.el("Status", ""),
                 el);
-    }
-
-    public static void main(String[] args) throws Exception {
-        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:testFest", "sa", "");
-
-        Flyway flyway  = new Flyway();
-        flyway.setLocations("db/db-medications");
-        flyway.setDataSource(dataSource);
-        flyway.migrate();
-
-        JdbcMedicationRepository repository = new JdbcMedicationRepository(dataSource);
-        FestMedicationImporter importer = new FestMedicationImporter();
-        importer.saveFest(new File("fest-mini.xml").toURI().toURL(), repository);
     }
 }

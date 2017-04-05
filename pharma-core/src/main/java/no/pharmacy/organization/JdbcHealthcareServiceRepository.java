@@ -1,5 +1,6 @@
 package no.pharmacy.organization;
 
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -53,9 +54,9 @@ public class JdbcHealthcareServiceRepository implements HealthcareServiceReposit
 
 
     @Override
-    public void refresh(String filename) {
+    public void refresh(InputStream input) {
         ArHealthcareServiceImporter importer = new ArHealthcareServiceImporter(this, jdbcSupport);
-        importer.refresh(filename);
+        importer.refresh(input);
     }
 
     public HealthcareService getOrganization(String herId) {

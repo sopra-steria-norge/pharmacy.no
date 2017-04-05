@@ -1,20 +1,18 @@
 package no.pharmacy.organization;
 
-import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
 
 import org.eaxy.Document;
 import org.eaxy.Element;
@@ -46,10 +44,10 @@ public class ArHealthcareServiceImporter {
                 });
     }
 
-    public void refresh(String filename) {
+    public void refresh(InputStream input) {
         try {
-            logger.info("Refreshing HealthcareServices from {}", filename);
-            Document doc = decodeXml(filename);
+            logger.info("Refreshing HealthcareServices");
+            Document doc = decodeXml(input);
             logger.info("Reading data");
             for (Element communicationParty : doc.find("CommunicationParty")) {
                 ElementSet businessType = communicationParty.find("BusinessType", "CodeValue");
@@ -80,18 +78,8 @@ public class ArHealthcareServiceImporter {
         return organization;
     }
 
-    private Document decodeXml(String filename) throws IOException {
-        if (filename.endsWith(".gz")) {
-            try(InputStream in = new GZIPInputStream(new BufferedInputStream(new FileInputStream(filename), 1024*1024))) {
-                int byteOrderMark = in.read(); // \uEFBBBF
-                if (byteOrderMark == 0xef) {
-                    in.read(); in.read();
-                }
-                return Xml.read(new InputStreamReader(in));
-            }
-        } else {
-            return Xml.read(new File(filename));
-        }
+    private Document decodeXml(InputStream input) throws IOException {
+        return Xml.read(new InputStreamReader(input, StandardCharsets.UTF_8));
     }
 
     private static Namespace CP = new Namespace("http://register.nhn.no/CommunicationParty");
@@ -99,9 +87,9 @@ public class ArHealthcareServiceImporter {
     public void createMini(String from, String to) {
         Element result = CP.el("ArrayOfCommunicationParty");
 
-        try {
+        try (FileInputStream input = new FileInputStream(from)) {
             logger.info("Minimizing HealthcareServices from {}", from);
-            Document doc = decodeXml(from);
+            Document doc = decodeXml(input);
             logger.info("Reading data");
             for (Element communicationParty : doc.find("CommunicationParty")) {
                 String name = communicationParty.find("Name").first().text();

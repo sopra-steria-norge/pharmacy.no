@@ -2,12 +2,11 @@ package no.pharmacy.organization;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
-
-import javax.sql.DataSource;
+import java.io.InputStream;
 
 import org.junit.Test;
 
+import no.pharmacy.infrastructure.IOUtil;
 import no.pharmacy.test.TestDataSource;
 
 public class JdbcHealthcareServiceRepositoryTest {
@@ -16,8 +15,12 @@ public class JdbcHealthcareServiceRepositoryTest {
     public void shouldReadPharmacies() throws Exception {
         JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource());
 
-        repository.refresh("src/test/resources/AR-mini.xml");
-        repository.refresh("src/test/resources/AR-mini.xml");
+        try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
+            repository.refresh(input);
+        }
+        try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
+            repository.refresh(input);
+        }
 
         assertThat(repository.listPharmacies())
             .extracting(HealthcareService::getDisplay)
@@ -31,23 +34,18 @@ public class JdbcHealthcareServiceRepositoryTest {
     public void shouldUpdatePharmacies() throws Exception {
         JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource());
 
-        repository.refresh("src/test/resources/AR-mini.xml");
+        try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
+            repository.refresh(input);
+        }
         assertThat(repository.getOrganization("90325").getDisplay())
             .isEqualTo("APOTEK 1 ÅKRA");
 
-        repository.refresh("src/test/resources/AR-update.xml");
+        try(InputStream input = IOUtil.resource("AR-update.xml")) {
+            repository.refresh(input);
+        }
         assertThat(repository.getOrganization("90325").getDisplay())
             .isEqualTo("APOTEK 1 ÅKRA (endret)");
     }
 
-
-
-    public static void main(String[] args) throws IOException {
-        DataSource dataSource = TestDataSource.createDataSource("test.organizations.jdbc.url",
-                "jdbc:h2:file:./target/db/organizations",
-                "db/db-practitioners");
-        JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(dataSource);
-        repository.refresh("../pharma-gui/target/AR-mini.xml");
-    }
 
 }

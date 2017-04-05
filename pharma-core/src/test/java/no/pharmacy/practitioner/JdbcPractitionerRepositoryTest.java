@@ -1,10 +1,6 @@
 package no.pharmacy.practitioner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import javax.sql.DataSource;
-
 import org.junit.Test;
 
 import no.pharmacy.core.PersonReference;
@@ -19,7 +15,7 @@ public class JdbcPractitionerRepositoryTest {
 
     @Test
     public void shouldImportHpr() throws Exception {
-        repository.refresh("src/test/resources/hpr-mini/");
+        repository.refresh("src/main/resources/seed/hpr-mini/");
 
         assertThat(repository.listDoctors())
                 .extracting(PersonReference::getReference)
@@ -36,8 +32,8 @@ public class JdbcPractitionerRepositoryTest {
 
     @Test
     public void shouldOnlyImportAuthorizationsOnce() throws Exception {
-        repository.refresh("src/test/resources/hpr-mini/");
-        repository.refresh("src/test/resources/hpr-mini/");
+        repository.refresh("src/main/resources/seed/hpr-mini/");
+        repository.refresh("src/main/resources/seed/hpr-mini/");
 
         assertThat(repository.getAuthorizations(1002104))
             .containsOnlyOnce(PractionerAuthorization.DOCTOR);
@@ -45,7 +41,7 @@ public class JdbcPractitionerRepositoryTest {
 
     @Test
     public void shouldImportUpdates() {
-        repository.refresh("src/test/resources/hpr-mini/");
+        repository.refresh("src/main/resources/seed/hpr-mini/");
 
         Practitioner practitioner = repository.getPractitioner("1002104").get();
         assertThat(practitioner).hasNoNullFieldsOrProperties();
@@ -66,18 +62,6 @@ public class JdbcPractitionerRepositoryTest {
 
         assertThat(repository.getPractitioner("9600000")).isNotEmpty();
     }
-
-    public static void main(String[] args) throws IOException, URISyntaxException {
-        DataSource dataSource = TestDataSource.createDataSource("test.practitioners.jdbc.url",
-                "jdbc:h2:file:./target/db/practitioners",
-                "db/db-practitioners");
-        JdbcPractitionerRepository repository = new JdbcPractitionerRepository(dataSource,
-                CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
-
-//        repository.refresh("src/test/resources/hpr-mini/");
-        repository.refresh("target/HprExport.L3.csv.v2.zip");
-    }
-
 
 
 }

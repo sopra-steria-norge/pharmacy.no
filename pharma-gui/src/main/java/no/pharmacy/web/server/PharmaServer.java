@@ -1,22 +1,33 @@
 package no.pharmacy.web.server;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ShutdownHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.flywaydb.core.Flyway;
-import org.h2.jdbcx.JdbcConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import ch.qos.logback.classic.Level;
 import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
 import no.pharmacy.infrastructure.CryptoUtil;
+import no.pharmacy.infrastructure.IOUtil;
 import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
@@ -30,6 +41,8 @@ import no.pharmacy.practitioner.JdbcPractitionerRepository;
 import no.pharmacy.practitioner.PractitionerRepository;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
+import no.pharmacy.web.infrastructure.auth.AuthenticationFilter;
+import no.pharmacy.web.infrastructure.auth.IdCheckServlet;
 import no.pharmacy.web.infrastructure.logging.LogDisplayServlet;
 import no.pharmacy.web.test.ReceiptTestCaseController;
 import no.pharmacy.web.test.ReseptFormidlerLogTestController;
@@ -62,7 +75,7 @@ public class PharmaServer {
         server.start();
     }
 
-    private Handler createHandlers() {
+    private Handler createHandlers() throws IOException, URISyntaxException {
         HandlerList handlers = new HandlerList();
         handlers.addHandler(new ShutdownHandler(SHUTDOWN_TOKEN, true, true));
 
@@ -73,10 +86,14 @@ public class PharmaServer {
 
         PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(createPractitionerDataSource(),
                 CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
-        practitionerRepository.refresh(System.getProperty("practitioner.hpr_source", "target/HprExport.L3.csv.v2.zip"));
+
+        File hprFile = new File("target/HprExport.L3.csv.v2.zip");
+        practitionerRepository.refresh(hprFile.toString());
 
         HealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(createHealthcareServiceDataSource());
-        healthcareServiceRepository.refresh(System.getProperty("healthcareservice.ar_source", "target/AR.xml.gz"));
+        try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
+            healthcareServiceRepository.refresh(input);
+        }
 
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository, patientRepository);
 
@@ -117,7 +134,12 @@ public class PharmaServer {
     }
 
     private DataSource createDataSource(String jdbcUrl, String migrations) {
-        JdbcConnectionPool dataSource = JdbcConnectionPool.create(jdbcUrl, "sa", "");
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(jdbcUrl); // config.setJdbcUrlFromProperty(property, jdbcDefault);
+        config.setUsername("sa");
+        config.setPassword("");
+
+        DataSource dataSource = new HikariDataSource(config);
         logger.info("Initializing {}", jdbcUrl);
 
         Flyway flyway = new Flyway();
@@ -143,6 +165,12 @@ public class PharmaServer {
         handler.setBaseResource(Resource.newClassPathResource("/pharma-ops-webapp"));
 
         handler.addServlet(new ServletHolder(logServlet), "/log/*");
+
+        handler.addServlet(new ServletHolder(new IdCheckServlet()), "/idCheck");
+
+        handler.addFilter(new FilterHolder(new AuthenticationFilter()), "/idCheck", EnumSet.of(DispatcherType.REQUEST));
+
+
         return handler;
     }
 
