@@ -40,7 +40,7 @@ public class ReceiptTestCaseController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String message = null;
-        HashMap<Object,Object> flash = (HashMap<Object,Object>)req.getSession().getAttribute("flash");
+        HashMap<Object,Object> flash = getFlash(req);
         if (flash != null) {
             req.getSession().removeAttribute("flash");
             message = (String) flash.get("message");
@@ -72,6 +72,11 @@ public class ReceiptTestCaseController extends HttpServlet {
 
         resp.setContentType("text/html");
         doc.writeTo(resp.getWriter());
+    }
+
+    @SuppressWarnings("unchecked")
+    private HashMap<Object, Object> getFlash(HttpServletRequest req) {
+        return (HashMap<Object,Object>)req.getSession().getAttribute("flash");
     }
 
     @Override

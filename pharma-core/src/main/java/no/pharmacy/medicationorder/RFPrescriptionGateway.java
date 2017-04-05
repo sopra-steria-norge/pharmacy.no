@@ -43,7 +43,7 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
         if (nationalId == null) {
             return new ArrayList<>();
         }
-        Element orderListRequest = createOrderListRequest(purpose, nationalId, employeeId);
+        Element orderListRequest = createOrderListRequest(nationalId, employeeId);
         Element orderListResponse = messageGateway.processRequest(orderListRequest);
         return decodeMedicationOrderListResponse(orderListResponse);
     }
@@ -74,7 +74,7 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
         return summary;
     }
 
-    private Element createOrderListRequest(String purpose, String nationalId, String employeeId) {
+    private Element createOrderListRequest(String nationalId, String employeeId) {
         return M91.el("ForesporselReseptUtleverer",
                 M91.el("Fnr", nationalId),
                 M91.el("AlleResepter"),
@@ -101,8 +101,11 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
     public MedicationOrder startMedicationOrderDispense(String prescriptionId, String referenceNumber,
             String employeeId) {
         Element dispenseMedicationOrderRequest = createDispenseMedicationOrderRequest(prescriptionId, employeeId);
-
         Element medicationOrderResponse = messageGateway.processRequest(dispenseMedicationOrderRequest);
+        return decodeMedicationOrder(prescriptionId, medicationOrderResponse);
+    }
+
+    private MedicationOrder decodeMedicationOrder(String prescriptionId, Element medicationOrderResponse) {
         Document prescriptionDocument = findPrescriptionDocument(medicationOrderResponse);
         MedicationOrder medicationOrder = new MedicationOrder();
         String productId = prescriptionDocument.find("Document", "RefDoc", "Content", "Resept", "ReseptDokLegemiddel", "Forskrivning", "Legemiddelpakning", "Varenr").first().text();
