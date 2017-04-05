@@ -1,13 +1,9 @@
 package no.pharmacy.practitioner;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,9 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
+import java.util.zip.ZipFile;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -54,42 +48,23 @@ public class HprPractitionerImporter {
 
     public void refresh(String hprLocation) {
         if (hprLocation.endsWith(".zip")) {
-            try (ZipInputStream zip = new ZipInputStream(new FileInputStream(hprLocation))) {
-                ZipEntry zipEntry;
-                while ((zipEntry = zip.getNextEntry()) != null) {
-                    logger.info("zipEntry {}", zipEntry);
-                    if (zipEntry.getName().endsWith("personer.csv")) {
-                        savePeople(IOUtil.dontClose(zip));
-                    } else if (zipEntry.getName().endsWith("godkjenninger.csv")) {
-                        saveAuthorizations(IOUtil.dontClose(zip));
-                    } else if (zipEntry.getName().endsWith("rekvisisjonsretter.csv")) {
-                        savePrescriptionAuthorizations(IOUtil.dontClose(zip));
-                    }
-                }
+            try(ZipFile file = new ZipFile(hprLocation)) {
+                savePeople(file.getInputStream(file.getEntry("normalisert/personer.csv")));
+                saveAuthorizations(file.getInputStream(file.getEntry("normalisert/godkjenninger.csv")));
+            } catch (IOException e) {
+                throw ExceptionUtil.softenException(e);
+            }
+        } else if (hprLocation.startsWith("classpath:")) {
+            try {
+                String directory = hprLocation.substring("classpath:".length());
+                savePeople(IOUtil.resource(directory + "personer.csv"));
+                saveAuthorizations(IOUtil.resource(directory + "godkjenninger.csv"));
             } catch (IOException e) {
                 throw ExceptionUtil.softenException(e);
             }
         } else {
-            try {
-                Path root = Paths.get(hprLocation);
-                if (Files.exists(root.resolve("personer.csv"))) {
-                    savePeople(Files.newInputStream(root.resolve("personer.csv")));
-                }
-                if (Files.exists(root.resolve("godkjenninger.csv"))) {
-                    saveAuthorizations(Files.newInputStream(root.resolve("godkjenninger.csv")));
-                }
-                if (Files.exists(root.resolve("rekvisisjonsretter.csv"))) {
-                    savePrescriptionAuthorizations(Files.newInputStream(root.resolve("rekvisisjonsretter.csv")));
-                }
-            } catch (IOException e) {
-                throw ExceptionUtil.softenException(e);
-            }
+            throw new IllegalArgumentException("Can't deal with " + hprLocation);
         }
-
-    }
-
-    private void savePrescriptionAuthorizations(InputStream input) {
-        // TODO Auto-generated method stub
 
     }
 
@@ -106,8 +81,7 @@ public class HprPractitionerImporter {
                     repository.save(practitioner);
                 }
             }
-
-            logger.info("Completed saving people");
+            logger.info("Completed saving {} people", parser.getRecordNumber());
         } catch (IOException e) {
             throw ExceptionUtil.softenException(e);
         }
@@ -164,7 +138,7 @@ public class HprPractitionerImporter {
                     repository.saveAuthorization(id, hprNumber, authorization);
                 }
             }
-            logger.info("Completed saving authorizations");
+            logger.info("Completed saving {} authorizations", parser.getCurrentLineNumber());
         } catch (IOException e) {
             throw ExceptionUtil.softenException(e);
         }

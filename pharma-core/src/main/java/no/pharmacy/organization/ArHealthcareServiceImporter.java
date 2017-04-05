@@ -49,6 +49,9 @@ public class ArHealthcareServiceImporter {
             logger.info("Refreshing HealthcareServices");
             Document doc = decodeXml(input);
             logger.info("Reading data");
+            int insertCount = 0;
+            int updateCount = 0;
+            int unchangedCount = 0;
             for (Element communicationParty : doc.find("CommunicationParty")) {
                 ElementSet businessType = communicationParty.find("BusinessType", "CodeValue");
                 if (businessType.isEmpty()) {
@@ -57,11 +60,16 @@ public class ArHealthcareServiceImporter {
                     HealthcareService organization = createOrganization(communicationParty);
                     if (!lastUpdated.containsKey(organization.getId())) {
                         healthcareServiceRepository.save(organization);
+                        insertCount++;
                     } else if (organization.getUpdatedAt().isAfter(lastUpdated.get(organization.getId()))) {
                         healthcareServiceRepository.update(organization);
+                        updateCount++;
+                    } else {
+                        unchangedCount++;
                     }
                 }
             }
+            logger.info("Inserted: {}, Updated: {}, Unchanged: {}", insertCount, updateCount, unchangedCount);
         } catch (IOException e) {
             throw ExceptionUtil.softenException(e);
         }

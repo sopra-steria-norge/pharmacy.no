@@ -19,8 +19,12 @@ import org.eclipse.jetty.server.UserIdentity;
 public class AuthenticationFilter implements Filter {
 
     private static final String SESSION_AUTH = "MySession";
-    private AuthenticationConfiguration authConfig = new AuthenticationConfiguration();
+    private AuthenticationConfiguration authConfig;
 
+
+    public AuthenticationFilter(AuthenticationConfiguration authConfig) {
+        this.authConfig = authConfig;
+    }
 
     @Override
     public void destroy() {

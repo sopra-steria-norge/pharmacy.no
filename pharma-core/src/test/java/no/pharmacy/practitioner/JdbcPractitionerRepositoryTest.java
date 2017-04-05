@@ -15,7 +15,7 @@ public class JdbcPractitionerRepositoryTest {
 
     @Test
     public void shouldImportHpr() throws Exception {
-        repository.refresh("src/main/resources/seed/hpr-mini/");
+        repository.refresh("classpath:seed/hpr-mini/");
 
         assertThat(repository.listDoctors())
                 .extracting(PersonReference::getReference)
@@ -32,8 +32,8 @@ public class JdbcPractitionerRepositoryTest {
 
     @Test
     public void shouldOnlyImportAuthorizationsOnce() throws Exception {
-        repository.refresh("src/main/resources/seed/hpr-mini/");
-        repository.refresh("src/main/resources/seed/hpr-mini/");
+        repository.refresh("classpath:seed/hpr-mini/");
+        repository.refresh("classpath:seed/hpr-mini/");
 
         assertThat(repository.getAuthorizations(1002104))
             .containsOnlyOnce(PractionerAuthorization.DOCTOR);
@@ -41,7 +41,7 @@ public class JdbcPractitionerRepositoryTest {
 
     @Test
     public void shouldImportUpdates() {
-        repository.refresh("src/main/resources/seed/hpr-mini/");
+        repository.refresh("classpath:seed/hpr-mini/");
 
         Practitioner practitioner = repository.getPractitioner("1002104").get();
         assertThat(practitioner).hasNoNullFieldsOrProperties();
@@ -53,7 +53,7 @@ public class JdbcPractitionerRepositoryTest {
 
         assertThat(repository.getPractitioner("9600000")).isEmpty();
 
-        repository.refresh("src/test/resources/hpr-update/");
+        repository.refresh("classpath:hpr-update/");
         assertThat(repository.getPractitioner("1002104").get().getDisplay())
             .isEqualTo("NOEN ANDRE RAUDI");
         assertThat(repository.getAuthorizations(1002104))
@@ -61,6 +61,14 @@ public class JdbcPractitionerRepositoryTest {
             .contains(PractionerAuthorization.PHARMACIST);
 
         assertThat(repository.getPractitioner("9600000")).isNotEmpty();
+    }
+
+    public static void main(String[] args) {
+        JdbcPractitionerRepository repository = new JdbcPractitionerRepository(
+                TestDataSource.createMemDataSource("practitioners"),
+                CryptoUtil.aesKey("sdgsdg lsdngdlsdnglsndg".getBytes()));
+
+        repository.refresh("../data-dumps/hpr-mini.zip");
     }
 
 

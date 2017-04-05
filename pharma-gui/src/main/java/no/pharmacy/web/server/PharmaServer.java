@@ -41,6 +41,7 @@ import no.pharmacy.practitioner.JdbcPractitionerRepository;
 import no.pharmacy.practitioner.PractitionerRepository;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
+import no.pharmacy.web.infrastructure.auth.AuthenticationConfiguration;
 import no.pharmacy.web.infrastructure.auth.AuthenticationFilter;
 import no.pharmacy.web.infrastructure.auth.IdCheckServlet;
 import no.pharmacy.web.infrastructure.logging.LogDisplayServlet;
@@ -63,7 +64,11 @@ public class PharmaServer {
         logConfiguration.setLevel("org.flywaydb", Level.WARN);
         logServlet = new LogDisplayServlet(logConfiguration.getContext());
 
-        server = new Server(8080);
+        int port = 8080;
+        if (System.getenv("HTTP_PORT") != null) {
+            port = Integer.parseInt(System.getenv("HTTP_PORT"));
+        }
+        server = new Server(port);
     }
 
     public static void main(String[] args) throws Exception {
@@ -73,6 +78,7 @@ public class PharmaServer {
     private void start() throws Exception {
         server.setHandler(createHandlers());
         server.start();
+        logger.warn("Started http://localhost:{}", server.getURI().getPort());
     }
 
     private Handler createHandlers() throws IOException, URISyntaxException {
@@ -87,8 +93,12 @@ public class PharmaServer {
         PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(createPractitionerDataSource(),
                 CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
 
-        File hprFile = new File("target/HprExport.L3.csv.v2.zip");
-        practitionerRepository.refresh(hprFile.toString());
+        File hprFile = new File("../ddata-dump/HprExport.L3.csv.v2.zip");
+        if (hprFile.exists()) {
+            practitionerRepository.refresh(hprFile.toString());
+        } else {
+            practitionerRepository.refresh("classpath:seed/hpr-mini/");
+        }
 
         HealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(createHealthcareServiceDataSource());
         try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
@@ -118,19 +128,23 @@ public class PharmaServer {
     }
 
     private DataSource createPharmaDataSource() {
-        return createDataSource("jdbc:h2:file:./target/db/pharmacist", "db/db-pharmacist");
+        return createFileDataSource("pharmacist");
     }
 
     private DataSource createPatientDataSource() {
-        return createDataSource("jdbc:h2:file:./target/db/patient", "db/db-patient");
+        return createFileDataSource("patient");
     }
 
     private DataSource createMedicationDataSource() {
-        return createDataSource("jdbc:h2:file:./target/db/medications", "db/db-medications");
+        return createFileDataSource("medications");
     }
 
     private DataSource createPractitionerDataSource() {
-        return createDataSource("jdbc:h2:file:./target/db/practitioners", "db/db-practitioners");
+        return createFileDataSource("practitioners");
+    }
+
+    private DataSource createFileDataSource(String name) {
+        return createDataSource("jdbc:h2:file:./target/db/" + name, "db/db-" + name);
     }
 
     private DataSource createDataSource(String jdbcUrl, String migrations) {
@@ -168,7 +182,7 @@ public class PharmaServer {
 
         handler.addServlet(new ServletHolder(new IdCheckServlet()), "/idCheck");
 
-        handler.addFilter(new FilterHolder(new AuthenticationFilter()), "/idCheck", EnumSet.of(DispatcherType.REQUEST));
+        handler.addFilter(new FilterHolder(new AuthenticationFilter(new AuthenticationConfiguration())), "/idCheck", EnumSet.of(DispatcherType.REQUEST));
 
 
         return handler;
