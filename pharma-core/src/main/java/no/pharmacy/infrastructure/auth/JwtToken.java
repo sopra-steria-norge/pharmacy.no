@@ -43,11 +43,17 @@ public class JwtToken {
 
     public boolean isValid() {
         try {
-            return verifySignature() && verifyTimeValidity(Instant.now());
+            if (!verifySignature()) {
+                logger.warn("Failed to signature");
+                return false;
+            } else {
+                logger.debug("Verified signature");
+            }
         } catch (GeneralSecurityException e) {
             logger.warn("Failed to validate token {}", e);
             return false;
         }
+        return verifyTimeValidity(Instant.now());
     }
 
     public boolean verifyTimeValidity(Instant instant) {
@@ -131,7 +137,6 @@ public class JwtToken {
         return payload.keys();
     }
 
-
     public boolean verifySignature() throws GeneralSecurityException {
         Signature signature = Signature.getInstance("SHA256withRSA"); // because jwt[0].alg == RS256
         signature.initVerify(getCertificate().getPublicKey());
@@ -141,18 +146,22 @@ public class JwtToken {
 
     private Certificate getCertificate() throws CertificateException {
         if (iss().startsWith("https://sts.windows.net/")) {
-            return getCertificate(payload.requiredString("tid"), jwtHeader.requiredString("kid"));
+            String tenant = payload.requiredString("tid");
+            String keyUrl = "https://login.microsoftonline.com/" + tenant + "/discovery/v2.0/keys";
+            return getCertificate(keyUrl, jwtHeader.requiredString("kid"));
+        } else if (iss().startsWith("https:")) {
+            return getCertificate(iss() + "/discovery/keys", jwtHeader.requiredString("kid"));
         } else {
             throw new IllegalArgumentException("Unknown issuer " + iss());
         }
     }
 
-    private static synchronized Certificate getCertificate(String tenantId, String kid) throws CertificateException {
-        String keyId = tenantId + "/" + kid;
+    private static synchronized Certificate getCertificate(String keyUrl, String keyId) throws CertificateException {
         if (!certificates.containsKey(keyId)) {
             try {
-                JsonObject keyJson = httpGetJsonObject(new URL("https://login.microsoftonline.com/" + tenantId + "/discovery/v2.0/keys"));
-                certificates.put(keyId, decodeCertificate(getKey(keyJson, kid)));
+                logger.debug("Getting JWK from {}", keyUrl);
+                JsonObject keyJson = httpGetJsonObject(new URL(keyUrl));
+                certificates.put(keyId, decodeCertificate(getKey(keyJson, keyId)));
             } catch (IOException e) {
                 throw ExceptionUtil.softenException(e);
             }
@@ -164,6 +173,7 @@ public class JwtToken {
         if (certificateFactory == null) {
             certificateFactory = CertificateFactory.getInstance("X.509");
         }
+        logger.debug("Decoding certificate {}", key);
         return certificateFactory.generateCertificate(asInputStream(key));
     }
 

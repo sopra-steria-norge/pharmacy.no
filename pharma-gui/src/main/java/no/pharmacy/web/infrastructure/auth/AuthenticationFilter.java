@@ -15,12 +15,15 @@ import org.eclipse.jetty.security.UserAuthentication;
 import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.UserIdentity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AuthenticationFilter implements Filter {
 
     private static final String SESSION_AUTH = "MySession";
     private AuthenticationConfiguration authConfig;
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     public AuthenticationFilter(AuthenticationConfiguration authConfig) {
         this.authConfig = authConfig;
@@ -43,12 +46,14 @@ public class AuthenticationFilter implements Filter {
             Authentication auth = (Authentication) req.getSession().getAttribute(SESSION_AUTH);
             ((Request)request).setAuthentication(auth);
             chain.doFilter(request, response);
-        } else if (req.getParameter("id_token") != null) {
+        } else if (req.getMethod().equals("POST") && req.getParameter("id_token") != null) {
+            logger.debug("Decoding id_token {}", req.getParameter("id_token"));
             Authentication auth = decodeAuthentication(req.getParameter("id_token"));
             ((Request)request).setAuthentication(auth);
             req.getSession().setAttribute(SESSION_AUTH, auth);
             resp.sendRedirect(authConfig.getCurrentUri(req));
         } else {
+            logger.debug("Redirecting user for login {}", authConfig.getRedirectUrl(req));
             resp.sendRedirect(authConfig.getRedirectUrl(req));
         }
     }
@@ -56,7 +61,6 @@ public class AuthenticationFilter implements Filter {
     private Authentication decodeAuthentication(String idToken) {
         OpenIdPrincipal userPrincipal = authConfig.decodeUserPrincipal(idToken);
         UserIdentity userIdentity = new DefaultUserIdentity(userPrincipal.getSubject(), userPrincipal, userPrincipal.getRoles());
-        Authentication auth = new UserAuthentication("OpenID", userIdentity);
-        return auth;
+        return new UserAuthentication("OpenID", userIdentity);
     }
 }

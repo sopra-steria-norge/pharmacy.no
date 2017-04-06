@@ -14,15 +14,18 @@ import no.pharmacy.infrastructure.auth.JwtToken;
 public class AuthenticationConfiguration {
 
     private String authority;
-    private String tenant;
     private String clientId;
 
     public AuthenticationConfiguration() {
         List<String> missingFields = new ArrayList<>();
 
-        tenant = getEnv("AD_TENANT", missingFields);
         clientId = getEnv("AD_CLIENT_ID", missingFields);
-        authority = getEnv("AD_AUTHORITY", missingFields);
+
+        if (System.getenv("AD_TENANT") != null) {
+            this.authority = "https://login.microsoftonline.com/" + System.getenv("AD_TENANT");
+        } else {
+            this.authority = getEnv("AD_AUTHORITY", missingFields);
+        }
 
         if (!missingFields.isEmpty()) {
             throw new RuntimeException("Can't start without Active Directory ENVIRONMENT VARIABLES: " + missingFields);
@@ -38,10 +41,10 @@ public class AuthenticationConfiguration {
     }
 
     public String getRedirectUrl(HttpServletRequest req) {
-        return this.authority + this.tenant
-                + "/oauth2/authorize?response_type=code%20id_token&scope=openid&response_mode=form_post&"
+        return this.authority
+                + "/oauth2/authorize?response_type=id_token&scope=openid&response_mode=form_post&"
                 + "redirect_uri=" + encodeUTF8(getCurrentUri(req)) + "&client_id=" + clientId
-                + "&resource=https%3a%2f%2fgraph.windows.net"
+                + "&client-requst-id=" + UUID.randomUUID()
                 + "&nonce=" + UUID.randomUUID();
     }
 
