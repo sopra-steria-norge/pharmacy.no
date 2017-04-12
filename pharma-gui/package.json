@@ -1,0 +1,20 @@
+{
+  "name": "pharma-gui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "karma start src/test/js/unit/karma.conf.js --single-run",
+    "watch": "karma start src/test/js/unit/karma.conf.js"
+  },
+  "author": "Johannes Brodwall <johannes.brodwall@soprasteria.com>",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "karma": "^1.6.0",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-mocha": "^1.3.0",
+    "mocha": "^3.2.0"
+  }
+}

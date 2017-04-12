@@ -4,6 +4,7 @@
 <title>Load test scenario | Pharmacy.no</title>
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/3.5.2/superagent.js"></script>
+<script src="js/prescriptions-simulator.js"></script>
 </head>
 <body>
 	<div id="app">
@@ -64,143 +65,31 @@
 		<button @click="submit">Registrere resept</button>
 	</div>
 <script>
-Vue.component('list-select', {
-	template: `<div>
-			<p>
-				<slot name="selected" :selected="value" v-if="value">{{value}}</slot>
-				<a href="#" @click="toggle">[endre]</a>
-			</p>
-			<ul v-if="displayOptions">
-				<p>
-					<input v-model="itemFilter" placeholder="søk" autofocus />
-				</p>
-				<li v-for="option in options"><a href="#" @click="selectOption(option)"
-					>[ velg ]</a><slot :option="option">{{option}}</slot></li>
-			</ul>
-		</div>`,
-	model: {
-		prop: 'value',
-		event: 'input'
-	},
-	props: {
-		"allOptions": {type: Array, required:true},
-		"value": [Object, String],
-		"filter": {type: Function},
-		"objectFilter": {type: Function}
-	},
-	data: function () {
-		return {
-			displayOptions: false,
-			itemFilter: ""
-		}; 
-	},
-	methods: {
-		toggle: function() {
-			this.displayOptions = !this.displayOptions;
-		},
-		selectOption: function(option) {
-			this.displayOptions = false;
-			this.currentOption = option;
-			this.itemFilter = "";
-			this.$emit('input', option);
-		}
-	},
-	computed: {
-		options: function() {
-			if (this.objectFilter) {
-				return this.allOptions.filter(this.objectFilter(this.itemFilter)).slice(0, 10);
-			}
-			return this.filter(this.itemFilter)(this.allOptions).slice(0, 10);
-		}
-	}
-})
-</script>
-<script>
-function dateString(date) {
-	return date && date.toISOString().substring(0, 10);
-}
-function randomDaysAgo(maxDays) {
-	return new Date(new Date() - Math.random() * maxDays*24*60*60*1000);	
-}
-
-function submitJsonPost(url, json) {
-	var form = document.createElement("form");
-	form.setAttribute("method", "POST");
-	form.setAttribute("action", url);
-	
-	var dataField = document.createElement("input");
-	dataField.setAttribute("type", "hidden");
-	dataField.setAttribute("name", "JSON");
-	dataField.setAttribute("value", JSON.stringify(json));
-	form.append(dataField);
-	
-	document.body.append(form);
-	form.submit();
-}
-
 var app = new Vue({
 	el : '#app',
 	data : {
+		scenario: "custom",
+
 		allPatients: [],
 		patient: null,
-		filterPatients: function(string) {
-			if (string.match(/^\d+$/)) {
-				return function(o) {
-					return o.nationalId.indexOf(string) == 0;
-				};
-			}
-			const filter = string.toUpperCase();
-			return function(o) {
-				return o.firstName.toUpperCase().indexOf(filter) == 0 || o.lastName.toUpperCase().indexOf(filter) == 0;
-			};
-		},
-		scenario: "custom",
+		filterPatients: filterPatients,
+
 		allPractitioners: [],
 		prescriber: null,
-		filterPractitioners: function(string) {
-			if (string.length < 3) {
-				return function(o) { return true; };
-			}
-			const filter = string.toUpperCase();
-			if (isNaN(filter)) {
-				return function(o) {
-					return o.name.toUpperCase().includes(filter);
-				};
-			} else {
-				return function(o) {
-					return o.id.indexOf(filter) == 0;
-				};
-			}
-		},
+		filterPractitioners: filterPractitioners,
+		
 		medication: null,
 		allMedications: [],
-		filterMedications: function(string) {
-			if (string.length < 2) {
-				return function(o) { return true; };
-			}
-			const filter = string.toUpperCase();
-			if (filter.match(/^[A-Z]\d+([A-Z]([A-Z]\d{0,2})?)?$/)) {
-				return function(o) {
-					return o.atc && o.atc.indexOf(filter) == 0;
-				};
-			} else if (filter.match(/^\d+$/)) {
-				return function(o) {
-					return o.productId.indexOf(filter) == 0;
-				}
-			} else {
-				return function(o) {
-					return o.display.toUpperCase().indexOf(filter) == 0;
-				};
-			}
-		},
+		filterMedications: filterMedications,
+		
 		earliestDate: dateString(new Date(new Date() - 4*7*24*60*60*1000)),
 		latestDate: dateString(new Date()),
 		dateWritten: dateString(randomDaysAgo(14))
 	},
-	methods: {
-		submit: function() {
+	computed: {
+		prescriptions: function() {
 			if (this.scenario === 'custom') {
-				var prescription = {
+				return {
 					patient: this.patient,
 					prescriptions: [{
 						medication: this.medication.productId,
@@ -208,24 +97,26 @@ var app = new Vue({
 						dateWritten: this.dateWritten
 					}]
 				};
-				var url = "/pharma-test/api/prescriptions";
-				submitJsonPost(url, prescription);
 			} else if (this.scenario === 'interaction') {
-				var prescription = {
-						patient: this.patient,
-						prescriptions: [{
-							medication: "500595",
-							prescriber: this.allPractitioners[Math.floor(Math.random() * this.allPractitioners.length)],
-							dateWritten: randomDaysAgo(14)
-						}, {
-							medication: "466813",
-							prescriber: this.allPractitioners[Math.floor(Math.random() * this.allPractitioners.length)],
-							dateWritten: randomDaysAgo(14)
-						}]
-					};
-					var url = "/pharma-test/api/prescriptions";
-					submitJsonPost(url, prescription);
+				return {
+					patient: this.patient,
+					prescriptions: [{
+						medication: "500595",
+						prescriber: this.allPractitioners[Math.floor(Math.random() * this.allPractitioners.length)],
+						dateWritten: randomDaysAgo(14)
+					}, {
+						medication: "466813",
+						prescriber: this.allPractitioners[Math.floor(Math.random() * this.allPractitioners.length)],
+						dateWritten: randomDaysAgo(14)
+					}]
+				};
 			}
+		}
+	},
+	methods: {
+		submit: function() {
+			var url = "/pharma-test/api/prescriptions";
+			submitJsonPost(url, this.prescriptions);
 		}
 	}
 });
