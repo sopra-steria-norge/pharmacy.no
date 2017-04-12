@@ -2,6 +2,8 @@ package no.pharmacy.web.test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Random;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -52,8 +54,9 @@ public class ReceiptTestCaseController extends HttpServlet {
             doc.find("...", "#flashMessage").first().text(message);
         }
 
+        Random random = new Random(324523L);
         Element unusedIds = doc.find("...", "#unusedIds").first();
-        for (String nationalId : testData.unusedNationalIds(50)) {
+        for (String nationalId : testData.unusedNationalIds(random, 50)) {
             unusedIds.add(Xml.el("option", Xml.attr("value", nationalId), Xml.attr("label", nationalId)));
         }
 

@@ -45,27 +45,35 @@ public class PharmaTestData {
 
 
     // TODO: Use a master list of national IDs known not to be used by anyone
-    public List<String> unusedNationalIds(int count) {
+    public List<String> unusedNationalIds(Random random, int count) {
         List<String> result = new ArrayList<>();
         for (int i=0; i<count; i++) {
-            result.add(unusedNationalId());
+            result.add(unusedNationalId(random));
         }
         Collections.sort(result);
         return result;
     }
 
-    public String unusedNationalId() {
+    public String unusedNationalId(Random random) {
         // TODO: Also have some D-numbers
         LocalDate birthDate = LocalDate.now().minusYears(80)
-                .plusDays(random(80*365));
+                .plusDays(random.nextInt(80*365));
         return birthDate.format(DateTimeFormatter.ofPattern("ddMMyy"))
-                + randomNumericString(5); // TODO: Calculate checksum
+                + randomNumericString(5, random); // TODO: Calculate checksum
+    }
+
+    public String unusedNationalId() {
+        return unusedNationalId(random);
     }
 
     private static String randomNumericString(int length) {
+        return randomNumericString(length, random);
+    }
+
+    private static String randomNumericString(int length, Random random) {
         String result = "";
         for (int i=0; i<length; i++) {
-            result += String.valueOf(random(10));
+            result += String.valueOf(random.nextInt(10));
         }
         return result;
     }
@@ -76,7 +84,12 @@ public class PharmaTestData {
 
     @SafeVarargs
     public static <T> T pickOneOf(T... options) {
-        return options[random(options.length)];
+        return pickOneOf(random, options);
+    }
+
+    @SafeVarargs
+    public static <T> T pickOneOf(Random random, T... options) {
+        return options[random.nextInt(options.length)];
     }
 
     public static <T> T pickOne(List<T> options) {
@@ -86,34 +99,31 @@ public class PharmaTestData {
     public Practitioner samplePractitioner() {
         Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier(random(1000000));
-        practitioner.setFirstName(sampleFirstName());
-        practitioner.setLastName(sampleLastName());
+        practitioner.setFirstName(sampleFirstName(random));
+        practitioner.setLastName(sampleLastName(random));
         return practitioner;
     }
 
     public static String sampleName() {
-        return sampleFirstName() + " " + sampleLastName();
+        return sampleFirstName(random) + " " + sampleLastName(random);
     }
 
-    private static String sampleLastName() {
+    public static String sampleLastName(Random random) {
         // https://www.ssb.no/a/navn/alf/etter100.html
-        return pickOneOf(new String[] { "Hansen", "Johansen", "Olsen", "Larsen", "Andersen", "Pedersen", "Nilsen", "Kristiansen", "Jensen", "Karlsen", "Johnsen", "Pettersen", "Eriksen", "Berg", "Haugen" });
+        return pickOneOf(random, new String[] { "Hansen", "Johansen", "Olsen", "Larsen", "Andersen", "Pedersen", "Nilsen", "Kristiansen", "Jensen", "Karlsen", "Johnsen", "Pettersen", "Eriksen", "Berg", "Haugen" });
     }
 
-    private static String sampleFirstName() {
+    public static String sampleFirstName(Random random) {
         // https://www.ssb.no/befolkning/statistikker/navn/aar/2016-01-26?fokus=true
         String[] femaleNames = { "Emma", "Nora", "Sara", "Sofie", "Olivia", "Sofia", "Emilie", "Ella", "Leah", "Maja" };
         String[] maleNames = { "William", "Mathias", "Oliver", "Jakob", "Lucas", "Filip", "Liam", "Aksel", "Emil", "Oskar" };
-        return chance(50) ? pickOneOf(femaleNames) : pickOneOf(maleNames);
-    }
-
-    private static boolean chance(int percent) {
-        return random(100) < percent;
+        return random.nextBoolean() ?
+                pickOneOf(random, femaleNames) : pickOneOf(random, maleNames);
     }
 
     public PersonReference sampleDoctor() {
         return new PersonReference(String.valueOf(randomId()),
-                sampleFirstName(), sampleLastName());
+                sampleFirstName(random), sampleLastName(random));
     }
 
     public static long randomId() {
@@ -196,12 +206,11 @@ public class PharmaTestData {
     }
 
     public static String sampleGtin() {
-        return pickOneOf("70", "74", "40", "73")
-                + randomNumericString(11);
+        return pickOneOf("70", "74", "40", "73") + randomNumericString(11);
     }
 
     public PersonReference samplePatient() {
-        return new PersonReference(UUID.randomUUID().toString(), sampleFirstName(), sampleLastName());
+        return new PersonReference(UUID.randomUUID().toString(), sampleFirstName(random), sampleLastName(random));
     }
 
     public static String sampleProductId() {
