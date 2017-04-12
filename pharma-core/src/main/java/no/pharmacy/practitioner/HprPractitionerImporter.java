@@ -75,14 +75,19 @@ public class HprPractitionerImporter {
     private void savePeople(InputStream input) {
         try (CSVParser parser = new CSVParser(new InputStreamReader(input, StandardCharsets.UTF_8), format)) {
             for (CSVRecord record : parser) {
-                if (parser.getCurrentLineNumber() % 1000 == 0) {
+                if (parser.getCurrentLineNumber() % 10000 == 0) {
                     logger.info("Reading persons, line {}", parser.getCurrentLineNumber());
                 }
 
                 Practitioner practitioner = toPractitioner(record);
-                if (shouldSave(practitioner)) {
-                    lastUpdated.put(practitioner.getIdentifier(), practitioner.getUpdatedAt());
+                if (practitioner == null) continue;
+                Instant previousUpdate = lastUpdated.get(practitioner.getIdentifier());
+                if (previousUpdate == null) {
                     repository.save(practitioner);
+                    lastUpdated.put(practitioner.getIdentifier(), practitioner.getUpdatedAt());
+                } else if (practitioner.getUpdatedAt().isAfter(previousUpdate)) {
+                    repository.update(practitioner);
+                    lastUpdated.put(practitioner.getIdentifier(), practitioner.getUpdatedAt());
                 }
             }
             logger.info("Completed saving {} people", parser.getRecordNumber());
@@ -92,15 +97,8 @@ public class HprPractitionerImporter {
 
     }
 
-    private boolean shouldSave(Practitioner practitioner) {
-        if (practitioner == null) return false;
-        Instant previousUpdate = lastUpdated.getOrDefault(practitioner.getIdentifier(), Instant.MIN);
-        return practitioner.getUpdatedAt().isAfter(previousUpdate);
-    }
-
     private Practitioner toPractitioner(CSVRecord record) {
         try {
-
             Practitioner practitioner = new Practitioner();
             practitioner.setFirstName(record.get("Fornavn"));
             practitioner.setLastName(record.get("Etternavn"));
@@ -129,7 +127,7 @@ public class HprPractitionerImporter {
                 new ArrayList<>(), rs -> rs.getLong(1)));
         try (CSVParser parser = new CSVParser(new InputStreamReader(input, StandardCharsets.UTF_8), format)) {
             for (CSVRecord record : parser) {
-                if (parser.getCurrentLineNumber() % 1000 == 0) {
+                if (parser.getCurrentLineNumber() % 10000 == 0) {
                     logger.info("Reading authorizations, line {}", parser.getCurrentLineNumber());
                 }
 

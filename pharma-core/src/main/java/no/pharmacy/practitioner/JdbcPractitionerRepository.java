@@ -26,8 +26,8 @@ public class JdbcPractitionerRepository implements PractitionerRepository {
         return jdbcSupport.queryForList(
                 "select * from practitioners p"
                 + " where hpr_number in (select hpr_number from Practitioner_authorizations where authorization_code = ?)"
-                + " order by hpr_number limit ?",
-                Arrays.asList("LE", 20), this::read);
+                + " order by p.first_name, p.last_name limit ?",
+                Arrays.asList("LE", 100000), this::read);
     }
 
     private PersonReference read(ResultSet rs) throws SQLException {
@@ -68,12 +68,21 @@ public class JdbcPractitionerRepository implements PractitionerRepository {
                 rs -> PractionerAuthorization.getValue(rs.getString("authorization_code")));
     }
 
-    void save(Practitioner practitioner) {
+    void update(Practitioner practitioner) {
         jdbcSupport.executeUpdate("delete from practitioner_authorizations where hpr_number = ?",
                 Arrays.asList(practitioner.getIdentifier()));
-        jdbcSupport.executeUpdate("delete from practitioners where hpr_number = ?",
-                Arrays.asList(practitioner.getIdentifier()));
 
+        jdbcSupport.update("practitioners")
+            .where("hpr_number", practitioner.getIdentifier())
+            .set("encrypted_national_id", jdbcSupport.encrypt(practitioner.getNationalId()))
+            .set("first_name", practitioner.getFirstName())
+            .set("last_name", practitioner.getLastName())
+            .set("date_of_birth", practitioner.getDateOfBirth())
+            .set("updated_at", practitioner.getUpdatedAt())
+            .executeUpdate();
+    }
+
+    void save(Practitioner practitioner) {
         jdbcSupport.insertInto("practitioners")
             .value("hpr_number", practitioner.getIdentifier())
             .value("encrypted_national_id", jdbcSupport.encrypt(practitioner.getNationalId()))
