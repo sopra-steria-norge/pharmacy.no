@@ -45,6 +45,12 @@ public class PrescriptionsController extends HttpServlet {
         if (nationalId == null) {
             Document doc = Xml.readResource("/pharma-webapp/index.html.template");
             resp.setContentType("text/html");
+
+            String patientNationalId = req.getParameter("patientNationalId");
+            if (patientNationalId != null) {
+                doc.find("...", "#prescriptionsForNationalId").first().val(patientNationalId);
+                doc.find("...", "#historyForNationalId").first().val(patientNationalId);
+            }
             doc.writeTo(resp.getWriter());
             return;
         }

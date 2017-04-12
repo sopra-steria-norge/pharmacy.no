@@ -47,6 +47,7 @@ import no.pharmacy.web.infrastructure.auth.AuthenticationConfiguration;
 import no.pharmacy.web.infrastructure.auth.AuthenticationFilter;
 import no.pharmacy.web.infrastructure.auth.IdCheckServlet;
 import no.pharmacy.web.infrastructure.logging.LogDisplayServlet;
+import no.pharmacy.web.test.PharmaTestCaseApiController;
 import no.pharmacy.web.test.ReceiptTestCaseController;
 import no.pharmacy.web.test.ReseptFormidlerLogTestController;
 
@@ -182,8 +183,9 @@ public class PharmaServer {
         // Avoid locking files on disk
         handler.setInitParameter("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
 
-        handler.addServlet(new ServletHolder(new ReceiptTestCaseController(reseptFormidler, medicationRepository, practitionerRepository)), "/");
+        handler.addServlet(new ServletHolder(new ReceiptTestCaseController(reseptFormidler, medicationRepository, practitionerRepository)), "/old");
         handler.addServlet(new ServletHolder(new ReseptFormidlerLogTestController(reseptFormidler)), "/log");
+        handler.addServlet(new ServletHolder(new PharmaTestCaseApiController(reseptFormidler, medicationRepository, practitionerRepository)), "/api/*");
 
         return handler;
     }

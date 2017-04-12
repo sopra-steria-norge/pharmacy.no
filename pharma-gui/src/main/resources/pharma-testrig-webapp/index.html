@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Load test scenario | Pharmacy.no</title>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/3.5.2/superagent.js"></script>
+</head>
+<body>
+	<div id="app">
+		<h4>Pasient:</h4>
+		<list-select 
+			:all-options="allPatients"
+			:object-filter="filterPatients"
+			v-model="patient">
+			<template slot="selected" scope="item">
+				{{item.selected.firstName}} {{item.selected.lastName}} ({{item.selected.nationalId}})
+			</template>
+			<template scope="item">
+				{{item.option.firstName}} {{item.option.lastName}}
+			</template>
+		</list-select>
+		
+		<div v-if="patient">
+			<a :href="'/prescriptions/?patientNationalId=' + patient.nationalId">Ekspeder</a>
+		</div>
+		
+		<h4>Scenario</h4>
+
+		<div><label><input type="radio" v-model="scenario" name="scenario" value="custom">Registrer resept manuelt</label></div>
+		<div><label><input type="radio" v-model="scenario" name="scenario" value="interaction">To resepter med interaksjon</label></div>
+
+		<div v-if="scenario === 'custom'">
+			<h4>Forskriver:</h4>
+			<list-select 
+				:all-options="allPractitioners"
+				:object-filter="filterPractitioners"
+				v-model="prescriber">
+				<template slot="selected" scope="item">
+					{{item.selected.name}} ({{item.selected.id}})
+				</template>
+				<template scope="item">
+					{{item.option.name}}
+				</template>
+			</list-select>
+	
+			<h4>Legemiddelpakning:</h4>
+			<list-select 
+				:all-options="allMedications"
+				:object-filter="filterMedications"
+				v-model="medication">
+				<template slot="selected" scope="item">
+					{{item.selected.productId}}: {{item.selected.display}} ({{item.selected.atc}})
+				</template>
+				<template scope="item">
+					{{item.option.productId}}: {{item.option.display}} ({{item.option.atc}})
+				</template>
+			</list-select>
+	
+			<h4>Dato:</h4>
+			
+			<p><input type="date" v-model="dateWritten" :min="earliestDate" :max="latestDate" /></p>
+		</div>
+
+		<button @click="submit">Registrere resept</button>
+	</div>
+<script>
+Vue.component('list-select', {
+	template: `<div>
+			<p>
+				<slot name="selected" :selected="value" v-if="value">{{value}}</slot>
+				<a href="#" @click="toggle">[endre]</a>
+			</p>
+			<ul v-if="displayOptions">
+				<p>
+					<input v-model="itemFilter" placeholder="søk" autofocus />
+				</p>
+				<li v-for="option in options"><a href="#" @click="selectOption(option)"
+					>[ velg ]</a><slot :option="option">{{option}}</slot></li>
+			</ul>
+		</div>`,
+	model: {
+		prop: 'value',
+		event: 'input'
+	},
+	props: {
+		"allOptions": {type: Array, required:true},
+		"value": [Object, String],
+		"filter": {type: Function},
+		"objectFilter": {type: Function}
+	},
+	data: function () {
+		return {
+			displayOptions: false,
+			itemFilter: ""
+		}; 
+	},
+	methods: {
+		toggle: function() {
+			this.displayOptions = !this.displayOptions;
+		},
+		selectOption: function(option) {
+			this.displayOptions = false;
+			this.currentOption = option;
+			this.itemFilter = "";
+			this.$emit('input', option);
+		}
+	},
+	computed: {
+		options: function() {
+			if (this.objectFilter) {
+				return this.allOptions.filter(this.objectFilter(this.itemFilter)).slice(0, 10);
+			}
+			return this.filter(this.itemFilter)(this.allOptions).slice(0, 10);
+		}
+	}
+})
+</script>
+<script>
+function dateString(date) {
+	return date && date.toISOString().substring(0, 10);
+}
+function randomDaysAgo(maxDays) {
+	return new Date(new Date() - Math.random() * maxDays*24*60*60*1000);	
+}
+
+function submitJsonPost(url, json) {
+	var form = document.createElement("form");
+	form.setAttribute("method", "POST");
+	form.setAttribute("action", url);
+	
+	var dataField = document.createElement("input");
+	dataField.setAttribute("type", "hidden");
+	dataField.setAttribute("name", "JSON");
+	dataField.setAttribute("value", JSON.stringify(json));
+	form.append(dataField);
+	
+	document.body.append(form);
+	form.submit();
+}
+
+var app = new Vue({
+	el : '#app',
+	data : {
+		allPatients: [],
+		patient: null,
+		filterPatients: function(string) {
+			if (string.match(/^\d+$/)) {
+				return function(o) {
+					return o.nationalId.indexOf(string) == 0;
+				};
+			}
+			const filter = string.toUpperCase();
+			return function(o) {
+				return o.firstName.toUpperCase().indexOf(filter) == 0 || o.lastName.toUpperCase().indexOf(filter) == 0;
+			};
+		},
+		scenario: "custom",
+		allPractitioners: [],
+		prescriber: null,
+		filterPractitioners: function(string) {
+			if (string.length < 3) {
+				return function(o) { return true; };
+			}
+			const filter = string.toUpperCase();
+			if (isNaN(filter)) {
+				return function(o) {
+					return o.name.toUpperCase().includes(filter);
+				};
+			} else {
+				return function(o) {
+					return o.id.indexOf(filter) == 0;
+				};
+			}
+		},
+		medication: null,
+		allMedications: [],
+		filterMedications: function(string) {
+			if (string.length < 2) {
+				return function(o) { return true; };
+			}
+			const filter = string.toUpperCase();
+			if (filter.match(/^[A-Z]\d+([A-Z]([A-Z]\d{0,2})?)?$/)) {
+				return function(o) {
+					return o.atc && o.atc.indexOf(filter) == 0;
+				};
+			} else if (filter.match(/^\d+$/)) {
+				return function(o) {
+					return o.productId.indexOf(filter) == 0;
+				}
+			} else {
+				return function(o) {
+					return o.display.toUpperCase().indexOf(filter) == 0;
+				};
+			}
+		},
+		earliestDate: dateString(new Date(new Date() - 4*7*24*60*60*1000)),
+		latestDate: dateString(new Date()),
+		dateWritten: dateString(randomDaysAgo(14))
+	},
+	methods: {
+		submit: function() {
+			if (this.scenario === 'custom') {
+				var prescription = {
+					patient: this.patient,
+					prescriptions: [{
+						medication: this.medication.productId,
+						prescriber: this.prescriber,
+						dateWritten: this.dateWritten
+					}]
+				};
+				var url = "/pharma-test/api/prescriptions";
+				submitJsonPost(url, prescription);
+			} else if (this.scenario === 'interaction') {
+				var prescription = {
+						patient: this.patient,
+						prescriptions: [{
+							medication: "500595",
+							prescriber: this.allPractitioners[Math.floor(Math.random() * this.allPractitioners.length)],
+							dateWritten: randomDaysAgo(14)
+						}, {
+							medication: "466813",
+							prescriber: this.allPractitioners[Math.floor(Math.random() * this.allPractitioners.length)],
+							dateWritten: randomDaysAgo(14)
+						}]
+					};
+					var url = "/pharma-test/api/prescriptions";
+					submitJsonPost(url, prescription);
+			}
+		}
+	}
+});
+
+window.onload = function() {
+	var queryDict = {}
+	location.search.substr(1).split("&").forEach(function(item) {
+		queryDict[item.split("=")[0]] = item.split("=")[1]
+	});
+
+	superagent.get('/pharma-test/api/patients')
+		.accept('json')
+		.then(function(res) {
+			app.allPatients = res.body;
+			if (queryDict["patientNationalId"]) {
+				app.patient = app.allPatients.find(function(p) {
+					return p.nationalId === queryDict["patientNationalId"];
+				})
+			}
+			if (app.patient == null) {			
+				app.patient = app.allPatients[Math.floor(Math.random() * app.allPatients.length)];
+			}
+		}, function(err) {
+			console.log("error", err);
+		});
+	superagent.get('/pharma-test/api/practitioners')
+		.accept('json')
+		.then(function(res) {
+			app.allPractitioners = res.body;
+			app.prescriber = app.allPractitioners[Math.floor(Math.random() * app.allPractitioners.length)];
+		}, function(err) {
+			console.log("error", err);
+		});
+	superagent.get('/pharma-test/api/medications')
+		.accept('json')
+		.then(function(res) {
+			app.allMedications = res.body;
+			app.medication = app.allMedications[Math.floor(Math.random() * app.allMedications.length)];
+		}, function(err) {
+			console.log("error", err);
+		});
+}
+</script>
+</body>
+</html>
