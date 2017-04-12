@@ -71,6 +71,7 @@ public class PharmaServer {
             port = Integer.parseInt(System.getenv("HTTP_PORT"));
         }
         server = new Server(port);
+        server.addLifeCycleListener(Server.STOP_ON_FAILURE);
     }
 
     public static void main(String[] args) throws Exception {
@@ -90,12 +91,14 @@ public class PharmaServer {
         PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
 
         JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(createMedicationDataSource());
+        // TODO: Implement with lastmodified timestamp and checksum
         medicationRepository.refresh(FestMedicationImporter.FEST_URL.toString());
 
         PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(createPractitionerDataSource(),
                 CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
         File hprFile = new File("../data-dumps/HprExport.L3.csv.v2.zip");
         if (hprFile.exists()) {
+            // TODO: Implement with lastmodified timestamp
             practitionerRepository.refresh(hprFile.getPath());
         } else {
             practitionerRepository.refresh("classpath:seed/hpr-mini/");
@@ -104,6 +107,7 @@ public class PharmaServer {
         HealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(createHealthcareServiceDataSource());
         File arFile = new File("../data-dumps/AR.xml.gz");
         if (arFile.exists()) {
+            // TODO: Implement with last modified timestamp on file
             try(InputStream input = new GZIPInputStream(new FileInputStream(arFile), 16*1024*1024)) {
                 healthcareServiceRepository.refresh(input);
             }
@@ -175,6 +179,8 @@ public class PharmaServer {
     private Handler createPharmaTestRig(FakeReseptFormidler reseptFormidler, MedicationRepository medicationRepository, PractitionerRepository practitionerRepository) {
         WebAppContext handler = new WebAppContext(null, "/pharma-test");
         handler.setBaseResource(Resource.newClassPathResource("/pharma-testrig-webapp"));
+        // Avoid locking files on disk
+        handler.setInitParameter("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
 
         handler.addServlet(new ServletHolder(new ReceiptTestCaseController(reseptFormidler, medicationRepository, practitionerRepository)), "/");
         handler.addServlet(new ServletHolder(new ReseptFormidlerLogTestController(reseptFormidler)), "/log");

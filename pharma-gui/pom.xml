@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
-			<version>9.4.0.v20161208</version>
+			<version>9.4.3.v20170317</version>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
