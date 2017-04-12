@@ -174,7 +174,7 @@ public class JdbcSupport {
         return new InsertBuilder(this, tableName);
     }
 
-    protected UpdateBuilder update(String tableName) {
+    public UpdateBuilder update(String tableName) {
         return new UpdateBuilder(this, tableName);
     }
 
