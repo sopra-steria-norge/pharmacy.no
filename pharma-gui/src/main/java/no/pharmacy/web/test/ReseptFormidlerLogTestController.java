@@ -1,6 +1,7 @@
 package no.pharmacy.web.test;
 
 import java.io.IOException;
+import java.util.LinkedList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,7 +27,9 @@ public class ReseptFormidlerLogTestController extends HttpServlet {
 
         for (MessageLogEntry entry : reseptFormidler.getMessageLog()) {
             resp.getWriter().write("<h3>" + entry.getParticipants() + " (" + entry.getTimestamp() + ")</h3>");
-            resp.getWriter().write("<textarea cols=100 rows=5 readonly>" + entry.getMessage().toXML("  ") + "</textarea>");
+            resp.getWriter().write("<textarea cols=100 rows=5 readonly>");
+            entry.getMessage().writeIndentedTo(resp.getWriter(), new LinkedList<>(), "  ", "");
+            resp.getWriter().write("</textarea>");
         }
     }
 
