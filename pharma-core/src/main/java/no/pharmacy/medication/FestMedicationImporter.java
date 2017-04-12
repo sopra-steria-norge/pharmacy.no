@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
+import javax.sql.DataSource;
+
 import org.eaxy.Document;
 import org.eaxy.Element;
 import org.eaxy.ElementSet;
@@ -22,7 +24,7 @@ import no.pharmacy.core.Money;
 import no.pharmacy.core.Reference;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.infrastructure.IOUtil;
-import no.pharmacy.test.PharmaTestData;
+import no.pharmacy.test.TestDataSource;
 
 public class FestMedicationImporter {
     private Validator validator = new Validator(new String[] { "R1808-eResept-M30-2014-12-01/ER-M30-2014-12-01.xsd" });
@@ -156,7 +158,8 @@ public class FestMedicationImporter {
     }
 
     public static void main(String[] args) {
-        JdbcMedicationRepository repository = new JdbcMedicationRepository(PharmaTestData.medicationDataSource());
+        DataSource dataSource = TestDataSource.createDataSource("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications", "db/db-medications");
+        JdbcMedicationRepository repository = new JdbcMedicationRepository(dataSource);
         FestMedicationImporter importer = new FestMedicationImporter();
         importer.saveFest(FEST_URL, repository);
     }

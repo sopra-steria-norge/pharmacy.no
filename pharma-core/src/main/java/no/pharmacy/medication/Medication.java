@@ -29,6 +29,7 @@ public class Medication {
     private String display;
 
     @Getter @Setter
+    /** ATC code */
     private String substance;
 
     @Getter @Setter

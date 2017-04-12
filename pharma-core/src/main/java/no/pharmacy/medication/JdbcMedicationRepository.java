@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
     @Override
     public List<Medication> listAlternatives(Medication medication) {
         if (medication.getSubstitutionGroup() == null) {
-            return new ArrayList<>();
+            return Collections.singletonList(medication);
         }
 
         try (Connection conn = dataSource.getConnection()) {
@@ -64,7 +65,7 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
     @Override
     public List<Medication> list(int offset, int count) {
         return queryForList(
-                "select * from medications where exchange_group_id is not null and trinn_price is not null order by display asc  limit ? offset ?",
+                "select * from medications order by display asc  limit ? offset ?",
                 Arrays.asList(count, offset), this::read);
     }
 
@@ -175,6 +176,9 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
 
     synchronized List<MedicationInteraction> listInteractions(String atcCode) {
         ensureInteractionCache();
+        if (atcCode == null || atcCode.length() < 5) {
+            return Collections.emptyList();
+        }
 
         String anatomicalGroup = atcCode.substring(0, 1);
         String therapeuticGroup = atcCode.substring(0, 3);

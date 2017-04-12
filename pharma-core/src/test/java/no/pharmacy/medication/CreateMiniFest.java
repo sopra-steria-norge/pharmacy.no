@@ -22,6 +22,8 @@ import org.eaxy.Namespace;
 import org.eaxy.Validator;
 import org.eaxy.Xml;
 
+import no.pharmacy.test.PharmaTestData;
+
 public class CreateMiniFest {
 
     private static Random random = new Random();
@@ -56,10 +58,10 @@ public class CreateMiniFest {
             includeLegemiddelpakning(pakning.find("Legemiddelpakning", "Id").first().text());
         }
 
-        String[] varenrMedByttegruppe = {
-                "038397", "048788", "048797", "089497", "438175", "010965", "022113", "183039", "458492", "088656", "043175", "023949", "164606", "587209", "397520", "414533", "004752", "011054", "578081", "004741", "038407", "081825", "159558", "071712", "164617", "114740", "022175", "079261", "423739", "038507", "010288", "088645", "435610", "500038", "164628", "403219", "595422", "384157", "509091", "184839"
-        };
-        for (String id : varenrMedByttegruppe) {
+        for (String id : PharmaTestData.PRODUCT_IDS_WITH_SUBSTITUTIONS) {
+            includeLegemiddelpakningByVarenummer(id);
+        }
+        for (String id : PharmaTestData.PRODUCT_IDS_WITHOUT_SUBSTITUTIONS) {
             includeLegemiddelpakningByVarenummer(id);
         }
 
@@ -159,19 +161,25 @@ public class CreateMiniFest {
         String id = oppfLegemiddelpakning.find("Legemiddelpakning", "Id").first().text();
         if (includedIds.contains(id)) return;
 
-        katLegemiddelpakning.add(oppfLegemiddelpakning);
-        includedIds.add(id);
-        includeAtcCodes(oppfLegemiddelpakning.find("Legemiddelpakning", "Atc").attrs("V"));
+        try {
+            katLegemiddelpakning.add(oppfLegemiddelpakning);
+            includedIds.add(id);
+            includeAtcCodes(oppfLegemiddelpakning.find("Legemiddelpakning", "Atc").attrs("V"));
 
-        includeRefusjon(oppfLegemiddelpakning.find("Legemiddelpakning", "Refusjon", "RefRefusjonsgruppe").texts());
-        includeByttegrupper(oppfLegemiddelpakning.find("Legemiddelpakning", "PakningByttegruppe", "RefByttegruppe").texts());
-        includeMerkevarer(oppfLegemiddelpakning.find("Legemiddelpakning", "Pakningsinfo", "RefLegemiddelMerkevare").texts());
+            includeRefusjon(oppfLegemiddelpakning.find("Legemiddelpakning", "Refusjon", "RefRefusjonsgruppe").texts());
+            includeByttegrupper(oppfLegemiddelpakning.find("Legemiddelpakning", "PakningByttegruppe", "RefByttegruppe").texts());
+            includeMerkevarer(oppfLegemiddelpakning.find("Legemiddelpakning", "Pakningsinfo", "RefLegemiddelMerkevare").texts());
+        } catch (RuntimeException e) {
+            System.out.println("failed to read " + id);
+            throw e;
+        }
     }
 
     private void includeAtcCodes(List<String> atcCodes) {
         for (String atcCode : atcCodes) {
             includedAtcCodes.add(atcCode.substring(0, 1));
             includedAtcCodes.add(atcCode.substring(0, 3));
+            if (atcCode.length() < 4) return;
             includedAtcCodes.add(atcCode.substring(0, 4));
             includedAtcCodes.add(atcCode.substring(0, 5));
             includedAtcCodes.add(atcCode);

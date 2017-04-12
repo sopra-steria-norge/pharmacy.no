@@ -66,6 +66,19 @@ public class MedicationDispenseRepositoryTest {
     }
 
     @Test
+    public void shouldIncludeMedicationInAlternatives() {
+        DispenseOrder order = new DispenseOrder();
+        order.setPatient(testData.samplePatient());
+
+        Medication medication = testData.medicationWithoutSubstitutes();
+        order.addMedicationOrder(testData.sampleMedicationOrder(medication));
+        repository.saveDispenseOrder(order);
+        MedicationOrder retrievedPrescription = repository.getDispenseOrderById(order.getIdentifier()).getMedicationOrders().get(0);
+        assertThat(retrievedPrescription.getAlternatives()).containsOnly(medication);
+
+    }
+
+    @Test
     public void shouldPopulateMedicationDispense() {
         DispenseOrder order = new DispenseOrder();
 

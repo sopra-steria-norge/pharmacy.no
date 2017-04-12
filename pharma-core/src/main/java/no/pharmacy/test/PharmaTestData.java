@@ -20,29 +20,28 @@ import no.pharmacy.practitioner.Practitioner;
 
 public class PharmaTestData {
 
+    public static final String[] PRODUCT_IDS_WITH_SUBSTITUTIONS = {
+            "038397", "048788", "048797", "089497", "438175", "010965", "022113", "183039", "458492", "088656", "043175", "023949", "164606", "587209", "397520", "414533", "004752", "011054", "578081", "004741", "038407", "081825", "159558", "071712", "164617", "114740", "022175", "079261", "423739", "038507", "010288", "088645", "435610", "500038", "164628", "403219", "595422", "384157", "509091", "184839"
+    };
+    public static final String[] PRODUCT_IDS_WITHOUT_SUBSTITUTIONS = {
+            "482109", "298509", "206472", "362252", "340774", "539484", "160701", "025298",
+    };
+
     private static int sequence;
     private static final List<Medication> medicationCache = new ArrayList<>();
 
-    private final static JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(medicationDataSource());
+    private static JdbcMedicationRepository medicationRepository;
 
-    public JdbcMedicationRepository getMedicationRepository() {
+    public synchronized JdbcMedicationRepository getMedicationRepository() {
+        if (medicationRepository == null) {
+            DataSource dataSource = TestDataSource.createDataSource("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications", "db/db-medications");
+            medicationRepository = new JdbcMedicationRepository(dataSource);
+            medicationRepository.refresh(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString()));
+        }
         return medicationRepository;
     }
 
-    static {
-        medicationRepository.refresh(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString()));
-    }
-
     private static Random random = new Random();
-    private static DataSource medicationTestDatasource;
-
-    public static synchronized DataSource medicationDataSource() {
-        if (medicationTestDatasource == null) {
-            medicationTestDatasource = TestDataSource.createDataSource("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications", "db/db-medications");
-        }
-        return medicationTestDatasource;
-    }
-
 
     // TODO: Use a master list of national IDs known not to be used by anyone
     public List<String> unusedNationalIds(Random random, int count) {
@@ -150,23 +149,13 @@ public class PharmaTestData {
     }
 
     public Medication getMedication(String productId) {
-        if (medicationCache.isEmpty()) {
-            medicationCache.addAll(medicationRepository.list());
-        }
-
-        for (Medication medication : medicationCache) {
-            if (medication.getProductId().equals(productId)) {
-                return medication;
-            }
-        }
-        throw new IllegalArgumentException("Can't find medication " + productId);
+        return getMedicationRepository().findByProductId(productId).get();
     }
 
     public Medication sampleMedication() {
         if (medicationCache.isEmpty()) {
-            medicationCache.addAll(medicationRepository.list());
+            medicationCache.addAll(getMedicationRepository().list());
         }
-
         return pickOne(medicationCache);
     }
 
@@ -178,10 +167,11 @@ public class PharmaTestData {
 
 
     public Medication medicationWithSubstitutes() {
-        String[] id = {
-                "038397", "048788", "048797", "089497", "438175", "010965", "022113", "183039", "458492", "088656", "043175", "023949", "164606", "587209", "397520", "414533", "004752", "011054", "578081", "004741", "038407", "081825", "159558", "071712", "164617", "114740", "022175", "079261", "423739", "038507", "010288", "088645", "435610", "500038", "164628", "403219", "595422", "384157", "509091", "184839"
-        };
-        return medicationRepository.findByProductId(pickOneOf(id)).get();
+        return getMedication(pickOneOf(PRODUCT_IDS_WITH_SUBSTITUTIONS));
+    }
+
+    public Medication medicationWithoutSubstitutes() {
+        return getMedication(pickOneOf(PRODUCT_IDS_WITHOUT_SUBSTITUTIONS));
     }
 
 
