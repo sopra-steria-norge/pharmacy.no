@@ -1,8 +1,11 @@
 package no.pharmacy.medication;
 
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.zip.GZIPOutputStream;
 
 import org.eaxy.Document;
 import org.eaxy.Element;
@@ -26,10 +30,12 @@ public class CreateMiniFest {
     private static final Validator validator = Xml.validatorFromResource("R1808-eResept-M30-2014-12-01/ER-M30-2014-12-01.xsd");
 
     private Element katLegemiddelpakning = M30.el("KatLegemiddelpakning");
-    private Element katRefusjonsgruppe = M30.el("KatRefusjon");
+    private Element katRefusjon = M30.el("KatRefusjon");
     private Element katLegemiddelMerkevare = M30.el("KatLegemiddelMerkevare");
     private Element katVirkestoff = M30.el("KatVirkestoff");
+    private Element katLegemiddelVirkestoff = M30.el("KatLegemiddelVirkestoff");
     private Element katVilkar = M30.el("KatVilkar");
+    private Element katVarsler = M30.el("KatVarselSlv");
     private Element katByttegruppe = M30.el("KatByttegruppe");
     private Element katInteraksjon = M30.el("KatInteraksjon");
     private Set<String> includedIds = new HashSet<>();
@@ -63,6 +69,8 @@ public class CreateMiniFest {
         includeLegemiddelpakning("ID_99C4A44A-0968-48C2-8D59-51F93457EBC7"); // Ritalin
         includeLegemiddelpakning("ID_6312E47E-4874-461B-AA4A-0C27F134A5A8"); // Aurorix - Moklobemid
 
+        includeVarsler();
+
         includeInteraksjoner();
 
         return Xml.doc(
@@ -71,8 +79,10 @@ public class CreateMiniFest {
                         katLegemiddelMerkevare,
                         katLegemiddelpakning,
                         katVirkestoff,
-                        katRefusjonsgruppe,
+                        katLegemiddelVirkestoff,
+                        katRefusjon,
                         katVilkar,
+                        katVarsler,
                         katByttegruppe,
                         katInteraksjon
                         )
@@ -102,6 +112,35 @@ public class CreateMiniFest {
             includedIds.add(oppfInteraksjon.find("Interaksjon", "Id").first().text());
             includeVirkestoff(oppfInteraksjon.find("Interaksjon", "Substansgruppe", "Substans").check().find("RefVirkestoff").texts());
         }
+    }
+
+    private void includeVarsler() {
+        outer: for (Element oppfVarsel : festDoc.find("KatVarselSlv", "OppfVarselSlv")) {
+            for (Element referanseelement : oppfVarsel.find("VarselSlv", "Referanseelement")) {
+                String referenceClass = referanseelement.find("Klasse").first().attr("DN");
+
+                ElementSet refElements = referanseelement.find("RefElement");
+                if (refElements.size() > 10) {
+                    System.out.println("Skipping large RefElement for " + oppfVarsel.find("VarselSlv", "Overskrift").first().text());
+                    continue outer;
+                }
+
+                for (Element refElement : refElements) {
+                    if (referenceClass.equals("LegemiddelpakningId")) {
+                        includeLegemiddelpakning(refElement.text());
+                    } else if (referenceClass.equals("LegemiddelMerkevareId")) {
+                        includeMerkevare(refElement.text());
+                    } else if (referenceClass.equals("LegemiddelVirkestoffId")) {
+                        includeLegemiddelVirkestoff(refElement.text());
+                    } else {
+                        throw new IllegalArgumentException("Unknown Klasse " + referenceClass);
+                    }
+                }
+            }
+
+            katVarsler.add(oppfVarsel);
+        }
+
     }
 
     private void includeLegemiddelpakning(String id) {
@@ -140,23 +179,27 @@ public class CreateMiniFest {
     }
 
     private void includeMerkevarer(List<String> merkevareIds) {
-        outer: for (String id : merkevareIds) {
-            if (!includedIds.contains(id)) {
-                for (Element oppfLegemiddelMerkevare : festDoc.find("KatLegemiddelMerkevare", "OppfLegemiddelMerkevare")) {
-                    if (oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "Id").firstTextOrNull().equals(id)) {
-                        katLegemiddelMerkevare.add(oppfLegemiddelMerkevare);
-                        includeAtcCodes(oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "Atc").attrs("V"));
+        for (String id : merkevareIds) {
+            includeMerkevare(id);
+        }
+    }
 
-                        includeVirkestoffMedStyrke(oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "SortertVirkestoffMedStyrke", "RefVirkestoffMedStyrke").texts());
-                        includeVirkestoff(oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "SortertVirkestoffUtenStyrke", "RefVirkestoff").texts());
-                        includeVilkar(oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "RefVilkar").texts());
+    private void includeMerkevare(String id) {
+        if (!includedIds.contains(id)) {
+            for (Element oppfLegemiddelMerkevare : festDoc.find("KatLegemiddelMerkevare", "OppfLegemiddelMerkevare")) {
+                if (oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "Id").firstTextOrNull().equals(id)) {
+                    katLegemiddelMerkevare.add(oppfLegemiddelMerkevare);
+                    includeAtcCodes(oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "Atc").attrs("V"));
 
-                        includedIds.add(id);
-                        continue outer;
-                    }
+                    includeVirkestoffMedStyrke(oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "SortertVirkestoffMedStyrke", "RefVirkestoffMedStyrke").texts());
+                    includeVirkestoff(oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "SortertVirkestoffUtenStyrke", "RefVirkestoff").texts());
+                    includeVilkar(oppfLegemiddelMerkevare.find("LegemiddelMerkevare", "RefVilkar").texts());
+
+                    includedIds.add(id);
+                    return;
                 }
-                throw new IllegalArgumentException("Can't find LegemiddelMerkevare Id " + id);
             }
+            throw new IllegalArgumentException("Can't find LegemiddelMerkevare Id " + id);
         }
     }
 
@@ -191,7 +234,7 @@ public class CreateMiniFest {
             if (!includedIds.contains(refusjonsId)) {
                 for (Element oppfRefusjonsgruppe : festDoc.find("KatRefusjon", "OppfRefusjon")) {
                     if (oppfRefusjonsgruppe.find("Refusjonshjemmel", "Refusjonsgruppe", "Id").firstTextOrNull().equals(refusjonsId)) {
-                        katRefusjonsgruppe.add(oppfRefusjonsgruppe);
+                        katRefusjon.add(oppfRefusjonsgruppe);
                         includeAtcCodes(oppfRefusjonsgruppe.find("Refusjonshjemmel", "Refusjonsgruppe", "Atc").attrs("V"));
 
                         includeVilkar(oppfRefusjonsgruppe.find("Refusjonshjemmel", "Refusjonsgruppe", "Refusjonskode", "Refusjonsvilkar", "RefVilkar").texts());
@@ -238,18 +281,36 @@ public class CreateMiniFest {
     }
 
     private void includeVirkestoff(List<String> virkestoffIds) {
-        outer: for (String virkestoffId : virkestoffIds) {
-            if (!includedIds.contains(virkestoffId)) {
-                for (Element oppfVirkestoff : festDoc.find("KatVirkestoff", "OppfVirkestoff")) {
-                    if (virkestoffId.equals(oppfVirkestoff.find("Virkestoff", "Id").firstTextOrNull())) {
-                        katVirkestoff.add(oppfVirkestoff);
-                        includedIds.add(virkestoffId);
-                        includeVirkestoff(oppfVirkestoff.find("Virkestoff", "RefVirkestoff").texts());
-                        continue outer;
-                    }
+        for (String virkestoffId : virkestoffIds) {
+            includeVirkestoff(virkestoffId);
+        }
+    }
+
+    private void includeVirkestoff(String virkestoffId) {
+        if (!includedIds.contains(virkestoffId)) {
+            for (Element oppfVirkestoff : festDoc.find("KatVirkestoff", "OppfVirkestoff")) {
+                if (virkestoffId.equals(oppfVirkestoff.find("Virkestoff", "Id").firstTextOrNull())) {
+                    katVirkestoff.add(oppfVirkestoff);
+                    includedIds.add(virkestoffId);
+                    includeVirkestoff(oppfVirkestoff.find("Virkestoff", "RefVirkestoff").texts());
+                    return;
                 }
-                throw new IllegalArgumentException("Can't find Virkestoff Id " + virkestoffId);
             }
+            throw new IllegalArgumentException("Can't find Virkestoff Id " + virkestoffId);
+        }
+    }
+
+    private void includeLegemiddelVirkestoff(String virkestoffId) {
+        if (!includedIds.contains(virkestoffId)) {
+            for (Element oppfLegemiddelVirkestoff : festDoc.find("KatLegemiddelVirkestoff", "OppfLegemiddelVirkestoff").check()) {
+                if (virkestoffId.equals(oppfLegemiddelVirkestoff.find("LegemiddelVirkestoff", "Id").first().text())) {
+                    katLegemiddelVirkestoff.add(oppfLegemiddelVirkestoff);
+                    includedIds.add(virkestoffId);
+                    includeVirkestoffMedStyrke(oppfLegemiddelVirkestoff.find("LegemiddelVirkestoff", "SortertVirkestoffMedStyrke", "RefVirkestoffMedStyrke").texts());
+                    return;
+                }
+            }
+            throw new IllegalArgumentException("Can't find OppfLegemiddelVirkestoff Id " + virkestoffId);
         }
     }
 
@@ -259,6 +320,9 @@ public class CreateMiniFest {
         System.out.println("Extract complete");
 
         try (Writer writer = new FileWriter("fest-mini.xml")) {
+            miniFest.writeTo(writer);
+        }
+        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream("fest-mini.xml.gz")), StandardCharsets.UTF_8)) {
             miniFest.writeTo(writer);
         }
         System.out.println("Write complete");

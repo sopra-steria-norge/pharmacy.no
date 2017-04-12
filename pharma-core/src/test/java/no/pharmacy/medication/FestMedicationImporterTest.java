@@ -1,7 +1,8 @@
 package no.pharmacy.medication;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+import java.io.IOException;
+import java.net.URL;
 import java.time.Instant;
 import java.util.Random;
 
@@ -12,6 +13,7 @@ import org.eaxy.Xml;
 import org.junit.Test;
 
 import no.pharmacy.core.Reference;
+import no.pharmacy.test.TestDataSource;
 
 public class FestMedicationImporterTest {
 
@@ -158,6 +160,13 @@ public class FestMedicationImporterTest {
         assertThat(importer.readInteractions(katWrapper(interaksjon))).isEmpty();
     }
 
+    @Test
+    public void shouldReadWholeFile() throws Exception {
+        FestMedicationImporter importer = new FestMedicationImporter();
+        importer.saveFest(new URL("file:src/main/resources/seed/fest-mini.xml.gz"),
+                new JdbcMedicationRepository(TestDataSource.medicationInstance()));
+    }
+
     private Element katWrapper(Element el) {
         return M30.el("Kat" + el.tagName(), oppfWrapper(el));
     }
@@ -168,5 +177,9 @@ public class FestMedicationImporterTest {
                 M30.el("Tidspunkt", Instant.now().toString()),
                 M30.el("Status", ""),
                 el);
+    }
+
+    public static void main(String[] args) throws IOException {
+        CreateMiniFest.main(args);
     }
 }
