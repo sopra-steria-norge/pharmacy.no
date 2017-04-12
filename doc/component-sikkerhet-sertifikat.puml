@@ -2,7 +2,7 @@
 
 box "Apotek"
     actor Apoteker
-    actor Farmasøyt
+    actor Apotekansatt
 end box
 
 actor Buypass
@@ -28,7 +28,7 @@ deactivate DifaGUI
 ...
 
 == Bruke sertifikat ==
-Farmasøyt -> DifaGUI: Registrer utlevering
+Apotekansatt -> DifaGUI: Registrer utlevering
 activate DifaGUI
 DifaGUI -> DifaGUI: Generere M10
 DifaGUI -> DifaGUI: Signere M10
@@ -40,7 +40,7 @@ DifaGUI <-- HSM: Signatur
 DifaGUI --> DifaGUI
 deactivate DifaGUI
 DifaGUI -> eHelse: Signert Utleveringsmelding (M10)
-Farmasøyt <-- DifaGUI
+Apotekansatt <-- DifaGUI
 deactivate DifaGUI
 
 @enduml

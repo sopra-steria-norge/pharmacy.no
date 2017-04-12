@@ -2,7 +2,7 @@
 
 title Kjede POS bruker DIFA API
 
-actor Apotektekniker
+actor Apotekansatt
 actor Farmasøyt
 box "Kjede"
     participant POS
@@ -15,18 +15,18 @@ box "DIFA"
 end box
 participant eHelse
 
-Apotektekniker -> POS: Velger hent resept
-Apotektekniker <-- POS: Redirect
+Apotekansatt -> POS: Velger hent resept
+Apotekansatt <-- POS: Redirect
 group Dialog med DIFA
-Apotektekniker -> Reseptur: Vis Personsøk skjema
-Apotektekniker -> Reseptur ++: Angi person (fødselsnummer eller navn + fødselsdato)
+Apotekansatt -> Reseptur: Vis Personsøk skjema
+Apotekansatt -> Reseptur ++: Angi person (fødselsnummer eller navn + fødselsdato)
 Reseptur -> DIFA: Hent reseptliste
 DIFA -> eHelse: M9.1
 DIFA <-- eHelse: M9.2
 DIFA -> DIFA: Påfør informasjon og varsler
 Reseptur <-- DIFA: Reseptliste med interaksjonsvarsler
-Apotektekniker <-- Reseptur --: Vis resepter
-Apotektekniker -> Reseptur ++: Ekspeder resept
+Apotekansatt <-- Reseptur --: Vis resepter
+Apotekansatt -> Reseptur ++: Ekspeder resept
 Reseptur-> DIFA: Hent resept 
 DIFA -> eHelse: M9.3
 DIFA <-- eHelse: M9.4
@@ -36,34 +36,34 @@ DIFA -> DB: Lagre resept under ekspedering
 Reseptur <-- DIFA
 Reseptur-> Varesystem: Pris og beholdning for\nalle aktuelle legemidler\nfor apotek
 Reseptur<-- Varesystem
-Apotektekniker <--Reseptur --: Varsler, byttealternativer med priser, beholdning
-Apotektekniker -> Reseptur ++: Velg legemiddel
+Apotekansatt <--Reseptur --: Varsler, byttealternativer med priser, beholdning
+Apotekansatt -> Reseptur ++: Velg legemiddel
 Reseptur -> DIFA: Oppdater vare
 note over Reseptur: Her vil også intervensjoner registreres
 DIFA -> DIFA: Beregne refusjon
 DIFA -> DB
 Reseptur <-- DIFA: Oppdatert refusjon, egenandel, mellomlegg
-Apotektekniker <-- Reseptur --: Vis oppdatert pris
+Apotekansatt <-- Reseptur --: Vis oppdatert pris
 newpage
-Apotektekniker -> Reseptur ++: Oppdater reseptetikett
+Apotekansatt -> Reseptur ++: Oppdater reseptetikett
 Reseptur -> DIFA: Oppdatert reseptetikett
 DIFA -> DB
 Reseptur <-- DIFA: Oppdatert reseptetikett
-Apotektekniker <-- Reseptur --
-Apotektekniker -> Reseptur: Skriv reseptetikett
-Apotektekniker -> Reseptur: Scan strekkode på etikett og pakning
+Apotekansatt <-- Reseptur --
+Apotekansatt -> Reseptur: Skriv reseptetikett
+Apotekansatt -> Reseptur: Scan strekkode på etikett og pakning
 Reseptur -> DIFA: Teknisk kontroll
-Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
+Apotekansatt -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
 Farmasøyt -> DIFA: Hent resepter klar til farmasøytkontroll
 DIFA -> DB
 Farmasøyt -> DIFA: Utfør farmasøytkontroll
 DIFA -> DB
-Apotektekniker <- Farmasøyt: "Vær så god"
-Apotektekniker -> Reseptur ++: Start utlevering
+Apotekansatt <- Farmasøyt: "Vær så god"
+Apotekansatt -> Reseptur ++: Start utlevering
 Reseptur -> DIFA: Valider reseptekspedering
 Reseptur -> POS: Sett reseptkurv i kasse
-Apotektekniker <-- Reseptur --
-Apotektekniker -> POS ++: Registrer signatur og betaling
+Apotekansatt <-- Reseptur --
+Apotekansatt -> POS ++: Registrer signatur og betaling
 POS -> Reseptur ++: Fullfør utlevering
 Reseptur -> DIFA: Fullfør utlevering
 DIFA -> DB
@@ -71,6 +71,6 @@ DIFA -> eHelse: M10
 DIFA -> eHelse: M18
 Reseptur <-- DIFA
 POS <-- Reseptur --
-Apotektekniker <-- POS --
+Apotekansatt <-- POS --
 
 @enduml

@@ -2,7 +2,7 @@
 
 title "Toskjerms" GUI for testing
 
-actor Apotektekniker
+actor Apotekansatt
 actor Farmasøyt
 
 box "DIFA"
@@ -11,38 +11,38 @@ box "DIFA"
 end box
 
 group Dialog med DIFA
-Apotektekniker -> DifaGUI: Angi person (fødselsnummer eller navn + fødselsdato)
+Apotekansatt -> DifaGUI: Angi person (fødselsnummer eller navn + fødselsdato)
 activate DifaGUI
-Apotektekniker <-- DifaGUI: List resepter
+Apotekansatt <-- DifaGUI: List resepter
 deactivate DifaGUI
-Apotektekniker -> DifaGUI: Velg resept
+Apotekansatt -> DifaGUI: Velg resept
 activate DifaGUI
 DifaGUI-> DIFA: Hent resept 
 DIFA -> DIFA: Hent varer i byttegruppe
 DIFA -> DIFA: Påfør informasjon og varsler
 DifaGUI <-- DIFA
-Apotektekniker <--DifaGUI: Varsler, byttealternativer <i>uten</i> priser
+Apotekansatt <--DifaGUI: Varsler, byttealternativer <i>uten</i> priser
 deactivate DifaGUI
-Apotektekniker -> DifaGUI: Velg legemiddel, angi pris
-Apotektekniker <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
-note right of Apotektekniker: DIFA GUI åpner nettlesers print-dialog
-Apotektekniker -> Apotektekniker: Skriv reseptetikett
-Apotektekniker -> DifaGUI: Scan strekkode på etikett og pakning
-note right of Apotektekniker: Strekkodescanner i tastaturmodus
+Apotekansatt -> DifaGUI: Velg legemiddel, angi pris
+Apotekansatt <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
+note right of Apotekansatt: DIFA GUI åpner nettlesers print-dialog
+Apotekansatt -> Apotekansatt: Skriv reseptetikett
+Apotekansatt -> DifaGUI: Scan strekkode på etikett og pakning
+note right of Apotekansatt: Strekkodescanner i tastaturmodus
 DifaGUI -> DIFA: Teknisk kontroll
-Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
+Apotekansatt -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
 Farmasøyt -> DifaGUI: Vis resepter klar til farmasøytkontroll
 Farmasøyt -> DifaGUI: Utfør farmasøytkontroll
-Apotektekniker <- Farmasøyt: "Vær så god"
-Apotektekniker -> DifaGUI: Utlever
-Apotektekniker <-- DifaGUI: Vis reseptoversikt, egenandel, mellomlegg
-Apotektekniker -> Apotektekniker: Registrer signatur og betaling
-Apotektekniker -> DifaGUI: Registrer utlevering
+Apotekansatt <- Farmasøyt: "Vær så god"
+Apotekansatt -> DifaGUI: Utlever
+Apotekansatt <-- DifaGUI: Vis reseptoversikt, egenandel, mellomlegg
+Apotekansatt -> Apotekansatt: Registrer signatur og betaling
+Apotekansatt -> DifaGUI: Registrer utlevering
 activate DifaGUI
 DifaGUI -> DIFA: Registrer utlevering
 DIFA ->]: Utleveringsmelding
 DIFA ->]: Refusjonskrav
-Apotektekniker <-- DifaGUI
+Apotekansatt <-- DifaGUI
 deactivate DifaGUI
 
 @enduml

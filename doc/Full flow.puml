@@ -1,0 +1,150 @@
+actor Apotekansatt
+actor Farmasøyt
+
+participant Printer
+participant Regnskapsystem
+participant GUI
+
+box "DIFA"
+    participant FarmasøytGUI
+    participant DIFA
+    participant DB
+end box
+
+participant RF
+participant HELFO
+participant FMD
+participant GCM
+
+RF -> DIFA: M21
+DIFA -> DB: Lagre
+opt Kun for de som er smarte nok til å ville ha DIFA GUI
+DIFA -> GCM: Push notification
+GCM -> Apotekansatt: Push notification
+end
+
+Apotekansatt -> GUI ++: Vis ekspederingsanmodninger
+GUI -> DIFA ++: Hent ekspederingsanmodninger
+DIFA -> DB: Ekspederinganmodninger
+GUI <-- DIFA --
+Apotekansatt <-- GUI --
+
+Apotekansatt -> GUI ++: Velg resept for ekspedering
+GUI -> DIFA ++: Hent liste for pasient
+DIFA -> RF ++: M9.1
+DIFA <-- RF --: M9.2
+DIFA -> DB: Opprett reseptkurv for pasient
+GUI <-- DIFA --: Fullstendig reseptliste
+Apotekansatt <-- GUI --: Vis liste med anmodet resept uthevet
+
+Apotekansatt -> GUI ++: Velg resepter som skal ekspederes
+GUI -> DIFA ++: Start ekspedering (liste av resept ID)
+loop resept
+    DIFA -> RF ++: M9.3
+    DIFA <-- RF --: M9.4
+end
+DIFA -> DB: Legg til resepter i reseptkurv
+DIFA -> DB: Hent resepthistorikk for pasient
+DIFA -> DIFA: Beregn byttegruppe, varsler
+GUI <-- DIFA --: Reseptkurv ID
+GUI -> DIFA: Vis reseptkurv
+Apotekansatt <-- GUI --: Vis reseptkurv
+
+Apotekansatt -> GUI ++: Velg vare for resept (generisk bytte)
+GUI -> DIFA ++: Angi vare, reservasjonsstatus og AUP
+DIFA -> DIFA: Beregn refusjon for hele reseptkurv
+DIFA -> DB: Oppdater resept i reseptkurv
+GUI <-- DIFA --: Oppdatert reseptkurv med refusjonsberegning
+Apotekansatt <-- GUI --: Oppdatert reseptkurv med refusjonsberegning
+
+...
+Farmasøyt -> FarmasøytGUI ++: List reseptkurver klare for farmasikontroll
+FarmasøytGUI -> DIFA ++: List reseptkurver klare for farmasikontroll
+DIFA -> DB: Hent reseptkurver for apotek der varevalg er fullført
+FarmasøytGUI <-- DIFA --
+Farmasøyt <-- FarmasøytGUI --
+Farmasøyt -> FarmasøytGUI ++: Dokumenter aksjon for alle varsler
+FarmasøytGUI -> DIFA ++: Dokumenter aksjon for alle varsler
+DIFA -> DB
+FarmasøytGUI <-- DIFA --
+Farmasøyt <-- FarmasøytGUI --
+
+newpage
+...
+Apotekansatt -> GUI ++: Registrer oppdatert reseptetiketter
+GUI -> DIFA ++: Registrer oppdatert reseptetiketter
+DIFA -> DB: Oppdater reseptetiketter for resepter i reseptkurv
+DIFA -> DIFA: Beregn strekkode for reseptetikett
+GUI <-- DIFA --: Strekkoder for reseptetiketter
+GUI -> Printer: Print reseptetiketter
+Apotekansatt <-- GUI --
+Apotekansatt -> Apotekansatt: Klistre etiketter
+Apotekansatt -> GUI ++: Scan strekkode på reseptetikkett og pakning
+GUI -> DIFA ++: Registrer strekkoder
+DIFA -> FMD: Verifisert pakning
+DIFA -> DB: Oppdatere teknisk kontroll
+GUI <-- DIFA --
+Apotekansatt <-- GUI --
+
+Apotekansatt -> GUI ++: Fullfør utlevering
+GUI -> GUI: Hent refusjonsberegning
+GUI -> GUI: Hent farmasøytkontroll
+GUI -> GUI: Hent teknisk kontroll
+GUI -> DIFA ++: Fullfør utlevering
+DIFA -> DIFA: Valider utlevering
+DIFA -> DB: Start utlevering
+DIFA -> RF: M10
+DIFA -> HELFO: M18
+DIFA -> HELFO: AppRec
+DIFA -> DB: Fullfør utlevering
+GUI <-- DIFA --
+Apotekansatt <-- GUI --
+...
+Regnskapsystem -> DIFA ++: Hent refusjonsstatus
+DIFA -> DB
+Regnskapsystem <-- DIFA --: "Ikke bekreftet"
+...
+HELFO -> DIFA ++: Negativ M22
+DIFA -> DB
+DIFA -> GCM ++: Varsle apotekansatt om feil ved refusjon
+GCM -> Apotekansatt: Feil ved refusjon
+DIFA <-- GCM --
+HELFO -> DIFA --: AppRec
+Apotekansatt -> GUI ++: Hent refusjoner med feil
+GUI -> DIFA ++: Hent refusjoner med feil
+DIFA -> DB
+GUI <-- DIFA --
+Apotekansatt <-- GUI --
+Apotekansatt -> GUI ++: Start korrigeringsbehandling
+GUI -> DIFA ++: Start korrigeringsbehandling
+DIFA -> DB: Opprett ny reseptkurv
+GUI <-- DIFA --
+Apotekansatt <-- GUI --
+Apotekansatt -> GUI ++: Korriger intervensjonstatus, hjemmel, arbeidspris?
+GUI -> DIFA ++: Utfør korrigering
+DIFA -> DB: Oppdater reseptkurv
+DIFA -x FMD: Verifisert pakning (ikke aktuelt)
+DIFA -x RF: Utleveringmelding (ikke aktuelt)
+DIFA -> HELFO: M18
+DIFA <-- HELFO: AppRec
+GUI <-- DIFA --
+Apotekansatt <-- GUI --
+
+...
+HELFO -> DIFA ++: M22
+DIFA -> DB
+HELFO -> DIFA --: AppRec
+...
+Regnskapsystem -> DIFA ++: Hent refusjonsstatus
+DIFA -> DB
+Regnskapsystem <-- DIFA --: "Bekreftet"
+...
+...
+HELFO -> DIFA ++: M23
+DIFA -> DB
+HELFO -> DIFA --: AppRec
+...
+Regnskapsystem -> DIFA ++: Hent refusjonsstatus
+DIFA -> DB
+Regnskapsystem <-- DIFA --: "Utbetalt"
+

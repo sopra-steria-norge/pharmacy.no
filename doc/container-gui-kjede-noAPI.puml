@@ -2,7 +2,7 @@
 
 title DIFA i testmodus uten kjedetilkobling (test)
 
-actor Apotektekniker
+actor Apotekansatt
 actor Farmasøyt
 box "Kjede"
     participant POS #silver
@@ -13,13 +13,13 @@ box "DIFA"
     participant DIFA
 end box
 
-Apotektekniker -> POS: Velger hent resept
-Apotektekniker <-- POS: Redirect
+Apotekansatt -> POS: Velger hent resept
+Apotekansatt <-- POS: Redirect
 group Dialog med DIFA
-Apotektekniker -> DifaGUI: Vis Personsøk skjema
-Apotektekniker -> DifaGUI: Angi person (fødselsnummer eller navn + fødselsdato)
-Apotektekniker <-- DifaGUI: Vis resepter
-Apotektekniker -> DifaGUI: Velg resept
+Apotekansatt -> DifaGUI: Vis Personsøk skjema
+Apotekansatt -> DifaGUI: Angi person (fødselsnummer eller navn + fødselsdato)
+Apotekansatt <-- DifaGUI: Vis resepter
+Apotekansatt -> DifaGUI: Velg resept
 activate DifaGUI
 DifaGUI-> DIFA: Hent resept 
 DIFA -> DIFA: Hent varer i byttegruppe
@@ -27,33 +27,33 @@ DIFA -> DIFA: Påfør informasjon og varsler
 DifaGUI <-- DIFA
 note over Varesystem : Brukerens kjede har ikke integrasjon fra DIFA GUI
 DifaGUI-> Varesystem: <strike>Pris og beholdning
-Apotektekniker <--DifaGUI: <color red>Varsler, byttealternativer <b>uten</b> priser, beholdning
+Apotekansatt <--DifaGUI: <color red>Varsler, byttealternativer <b>uten</b> priser, beholdning
 deactivate DifaGUI
-Apotektekniker -> DifaGUI: <color red>Velg legemiddel, <b>angi pris
+Apotekansatt -> DifaGUI: <color red>Velg legemiddel, <b>angi pris
 
 newpage
 
-Apotektekniker <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
-note right of Apotektekniker: DIFA GUI åpner nettlesers print-dialog
-Apotektekniker -> Apotektekniker: Skriv reseptetikett
-Apotektekniker -> DifaGUI: Skriver inn GTIN og etikettnummer
-note right of Apotektekniker: Eller strekkodescanner i tastaturmodus
+Apotekansatt <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
+note right of Apotekansatt: DIFA GUI åpner nettlesers print-dialog
+Apotekansatt -> Apotekansatt: Skriv reseptetikett
+Apotekansatt -> DifaGUI: Skriver inn GTIN og etikettnummer
+note right of Apotekansatt: Eller strekkodescanner i tastaturmodus
 DifaGUI -> DIFA: Teknisk kontroll
-Apotektekniker -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
+Apotekansatt -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
 Farmasøyt -> DifaGUI: Vis resepter klar til farmasøytkontroll
 Farmasøyt -> DifaGUI: Utfør farmasøytkontroll
-Apotektekniker <- Farmasøyt: "Vær så god"
-Apotektekniker -> DifaGUI: Utlever
+Apotekansatt <- Farmasøyt: "Vær så god"
+Apotekansatt -> DifaGUI: Utlever
 activate DifaGUI
 note over Varesystem : Brukerens kjede har ikke integrasjon fra DIFA GUI
 DifaGUI -> POS: <strike>Sett reseptkurv i kasse (erstatte)
-Apotektekniker <-- DifaGUI: Vis signaturpad
+Apotekansatt <-- DifaGUI: Vis signaturpad
 deactivate DifaGUI
-note right of Apotektekniker: Last opp fil fra signatur pad eller bruk f.eks.\nhttps://github.com/szimek/signature_pad
-Apotektekniker -> DifaGUI: <color red>Registrer pasient signatur og bekreft betaling
+note right of Apotekansatt: Last opp fil fra signatur pad eller bruk f.eks.\nhttps://github.com/szimek/signature_pad
+Apotekansatt -> DifaGUI: <color red>Registrer pasient signatur og bekreft betaling
 activate DifaGUI
 DifaGUI -> DIFA: <color red>Fullfør utlevering
-Apotektekniker <-- DifaGUI
+Apotekansatt <-- DifaGUI
 deactivate DifaGUI
 
 @enduml

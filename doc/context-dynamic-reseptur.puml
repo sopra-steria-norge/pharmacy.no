@@ -1,6 +1,6 @@
 @startuml
 
-actor Apotektekniker
+actor Apotekansatt
 actor Farmasøyt
 box "DIFA tjenesten"
     participant DIFA
@@ -12,31 +12,31 @@ database RF
 participant HELFO
 
 activate DIFA
-Apotektekniker -> DIFA: Find person basert på kriterier
+Apotekansatt -> DIFA: Find person basert på kriterier
 DIFA -> Personregisteret
-Apotektekniker <-- DIFA: Liste med personer
+Apotekansatt <-- DIFA: Liste med personer
 deactivate DIFA
 
-Apotektekniker -> DIFA: Hent resepter for person
+Apotekansatt -> DIFA: Hent resepter for person
 activate DIFA
 DIFA -> RF: Hent resepter for person
-Apotektekniker <-- DIFA: Reseptliste
+Apotekansatt <-- DIFA: Reseptliste
 deactivate DIFA
 
-Apotektekniker -> DIFA: Ekspeder resept
+Apotekansatt -> DIFA: Ekspeder resept
 activate DIFA
 DIFA -> RF: Ekspeder resept
 DIFA -> HPR: Hent rekvisisjonsrett
 DIFA -> Farmalogg: Medikament-informasjon
 DIFA <-- Farmalogg: Bivirkninger, interaksjoner, trinnpris,\nbyttegruppe med legemiddeldetaljer
 DIFA -> DIFA: Bruk historikk til å generere varsler
-Apotektekniker <-- DIFA: Reseptliste med alternativer,\nbivirkninger, varsler
+Apotekansatt <-- DIFA: Reseptliste med alternativer,\nbivirkninger, varsler
 deactivate DIFA
 
-group Utføres av Apotektekniker etter behov
-Apotektekniker -> DIFA: Beregne refusjon basert på varevalg
-Apotektekniker -> DIFA: Forfalskningskontroll
-Apotektekniker -> DIFA: Verifiser utlevering
+group Utføres av Apotekansatt etter behov
+Apotekansatt -> DIFA: Beregne refusjon basert på varevalg
+Apotekansatt -> DIFA: Forfalskningskontroll
+Apotekansatt -> DIFA: Verifiser utlevering
 end group
 
 group Kan skje på andre tidspunkt
@@ -45,12 +45,12 @@ Farmasøyt -> DIFA: Utfør farmasøytkontroll
 end group
 
 
-Apotektekniker -> DIFA: Registrer utlevering med varevalg, strekkoder,\noppdatert etikett,\nfarmasøyts aksjon for alle varsler,\nunderskrift
+Apotekansatt -> DIFA: Registrer utlevering med varevalg, strekkoder,\noppdatert etikett,\nfarmasøyts aksjon for alle varsler,\nunderskrift
 activate DIFA
 DIFA -> DIFA: Verifiser rekvirent, varsler, strekkoder
 DIFA -> RF: Utleveringsmelding
 DIFA -> HELFO: Send refusjonskrav
-Apotektekniker <-- DIFA: OK/feilkoder
+Apotekansatt <-- DIFA: OK/feilkoder
 deactivate DIFA
 
 @enduml

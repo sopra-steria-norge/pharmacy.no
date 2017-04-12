@@ -1,7 +1,7 @@
 @startuml
 
 actor Pasient
-actor Apotektekniker
+actor Apotekansatt
 actor Farmasøyt
 actor Lege
 
@@ -23,8 +23,8 @@ node helsenorge.no #yellow
 Pasient <-down-> Lege
 Lege -right-> EPJ: Resept
 EPJ -right-> RF: Resept
-Pasient <-right-> Apotektekniker
-Apotektekniker -down-> POS
+Pasient <-right-> Apotekansatt
+Apotekansatt -down-> POS
 Farmasøyt -down-> POS
 Farmasøyt -down-> DIFA: Farmasøytkontroll
 

@@ -2,33 +2,33 @@
 
 title Inhalasjonsveiledning
 
-actor Apotektekniker
+actor Apotekansatt
 participant POS
 participant DIFA
 participant HELFO
 
 
 group Dialog med Kjede POS
-Apotektekniker -> POS: Velger Inhalasjonsveiledning
-Apotektekniker <-- POS: Redirect
+Apotekansatt -> POS: Velger Inhalasjonsveiledning
+Apotekansatt <-- POS: Redirect
 end group
 group Dialog med DIFA
-Apotektekniker -> DIFA: Vis Personsøk skjema
-Apotektekniker -> DIFA: Angi person (fødselsnummer eller navn + fødselsdato)
-Apotektekniker <-- DIFA: Vis instrukser for behandlingen
-Apotektekniker -> DIFA: Angi informasjon om behandlingen (eks: antall repetisjoner)
-Apotektekniker -> DIFA: Fullfør behandling
+Apotekansatt -> DIFA: Vis Personsøk skjema
+Apotekansatt -> DIFA: Angi person (fødselsnummer eller navn + fødselsdato)
+Apotekansatt <-- DIFA: Vis instrukser for behandlingen
+Apotekansatt -> DIFA: Angi informasjon om behandlingen (eks: antall repetisjoner)
+Apotekansatt -> DIFA: Fullfør behandling
 activate DIFA
 DIFA -> DIFA: Journalføre behandling
 DIFA -> DIFA: Beregne refusjon og egenandel
 DIFA -> HELFO: Refusjonskrav
-Apotektekniker <-- DIFA: Redirect med varenummer og egenandel
+Apotekansatt <-- DIFA: Redirect med varenummer og egenandel
 deactivate DIFA
 end group
 group Dialog med Kjede POS
-Apotektekniker -> POS: Legg til egenandel i handlekurv
-Apotektekniker <-> POS: Vis oppgjørsgrunnlag
-Apotektekniker <-> POS: Fullfør salg
+Apotekansatt -> POS: Legg til egenandel i handlekurv
+Apotekansatt <-> POS: Vis oppgjørsgrunnlag
+Apotekansatt <-> POS: Fullfør salg
 end group
 
 
