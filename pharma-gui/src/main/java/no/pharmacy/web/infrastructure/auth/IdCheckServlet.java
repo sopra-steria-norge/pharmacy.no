@@ -7,8 +7,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jsonbuddy.JsonObject;
-
 public class IdCheckServlet extends HttpServlet {
 
     @Override
@@ -17,8 +15,9 @@ public class IdCheckServlet extends HttpServlet {
 
         resp.getWriter().println(req.getUserPrincipal().getName());
         resp.getWriter().println();
-        JsonObject jwtPayload = ((OpenIdPrincipal)req.getUserPrincipal()).getToken().getPayload();
-        resp.getWriter().println(jwtPayload);
+        OpenIdPrincipal openIdPrincipal = (OpenIdPrincipal)req.getUserPrincipal();
+        resp.getWriter().println("HER-nummer: " + openIdPrincipal.getToken().claim("HER-nummer").orElse("<Missing>"));
+        resp.getWriter().println(openIdPrincipal.getToken().getPayload());
     }
 
 }

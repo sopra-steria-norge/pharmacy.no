@@ -1,9 +1,11 @@
 package no.pharmacy.infrastructure.auth;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -138,18 +140,36 @@ public class JwtToken {
     }
 
     public boolean verifySignature() throws GeneralSecurityException {
-        Signature signature = Signature.getInstance("SHA256withRSA"); // because jwt[0].alg == RS256
+//        if (!alg().equals("RS256")) {
+//            throw new IllegalArgumentException("Illegal algorithm " + alg());
+//        }
+        Signature signature = Signature.getInstance("SHA256withRSA");
         signature.initVerify(getCertificate().getPublicKey());
         signature.update((tokenValues[0] + "." + tokenValues[1]).getBytes());
         return signature.verify(base64Decode(tokenValues[2]));
     }
 
+    private String alg() {
+        return payload.requiredString("alg");
+    }
+
     private Certificate getCertificate() throws CertificateException {
+        if (iss().equals("sykehusapotekene")) {
+            try {
+                KeyStore keystoree = KeyStore.getInstance("sdg", "sdgs");
+                keystoree.load(new FileInputStream("file-on-disk"), "keypass".toCharArray());
+                return keystoree.getCertificate("sykehusapotekene");
+            } catch (IOException|GeneralSecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
         if (iss().startsWith("https://sts.windows.net/")) {
             String tenant = payload.requiredString("tid");
             String keyUrl = "https://login.microsoftonline.com/" + tenant + "/discovery/v2.0/keys";
             return getCertificate(keyUrl, jwtHeader.requiredString("kid"));
         } else if (iss().startsWith("https:")) {
+            // TODO: Use authority
             return getCertificate(iss() + "/discovery/keys", jwtHeader.requiredString("kid"));
         } else {
             throw new IllegalArgumentException("Unknown issuer " + iss());
