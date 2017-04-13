@@ -1,5 +1,6 @@
 package no.pharmacy.web.server;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServlet;
 
 import org.eclipse.jetty.server.Handler;
@@ -36,8 +37,16 @@ public class PharmaGuiHandler {
 
     private WebAppContext handler = new WebAppContext(null, "/");
 
-    public Handler createHandler() {
+    @SuppressWarnings("resource")
+    public Handler createHandler() throws IOException {
         handler.setBaseResource(Resource.newClassPathResource("/pharma-webapp"));
+
+        Resource resource = Resource.newResource("src/main/resources/pharma-webapp");
+        if (resource.isDirectory()) {
+            handler.setBaseResource(resource);
+            // Avoid locking files on disk
+            handler.setInitParameter("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
+        }
 
         addServlet(new PrescriptionsController(prescriptionGateway, repository, patientRepository), "/prescriptions/");
         addServlet(new DispenseOrderController(prescriptionGateway, repository, medicationRepository), "/dispenseOrder/*");

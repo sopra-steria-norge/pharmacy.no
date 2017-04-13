@@ -21,7 +21,7 @@ import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
-import no.pharmacy.medication.MedicationSource;
+import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.patient.PatientRepository;
 
 public class FakeReseptFormidler implements MessageGateway {
@@ -59,10 +59,10 @@ public class FakeReseptFormidler implements MessageGateway {
 
     private final PatientRepository patientRepository;
 
-    private final MedicationSource medicationSource;
+    private final MedicationRepository medicationSource;
 
-    public FakeReseptFormidler(MedicationSource medicationSource, PatientRepository patientRepository) {
-        this.medicationSource = medicationSource;
+    public FakeReseptFormidler(MedicationRepository medicationRepository, PatientRepository patientRepository) {
+        this.medicationSource = medicationRepository;
         this.patientRepository = patientRepository;
     }
 
@@ -81,7 +81,7 @@ public class FakeReseptFormidler implements MessageGateway {
     }
 
     public MedicationOrder addPrescription(String nationalId, String productId, PersonReference prescriber) {
-        Medication medication = this.medicationSource.getMedication(productId).orElseThrow(() -> new IllegalArgumentException(productId));
+        Medication medication = this.medicationSource.findByProductId(productId).orElseThrow(() -> new IllegalArgumentException(productId));
         return addPrescription(nationalId, medication, prescriber);
     }
 

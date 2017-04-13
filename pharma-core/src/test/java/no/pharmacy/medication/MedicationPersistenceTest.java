@@ -68,7 +68,7 @@ public class MedicationPersistenceTest {
         medication.setSubstance("N06BA04");
         repository.save(medication);
 
-        assertThat(repository.getMedication(medication.getProductId()).get().getInteractions())
+        assertThat(repository.findByProductId(medication.getProductId()).get().getInteractions())
             .contains(interaction);
     }
 

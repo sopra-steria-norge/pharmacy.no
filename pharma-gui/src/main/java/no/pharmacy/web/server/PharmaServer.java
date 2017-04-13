@@ -2,6 +2,7 @@ package no.pharmacy.web.server;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -90,36 +91,11 @@ public class PharmaServer {
         handlers.addHandler(new ShutdownHandler(SHUTDOWN_TOKEN, true, true));
 
         PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
-
-        JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(createMedicationDataSource());
-        // TODO: Implement with lastmodified timestamp and checksum
-        medicationRepository.refresh(FestMedicationImporter.FEST_URL.toString());
-
-        PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(createPractitionerDataSource(),
-                CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
-        File hprFile = new File("../data-dumps/HprExport.L3.csv.v2.zip");
-        if (hprFile.exists()) {
-            // TODO: Implement with lastmodified timestamp
-            practitionerRepository.refresh(hprFile.getPath());
-        } else {
-            practitionerRepository.refresh("classpath:seed/hpr-mini/");
-        }
-
-        HealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(createHealthcareServiceDataSource());
-        File arFile = new File("../data-dumps/AR.xml.gz");
-        if (arFile.exists()) {
-            // TODO: Implement with last modified timestamp on file
-            try(InputStream input = new GZIPInputStream(new FileInputStream(arFile), 16*1024*1024)) {
-                healthcareServiceRepository.refresh(input);
-            }
-        } else {
-            try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
-                healthcareServiceRepository.refresh(input);
-            }
-        }
+        MedicationRepository medicationRepository = createMedicationRepository();
+        PractitionerRepository practitionerRepository = createPractitionerRepository();
+        HealthcareServiceRepository healthcareServiceRepository = createHealthcareServiceRepository();
 
         FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository, patientRepository);
-
 
         handlers.addHandler(createOpsHandler());
         handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository, practitionerRepository));
@@ -134,6 +110,43 @@ public class PharmaServer {
         handlers.addHandler(guiHandler.createHandler());
 
         return handlers;
+    }
+
+    private HealthcareServiceRepository createHealthcareServiceRepository() throws IOException, FileNotFoundException {
+        HealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(createHealthcareServiceDataSource());
+        File arFile = new File("../data-dumps/AR.xml.gz");
+        if (arFile.exists()) {
+            // TODO: Implement with last modified timestamp on file
+            try(InputStream input = new GZIPInputStream(new FileInputStream(arFile), 16*1024*1024)) {
+                healthcareServiceRepository.refresh(input);
+            }
+        } else {
+            try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
+                healthcareServiceRepository.refresh(input);
+            }
+        }
+        return healthcareServiceRepository;
+    }
+
+    private JdbcMedicationRepository createMedicationRepository() {
+        JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(createMedicationDataSource());
+        // TODO: Implement with lastmodified timestamp and checksum
+        // TODO: Implement with timestamp entry checking
+        medicationRepository.refresh(FestMedicationImporter.FEST_URL.toString());
+        return medicationRepository;
+    }
+
+    private PractitionerRepository createPractitionerRepository() {
+        PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(createPractitionerDataSource(),
+                CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
+        File hprFile = new File("../data-dumps/HprExport.L3.csv.v2.zip");
+        if (hprFile.exists()) {
+            // TODO: Implement with lastmodified timestamp
+            practitionerRepository.refresh(hprFile.getPath());
+        } else {
+            practitionerRepository.refresh("classpath:seed/hpr-mini/");
+        }
+        return practitionerRepository;
     }
 
     private DataSource createHealthcareServiceDataSource() {

@@ -23,7 +23,7 @@ import no.pharmacy.core.Money;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 
-public class JdbcMedicationRepository extends JdbcSupport implements MedicationRepository, MedicationSource {
+public class JdbcMedicationRepository extends JdbcSupport implements MedicationRepository {
 
     private DataSource dataSource;
 
@@ -104,12 +104,6 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
             .value("xml", medication.getXml())
             .executeInsert()
             ;
-    }
-
-    @Override
-    public Optional<Medication> getMedication(String productId) {
-        return retrieveSingle("select * from medications where product_id = ?",
-            Arrays.asList(productId), this::read);
     }
 
     public boolean isEmpty() {
