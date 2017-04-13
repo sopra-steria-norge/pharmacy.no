@@ -80,9 +80,10 @@ function filterPatients(string) {
 	}
 	const filter = string.toUpperCase();
 	return function(o) {
-		console.log("okay : " + JSON.stringify(o))
-		return o.firstName.toUpperCase().indexOf(filter) == 0 || 
-			o.lastName.toUpperCase().indexOf(filter) == 0;
+		var fullName = (o.firstName + " " + o.lastName).toUpperCase();
+		var lastFirst = (o.lastName + ", " + o.firstName).toUpperCase();
+		return fullName.indexOf(filter) == 0 || 
+			lastFirst.toUpperCase().indexOf(filter) == 0;
 	};
 };
 
