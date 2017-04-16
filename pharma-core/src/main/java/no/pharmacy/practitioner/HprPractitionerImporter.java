@@ -1,8 +1,10 @@
 package no.pharmacy.practitioner;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -10,7 +12,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.pharmacy.infrastructure.ExceptionUtil;
-import no.pharmacy.infrastructure.IOUtil;
 import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 
 public class HprPractitionerImporter {
@@ -38,6 +38,9 @@ public class HprPractitionerImporter {
     HprPractitionerImporter(JdbcPractitionerRepository repository, JdbcSupport jdbcSupport) {
         this.repository = repository;
         this.jdbcSupport = jdbcSupport;
+    }
+
+    private void cachePractitioners(JdbcSupport jdbcSupport) {
         jdbcSupport.queryForList(
                 "select hpr_number, updated_at from practitioners",
                 new ArrayList<>(), rs -> {
@@ -47,29 +50,24 @@ public class HprPractitionerImporter {
                 });
     }
 
-    public void refresh(String hprLocation) {
-        logger.info("Reading Practitioners from {}", hprLocation);
-        if (hprLocation.endsWith(".zip")) {
-            try(ZipFile file = new ZipFile(hprLocation)) {
-                logger.debug("Files in {}: {}", file.getName(), Collections.list(file.entries()));
+    public void refresh(URL url) throws IOException {
+        logger.info("Reading Practitioners from {}", url);
+        if (url.openConnection().getLastModified() < repository.lastImportTime(url)) {
+            logger.info("Skipping up to date {}", url);
+            return;
+        }
+        cachePractitioners(jdbcSupport);
 
+        if (url.toString().endsWith(".zip")) {
+            try(ZipFile file = new ZipFile(new File(url.getFile()))) {
                 savePeople(file.getInputStream(file.getEntry("normalisert\\personer.csv")));
                 saveAuthorizations(file.getInputStream(file.getEntry("normalisert\\godkjenninger.csv")));
-            } catch (IOException e) {
-                throw ExceptionUtil.softenException(e);
-            }
-        } else if (hprLocation.startsWith("classpath:")) {
-            try {
-                String directory = hprLocation.substring("classpath:".length());
-                savePeople(IOUtil.resource(directory + "personer.csv"));
-                saveAuthorizations(IOUtil.resource(directory + "godkjenninger.csv"));
-            } catch (IOException e) {
-                throw ExceptionUtil.softenException(e);
             }
         } else {
-            throw new IllegalArgumentException("Can't deal with " + hprLocation);
+            savePeople(new URL(url, "personer.csv").openStream());
+            saveAuthorizations(new URL(url, "godkjenninger.csv").openStream());
         }
-
+        repository.updateLastImportTime(System.currentTimeMillis(), url);
     }
 
     private void savePeople(InputStream input) {

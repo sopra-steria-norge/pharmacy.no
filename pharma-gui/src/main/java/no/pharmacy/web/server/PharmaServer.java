@@ -1,14 +1,10 @@
 package no.pharmacy.web.server;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
-import java.util.zip.GZIPInputStream;
-
 import javax.servlet.DispatcherType;
 import javax.sql.DataSource;
 
@@ -30,7 +26,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import ch.qos.logback.classic.Level;
 import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
 import no.pharmacy.infrastructure.CryptoUtil;
-import no.pharmacy.infrastructure.IOUtil;
 import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
@@ -116,14 +111,9 @@ public class PharmaServer {
         HealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(createHealthcareServiceDataSource());
         File arFile = new File("../data-dumps/AR.xml.gz");
         if (arFile.exists()) {
-            // TODO: Implement with last modified timestamp on file
-            try(InputStream input = new GZIPInputStream(new FileInputStream(arFile), 16*1024*1024)) {
-                healthcareServiceRepository.refresh(input);
-            }
+            healthcareServiceRepository.refresh(arFile.toURI().toURL());
         } else {
-            try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
-                healthcareServiceRepository.refresh(input);
-            }
+            healthcareServiceRepository.refresh(getClass().getResource("/seed/AR-mini.xml.gz"));
         }
         return healthcareServiceRepository;
     }
@@ -136,15 +126,14 @@ public class PharmaServer {
         return medicationRepository;
     }
 
-    private PractitionerRepository createPractitionerRepository() {
+    private PractitionerRepository createPractitionerRepository() throws IOException {
         PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(createPractitionerDataSource(),
                 CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
         File hprFile = new File("../data-dumps/HprExport.L3.csv.v2.zip");
         if (hprFile.exists()) {
-            // TODO: Implement with lastmodified timestamp
-            practitionerRepository.refresh(hprFile.getPath());
+            practitionerRepository.refresh(hprFile.toURI().toURL());
         } else {
-            practitionerRepository.refresh("classpath:seed/hpr-mini/");
+            practitionerRepository.refresh(getClass().getResource("/seed/hpr-mini/"));
         }
         return practitionerRepository;
     }

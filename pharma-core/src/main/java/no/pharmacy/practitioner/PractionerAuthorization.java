@@ -2,8 +2,8 @@ package no.pharmacy.practitioner;
 
 // Kodeverk 9060 - https://volven.no/produkt.asp?open_f=true&id=292576&catID=3&subID=8&subCat=61&oid=9060
 public enum PractionerAuthorization {
-    PHARMACIST("FA"), PHARMACIST2("FA2"), NURSE("SP"), DOCTOR("LE"), VETERINARIAN("VE"),
-    PHYSIOTHERAPIST("FT");
+    PHARMACIST("FA"), PHARMACIST1("FA1"), PHARMACIST2("FA2"), NURSE("SP"), DOCTOR("LE"), VETERINARIAN("VE"),
+    PHYSIOTHERAPIST("FT"), PHARMACY_TECHNICIAN("AT");
 
     private String code;
 
