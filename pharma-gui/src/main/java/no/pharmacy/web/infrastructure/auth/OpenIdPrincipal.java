@@ -8,21 +8,15 @@ import no.pharmacy.infrastructure.auth.JwtToken;
 
 public class OpenIdPrincipal implements Principal {
 
-    private String name;
     private JwtToken jwt;
 
     public OpenIdPrincipal(JwtToken jwt) {
         this.jwt = jwt;
-        setName(jwt.name().orElse(jwt.sub()));
     }
 
     @Override
     public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        return jwt.getUserName();
     }
 
     public Subject getSubject() {
@@ -35,5 +29,14 @@ public class OpenIdPrincipal implements Principal {
 
     public JwtToken getToken() {
         return jwt;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{name=" + getName() + ",token=" + getToken() + "}";
+    }
+
+    public String getDisplayName() {
+        return jwt.getDisplayName();
     }
 }

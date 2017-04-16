@@ -128,7 +128,6 @@ public class JwtToken {
         return claim("name");
     }
 
-
     public Optional<String> claim(String claimId) {
         return payload.stringValue(claimId);
     }
@@ -209,4 +208,33 @@ public class JwtToken {
     public JsonObject getPayload() {
         return payload;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{name=" + getUserName() + ",sub=" + sub() + ",claims=" + claimNames() + "}";
+    }
+
+    /** Returns a (probably) unique name used to identify the user.
+     *  This will be email address, login name or subject ID.
+     */
+    public String getUserName() {
+        return name().orElse(upn().orElse(uniqueName().orElse(sub())));
+    }
+
+    /** Returns a human name used to display regarding user. */
+    public String getDisplayName() {
+        return name().orElse(uniqueName().orElse(getUserName()));
+    }
+
+
+    /** Despite the claim name, not guaranteed to be unique! */
+    private Optional<String> uniqueName() {
+        return claim("unique_name");
+    }
+
+    /** User Principal Name */
+    private Optional<String> upn() {
+        return claim("upn");
+    }
+
 }

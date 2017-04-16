@@ -42,8 +42,9 @@ public class AuthenticationConfiguration {
 
     public String getRedirectUrl(HttpServletRequest req) {
         return this.authority
-                + "/oauth2/authorize?response_type=id_token&scope=openid&response_mode=form_post&"
-                + "redirect_uri=" + encodeUTF8(getCurrentUri(req)) + "&client_id=" + clientId
+                + "/oauth2/authorize?response_type=id_token&scope=openid&response_mode=form_post"
+                + "&redirect_uri=" + encodeUTF8(getAuthority(req) + "/pharmacies/api/oauth2callback")
+                + "&state=" + encodeUTF8(getCurrentUri(req)) + "&client_id=" + clientId
                 + "&client-requst-id=" + UUID.randomUUID()
                 + "&nonce=" + UUID.randomUUID();
     }
@@ -56,7 +57,7 @@ public class AuthenticationConfiguration {
         }
     }
 
-    public String getCurrentUri(HttpServletRequest req) {
+    public static String getCurrentUri(HttpServletRequest req) {
         return getRequestUrl(req) + (req.getQueryString() != null ? "?" + req.getQueryString() : "");
     }
 

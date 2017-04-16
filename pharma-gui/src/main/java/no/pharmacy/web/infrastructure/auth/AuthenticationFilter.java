@@ -49,11 +49,21 @@ public class AuthenticationFilter implements Filter {
         } else if (req.getMethod().equals("POST") && req.getParameter("id_token") != null) {
             logger.debug("Decoding id_token {}", req.getParameter("id_token"));
             Authentication auth = decodeAuthentication(req.getParameter("id_token"));
+
+            String redirect = (String) req.getSession().getAttribute("login_redirect_url");
+            if (redirect == null) {
+                redirect = req.getContextPath();
+            }
+
             ((Request)request).setAuthentication(auth);
+            req.getSession().invalidate();
             req.getSession().setAttribute(SESSION_AUTH, auth);
-            resp.sendRedirect(authConfig.getCurrentUri(req));
+            resp.sendRedirect(redirect);
+        } else if (req.getHeader("accept").equals("application/json")) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "AJAX called not authenticated");
         } else {
             logger.debug("Redirecting user for login {}", authConfig.getRedirectUrl(req));
+            req.getSession().setAttribute("login_redirect_url", AuthenticationConfiguration.getCurrentUri(req));
             resp.sendRedirect(authConfig.getRedirectUrl(req));
         }
     }
