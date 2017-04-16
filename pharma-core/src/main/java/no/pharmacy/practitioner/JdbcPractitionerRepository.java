@@ -1,7 +1,10 @@
 package no.pharmacy.practitioner;
 
+import java.io.IOException;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -36,9 +39,9 @@ public class JdbcPractitionerRepository implements PractitionerRepository {
     }
 
     @Override
-    public void refresh(String hprLocation) {
+    public void refresh(URL url) throws IOException {
         HprPractitionerImporter importer = new HprPractitionerImporter(this, jdbcSupport);
-        importer.refresh(hprLocation);
+        importer.refresh(url);
     }
 
     @Override
@@ -98,6 +101,24 @@ public class JdbcPractitionerRepository implements PractitionerRepository {
             .value("id", id)
             .value("hpr_number", hprNumber)
             .value("authorization_code", authorization)
+            .executeUpdate();
+    }
+
+    public long lastImportTime(URL source) {
+        return jdbcSupport.retrieveSingle(
+                "select last_import_time from Last_import_time where import_name = ? and source = ?",
+                Arrays.asList("practitioners", source),
+                rs -> rs.getTimestamp(1).getTime()).orElse(0L);
+    }
+
+    public void updateLastImportTime(long lastImportTime, URL source) {
+        jdbcSupport.executeUpdate("delete from Last_import_time where import_name = ? and source = ?",
+                Arrays.asList("practitioners", source));
+
+        jdbcSupport.insertInto("Last_import_time")
+            .value("import_name", "practitioners")
+            .value("source", source)
+            .value("last_import_time", new Timestamp(lastImportTime))
             .executeUpdate();
     }
 

@@ -1,6 +1,6 @@
 package no.pharmacy.organization;
 
-import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 public interface HealthcareServiceRepository {
@@ -11,6 +11,13 @@ public interface HealthcareServiceRepository {
 
     void update(HealthcareService organization);
 
-    void refresh(InputStream input);
+    void refresh(URL path);
+
+    HealthcareService retrieve(String herNumber);
+
+    long lastImportTime(URL source);
+
+    void updateLastImportTime(long lastImportTime, URL source);
+
 
 }

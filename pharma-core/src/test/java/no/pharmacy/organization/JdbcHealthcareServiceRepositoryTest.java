@@ -2,11 +2,8 @@ package no.pharmacy.organization;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.InputStream;
-
 import org.junit.Test;
 
-import no.pharmacy.infrastructure.IOUtil;
 import no.pharmacy.test.TestDataSource;
 
 public class JdbcHealthcareServiceRepositoryTest {
@@ -15,16 +12,15 @@ public class JdbcHealthcareServiceRepositoryTest {
     public void shouldReadPharmacies() throws Exception {
         JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource());
 
-        try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
-            repository.refresh(input);
-        }
-        try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
-            repository.refresh(input);
-        }
+        repository.refresh(getClass().getResource("/seed/AR-mini.xml.gz"));
+        repository.refresh(getClass().getResource("/seed/AR-mini.xml.gz"));
 
         assertThat(repository.listPharmacies())
             .extracting(HealthcareService::getDisplay)
             .containsOnlyOnce("BOOTS APOTEK SOLLI", "APOTEK 1 FINNSNES", "APOTEK 1 FINNSNES");
+
+        assertThat(repository.retrieve("90416").getDisplay())
+            .isEqualTo("BOOTS APOTEK SOLLI");
 
         assertThat(repository.listPharmacies().iterator().next())
             .hasNoNullFieldsOrProperties();
@@ -34,16 +30,12 @@ public class JdbcHealthcareServiceRepositoryTest {
     public void shouldUpdatePharmacies() throws Exception {
         JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource());
 
-        try(InputStream input = IOUtil.resource("seed/AR-mini.xml.gz")) {
-            repository.refresh(input);
-        }
-        assertThat(repository.getOrganization("90325").getDisplay())
+        repository.refresh(getClass().getResource("/seed/AR-mini.xml.gz"));
+        assertThat(repository.retrieve("90325").getDisplay())
             .isEqualTo("APOTEK 1 ÅKRA");
 
-        try(InputStream input = IOUtil.resource("AR-update.xml")) {
-            repository.refresh(input);
-        }
-        assertThat(repository.getOrganization("90325").getDisplay())
+        repository.refresh(getClass().getResource("/AR-update.xml"));
+        assertThat(repository.retrieve("90325").getDisplay())
             .isEqualTo("APOTEK 1 ÅKRA (endret)");
     }
 

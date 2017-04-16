@@ -1,8 +1,9 @@
 package no.pharmacy.organization;
 
-import java.io.InputStream;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,6 +38,13 @@ public class JdbcHealthcareServiceRepository implements HealthcareServiceReposit
     }
 
     @Override
+    public HealthcareService retrieve(String herNumber) {
+        return jdbcSupport.retrieveSingle(
+                "select * from organizations where her_number = ?",
+                Arrays.asList(herNumber), this::readOrganization).get();
+    }
+
+    @Override
     public List<HealthcareService> listPharmacies() {
         return jdbcSupport.queryForList("select * from organizations where business_type = ? order by display",
                 Arrays.asList("108"), this::readOrganization);
@@ -54,14 +62,28 @@ public class JdbcHealthcareServiceRepository implements HealthcareServiceReposit
 
 
     @Override
-    public void refresh(InputStream input) {
+    public void refresh(URL path) {
         ArHealthcareServiceImporter importer = new ArHealthcareServiceImporter(this, jdbcSupport);
-        importer.refresh(input);
+        importer.refresh(path);
     }
 
-    public HealthcareService getOrganization(String herId) {
-        return jdbcSupport.retrieveSingle("select * from organizations where her_number = ?",
-                Arrays.asList(herId), this::readOrganization).get();
+    @Override
+    public long lastImportTime(URL url) {
+        return jdbcSupport.retrieveSingle(
+                "select last_import_time from Last_import_time where import_name = ? and source = ?",
+                Arrays.asList("organizations", url.toString()),
+                rs -> rs.getTimestamp(1).getTime()).orElse(0L);
     }
 
+    @Override
+    public void updateLastImportTime(long lastImportTime, URL source) {
+        jdbcSupport.executeUpdate("delete from Last_import_time where import_name = ? and source = ?",
+                Arrays.asList("organizations", source.toString()));
+
+        jdbcSupport.insertInto("Last_import_time")
+            .value("import_name", "organizations")
+            .value("source", source.toString())
+            .value("last_import_time", new Timestamp(lastImportTime))
+            .executeUpdate();
+    }
 }

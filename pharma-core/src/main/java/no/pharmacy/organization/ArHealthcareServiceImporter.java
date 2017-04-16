@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -13,6 +15,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import org.eaxy.Document;
 import org.eaxy.Element;
@@ -28,13 +31,19 @@ import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 public class ArHealthcareServiceImporter {
     private static final Logger logger = LoggerFactory.getLogger(ArHealthcareServiceImporter.class);
 
-    private HealthcareServiceRepository healthcareServiceRepository;
+    private HealthcareServiceRepository repository;
 
     private Map<String, Instant> lastUpdated = new HashMap<>();
 
+    private JdbcSupport jdbcSupport;
+
     public ArHealthcareServiceImporter(HealthcareServiceRepository healthcareServiceRepository,
             JdbcSupport jdbcSupport) {
-        this.healthcareServiceRepository = healthcareServiceRepository;
+        this.repository = healthcareServiceRepository;
+        this.jdbcSupport = jdbcSupport;
+    }
+
+    private void cacheOrganizations() {
         jdbcSupport.queryForList(
                 "select her_number, updated_at from organizations",
                 new ArrayList<>(), rs -> {
@@ -44,8 +53,29 @@ public class ArHealthcareServiceImporter {
                 });
     }
 
+    void refresh(URL url) {
+        try {
+            URLConnection connection = url.openConnection();
+            if (connection.getLastModified() < repository.lastImportTime(url)) {
+                logger.info("Skipping up to date {}", url);
+                return;
+            }
+            try (InputStream input = url.openStream()) {
+                if (url.getPath().endsWith(".gz")) {
+                    refresh(new GZIPInputStream(input, 16*1024*1024));
+                } else {
+                    refresh(input);
+                }
+                repository.updateLastImportTime(Instant.now().toEpochMilli(), url);
+            }
+        } catch (IOException e) {
+            throw ExceptionUtil.softenException(e);
+        }
+    }
+
     public void refresh(InputStream input) {
         try {
+            cacheOrganizations();
             logger.info("Refreshing HealthcareServices");
             Document doc = decodeXml(input);
             logger.info("Reading data");
@@ -59,10 +89,10 @@ public class ArHealthcareServiceImporter {
                 } else if (businessType.first().text().equals("108") || businessType.first().text().equals("109")) {
                     HealthcareService organization = createOrganization(communicationParty);
                     if (!lastUpdated.containsKey(organization.getId())) {
-                        healthcareServiceRepository.save(organization);
+                        repository.save(organization);
                         insertCount++;
                     } else if (organization.getUpdatedAt().isAfter(lastUpdated.get(organization.getId()))) {
-                        healthcareServiceRepository.update(organization);
+                        repository.update(organization);
                         updateCount++;
                     } else {
                         unchangedCount++;
@@ -116,5 +146,7 @@ public class ArHealthcareServiceImporter {
             throw ExceptionUtil.softenException(e);
         }
     }
+
+
 
 }
