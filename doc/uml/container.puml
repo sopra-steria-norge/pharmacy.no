@@ -6,8 +6,7 @@ node Apotek1 #yellow
 node Apotek2 #yellow
 node ApotekN #yellow
 node Kjede #yellow
-node FHI
-node data.norge.no
+node FHI #Aquamarine
 
 interface FarmasøytApp <<opsjon>> #lime
 
@@ -71,9 +70,9 @@ Internet -down-> Rapport
 cloud NHN as "Norsk helsenett" #Aquamarine
 
 package eHelse {
-    node RF
-    node HELFO
-    node helsenorge.no
+    node RF #Aquamarine
+    node HELFO #Aquamarine
+    node helsenorge.no #Aquamarine
 }
 
 Reseptur -> NHN

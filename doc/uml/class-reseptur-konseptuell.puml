@@ -19,6 +19,7 @@ class ReseptKurv {
 }
 
 class ReseptVarsel {
+    alvorlighetsgrad
     interaksjonsvarsel
     nyttLegemiddel
     endretDosering

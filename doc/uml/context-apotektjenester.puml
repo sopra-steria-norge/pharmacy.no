@@ -13,7 +13,7 @@ package Kjedesystemer {
 node DIFA #limegreen
 
 node helsenorge.no #yellow
-node HELFO #yellow
+node HELFO #pink
 node HPR #yellow
 
 Pasient <-> Farmasøyt

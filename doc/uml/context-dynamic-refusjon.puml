@@ -1,7 +1,5 @@
 @startuml
 
-actor Pasient
-
 box "Kjede"
     participant POS
     participant Økonomisystem

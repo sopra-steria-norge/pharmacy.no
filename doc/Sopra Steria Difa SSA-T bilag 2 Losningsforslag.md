@@ -41,22 +41,24 @@ DIFA vil levere følgende tjenester:
 | Rapportering          | Hent rapport til offentlig instans        |
 |                       | Hent datagrunnlag til bransjestatistikk   |
 
-Merk at alle oppslag på pasientinformasjon skal logges med årsak til oppslaget og eventuell legitimasjon for den som krevde oppslaget. Merk at all rapporteringsinformasjon vil ha fjernet koblinger til identifiserbare personer.
+Merk at alle oppslag på pasientinformasjon vil logges med årsak til oppslaget og eventuell legitimasjon for den som krevde oppslaget. Merk at all rapporteringsinformasjon vil ha fjernet koblinger til identifiserbare personer.
 
 
 ## Resultatmål
 
-Avtalen dekker leveranse av første versjon av DIFA som skal inneholde nødvendig funksjonalitet for å understøtte reseptbehandling i apoteker. Systemet DIFA skal i versjon 1.0 levere et API til apotekkjedene for håndtering av resepter, refusjon og utvalgte farmasøytiske tjenester. Leveransen innebærer tilstrekkelig ytelseskrav levert til et definert nettverksmessig point-of-delivery. Leveransen inneholder nødvendige test- og driftsmekanismer for å sikre at apotekkjedene kan ta i bruk tjenesten samt integrasjon med tjenester på Norsk helsenett som skal til for å realisere tjenesten.
+Avtalen dekker leveranse av første versjon av DIFA som vil inneholde nødvendig funksjonalitet for å understøtte reseptbehandling i apoteker. Systemet DIFA vil i versjon 1.0 levere et API til apotekkjedene for håndtering av resepter, refusjon og utvalgte farmasøytiske tjenester. Leveransen innebærer tilstrekkelig ytelseskrav levert til et definert nettverksmessig point-of-delivery. Leveransen inneholder nødvendige test- og driftsmekanismer for å sikre at apotekkjedene kan ta i bruk tjenesten samt integrasjon med tjenester på Norsk helsenett som skal til for å realisere tjenesten.
+
+Overgangen fra FarmaPro til DIFA vil frigjøre kjedene til å kontrollere sine egne IT-system porteføljer etter egne behov og prioriteringer. Ved å slippe FarmaPro lisense vil kjede få frigjort midler til å kjøpe, tilpasse og drifte egne løsninger.
+
+Leverandøren er forberedt på å påta seg et betydelig ansvar for at lover og forskrifter vil følges i den nye løsningen. Selv om apotekbransjen og farmasøytene i apotek har pasientens behov som sitt viktigste kompetansefelt, vil *kjedes IT-satsninger* kunne ønske å fokusere på de kommersielle aspektene av virksomheten med vissheten om at DIFA vil garantere at pasientens rettigheter og behov er ivaretatt.
+
 
 ## Endringer i denne versjonen av løsningsbeskrivelsen
 
-Ved presentasjon av forrige versjon ble leverandøren bedt om å detaljere konsekvensene med GUI ytterligere. Leverandøren har fjernet anbefalingen om å ikke levere GUI opsjonen, men i stedet lagt på en merknad om faktorer som kjeder som ønsker dette må være bevisst på.
-
-Migreringsplan er endret basert på tilbakemeldinger fra forrige presentasjon. Så lenge kjeder forventer å ta i bruk reseptur API tidlig anser leverandøren ikke lenger FarmaPro bro-løsning som viktig. Den oppdaterte migreringsplanen fokuserer i stedet på å frikoble tekniske komplekse leveranser fra leveranser med stor forretningsmessig konsekvens.
+Leverandøren har mottatt en rekke innspill som fortsatt ikke er innarbeidet i denne versjonen av systemdesignet. Vi legger allikevel ved et uferdig systemdesign for å gi forståelse av strukturen på løsningen. Strukturen på dokumentet forventes ikke å undergå betydlige endringer fram til prøvetilbudet.
 
 
-
-# Funksjonelt omfang (jfr avtalens punkt 1.1)
+# Funksjonelt omfang
 
 Leverandøren har valgt å gruppere funksjonaliteten i grovkornede funksjonelle områder som tilsvarer det vi ser som sammenhengende funksjonalitet. Hvert område er tekstlig beskrevet med en funksjonell flyt. Hvert sted i denne funksjonelle flyten vil typisk gi opphav til en eller flere product backlog items. Dette kapittelet utgjør en uttømmende beskrivelse av prosjektets omfang, men detaljer under hvert punkt er utelatt i beskrivelsen. Teksten skal *definere* omfanget, men beskrivelsen av detaljene forutsetter at prosjektmedlemmene i felleskap med funksjonelle eksperter diskuterer og fastsetter forløpende i prosjektgjennomføringen.
 
@@ -67,6 +69,20 @@ Omfang som ikke inngår i et funksjonelt område er beskrevet som Krav til tjene
 Et utkast til en fullstendig product backlog ligger vedlagt.
 
 ## Begrepsmodell
+
+Begrepsmodellen viser sammenhengen mellom de ordene som brukes for å beskrive funksjonaliteten i DIFA. Formålet med figuren er å gi en oversikt over forretningsverden som DIFA lever i. De sentrale begrepene i modellen er:
+
+* *Pasient* representerer den som skal benytte resepten. Pasient kan være en faktisk pasient, lege for bruk i egen praksis eller en dyreeier i forbindelse med en veterinærresept. (Figuren har utelatt denne kompleksiteten for å unngå visuell kompleksitet)
+* *Resept* beskriver en pasients autorisasjon for å motta ett enkelt legemiddel og eventuelt få dekket prisen for denne
+* Vi har introdusert begrepet *ReseptBunke* for å svare opp en uklarhet i lovverket. Dersom en helseperson forskriver flere legemidler til en pasient på samme visitt (teknisk sett: på samme dag) så kan dette forståes som én resept eller flere resepter. I tolkningen av blåreseptforskriftens egenandelstak kan én resept inneholde flere legemidler, mens i grensesnittet mot Reseptformidleren og i FHIR sitt begrepsapparat vil hvert legemiddel være en separat resept. Leverandøren benytter den siste terminologien og bruker begrepet "ReseptBunke" for å beskrive listen av resepter (legemidler) som var forskrevet på samme visitt.
+* *ReseptUtlevering* dokumenterer hvilket legemiddel som faktisk ble utlevert basert på en resept.
+* *ReseptKurv* er hovedenheten for kommunikasjon mellom kjedesystemene og DIFA. En ReseptKurv representerer de legemidlene som skal utleveres samtidig til en pasient på apoteket. Normalt vil en pasient kun ha en ReseptKurv under ekspedering, men en kunde kan få utlevert flere reseptkurver, for eksempel for barn eller veterinærresepter.
+* *ReseptVarsel* er en melding som DIFA genererer til farmasøyten. Eksempler kan være Interaksjonsvarsler, Endring av dosering, Dobbelforskrivning etc. Varsler vil ha alvorlighetsgrad der DIFA kan sette begrensninger rundt utlevering av alvorlige varsler.
+* *ReseptUtleveringAksjon* dokumenterer en farmasøyts aksjon basert på et varsel. Ved alvorlige varsler kan DIFA kreve at farmasøyt dokumenterer en varsel for å tillate utleveringen
+* *Legemiddel* er uformelt beskrevet i denne modellen. En Resept kan forskrives på virkestoff, merkevare eller pakning, mens en utlevering alltid vil være på pakningsnivå. DIFA vil informere kjedesystemet om alle alternative legemiddelpakninger på resepten basert på byttegruppe (ved forskrivning på pakning) eller ATC-kode (ved forskrivning på virkestoff).
+* *Helseperson* er en helseperson definert i Helsepersonellregisteret med tilhørende godkjenninger. Dette kan være forskriver (lege, veterinær etc) eller apotekansatt (apotektekniker eller farmasøyt)
+
+
 
 Følgende figur illustrerer de viktigste begrepene i DIFA og hvordan de henger sammen. I grensesnittet mellom kjedesystemene og bransjesystemet ser leverandøren for seg at disse begrepene har engelske navn med utgangspunkt i HL7-standarder (se systemdesign for detaljer).
 
@@ -93,7 +109,7 @@ Denne flyten illustrerer hvordan aktørene interagerer med systemet under resept
     * Variant: Resept til person uten fødselsnummer/D-nummer
     * Variant: Resepten bestilles som forsendelse over telefon eller elektronisk
     * Variant: Resepten hentes av institusjon eller hjemmehjelptjeneste (ekspederes som ordre)
-    * Variant: Dersom pasienten er en multidosekunde skal apotekansatt varsles om dette. (Multidoseekspedering er ikke omfattet av denne beskrivelsen)
+    * Variant: Dersom pasienten er en multidosekunde varsles apotekansatt om dette. (Multidoseekspedering er ikke omfattet av denne beskrivelsen)
 3. Apotekansatt henter reseptliste fra Reseptformidleren for pasienten via sitt POS og DIFA
 4. Apotekansatt laster ned resepter som skal ekspederes fra Reseptformidleren
     * Variant: Systemet hindrer en resept som er under behandling i et annet apotek fra å ekspederes
@@ -107,8 +123,8 @@ Denne flyten illustrerer hvordan aktørene interagerer med systemet under resept
     * Variant: Systemet sjekker avlest QR-kode på pakning mot forfalskningsregisteret
 8. Farmasøyt registrerer aksjoner for advarsler farmasøytkontroll på apotekansatts arbeidsstasjon eller på separat arbeidsstasjon eller mobil enhet
     * Systemet vil avvise utleveringen dersom nødvendige aksjoner ikke er dokumentert
-9. Pasient signerer og betaler for utleveringen og mottar legemidlene
-9. Systemet registrerer utleveringen i Reseptformidlere og sender eventuelt refusjonskrav til HELFO. Reseptformidleren markerer resepten som ekspedert dersom det ikke gjenstår iterasjoner.
+9. Pasient signerer og betaler for alle reseptene i reseptkurven og mottar legemidlene
+9. Systemet registrerer utleveringen av alle reseptene i reseptkurven i Reseptformidlere og sender eventuelt refusjonskrav til HELFO. Reseptformidleren markerer resepten som ekspedert dersom det ikke gjenstår iterasjoner.
 
 ### Spesialtilfeller
 
@@ -149,7 +165,7 @@ Denne flyten illustrerer hvordan aktørene interagerer med systemet under resept
 3. Pasienten kan nå motta legemidlene og forlate apoteket
 4. HELFO sender oppgjørsresultat når kravet er validert (typisk noen få minutter)
     * Unntak: Dersom HELFO avviser kravet kan apotekmedarbeider korrigere kravet og sende på nytt
-    * Unntak: Dersom HELFO avviser kravet skal tjenesteleverandøren håndtere dette som en B-feil
+    * Unntak: Dersom HELFO avviser kravet vil tjenesteleverandøren håndtere dette som en B-feil
 5. Kjedens regnskapssystem henter status fra systemet på refusjonskrav og oppretter fordringer [eller er dette bedre beskrevet som faktura?]
 6. HELFO sender utbetalingsmelding når betalingen er utført
 7. Kjedens regnskapssystem henter status fra systemet og registrerer betaling av fordringen
@@ -188,8 +204,8 @@ Disse journalene inneholder også personlig identifiserbar informasjon og vil de
 
 Disse to regelsettene er i stor grad overlappende og innebærer en del funksjonalitet og aktiviteter som vil inngå i product backlog:
 
-* All tilgang til journalene skal loggføres (pasientjournalloven § 16. Forbud mot urettmessig tilegnelse av helseopplysninger)
-* Når en bruker slår opp pasientopplysninger skal DIFA kreve at brukeren registrerer årsaken til oppslaget samt legitimasjon for den som forespurte oppslaget om relevant
+* All tilgang til journalene vil loggføres (pasientjournalloven § 16. Forbud mot urettmessig tilegnelse av helseopplysninger)
+* Når en bruker slår opp pasientopplysninger vil DIFA kreve at brukeren registrerer årsaken til oppslaget samt legitimasjon for den som forespurte oppslaget om relevant
     * Systemet vil holde tilbake informasjon som den som gjør oppslaget ikke skal ha (for eksempel ved vergeinnsynsperre)
 * Bruker med relevant autorisasjon skal ettergå tilgangslogg
     * Variant: Bruker kan søke opp kritiske hendelser som kansellerte ekspederinger, nødekspedering og intervensjon
@@ -197,7 +213,7 @@ Disse to regelsettene er i stor grad overlappende og innebærer en del funksjona
 * Bruker med relevant autorisasjon kan ta ut informasjon om en pasient på pasientens forespørsel (pasientjournalloven § 18. Informasjon og innsyn)
 * Bruker med relevant autorisasjon kan rette og sperre informasjon om en pasient på pasientens forespørsel (personopplysningsloven § 27. Retting av mangelfulle personopplysninger)
 * Pasientjournalen vil oppdage og forhindre at brukere forsøker å hente ut store mengder med data på kort tid ("resource governor")
-* Som en del av målbilde skal DIFA avlevere informasjon om en pasient til helsenorge.no slik at pasienten kan være selvbetjent på innsyn (pasientjournalloven § 18. Informasjon og innsyn)
+* Som en del av målbilde vil DIFA avlevere informasjon om en pasient til helsenorge.no slik at pasienten kan være selvbetjent på innsyn (pasientjournalloven § 18. Informasjon og innsyn)
 
 
 ## Rapporter
@@ -275,6 +291,10 @@ Merk at farmasøytkontroll foreslås levert som en del av kjerneløsningen
 
 ### Opsjon: Reseptekspedering GUI
 
+Testbrukergrensesnittet vil danne et godt grunnlag for et fullstendig brukergrensesnitt for å ekspedere resepter. Det vil kreve noen integrasjonsaktiviteter samt brukergrensesnittforbedringer for å gjøre det bruksverdig av apotekansatt til daglig arbeid. Nøyaktig omfang av dette arbeidet vil være avhengig av rammevilkår for kjedene som eventuelt ønsker denne muligheten.
+
+Leverandøren kan levere et pristilbud på nødvendige tilpasninger som et avrop på rammeavtalen. Aktuelle opppgaver vil være:
+
 * Apotekansatt får se priser og beholdning for varer under gjennomføring av generisk bytte
 * DIFA skal støtte nødvendig interaksjon med kjeders POS
 * DIFA skal ha en effektiv og innbydende visuell karakter
@@ -290,13 +310,13 @@ DIFA løsningen oppbevarer store mengder pasientopplysninger og det er kritisk a
 Sikkerhetskravene i prosjektet tar utgangspunkt i Normen faktaark 38 og OWASP ASVS versjon 3.
 
 * Tilgangsstyring (helsepersonelloven § 48): Apotekkjedene vil være ansvarlig for sikker og korrekt *identifisering* av bruker opp og angivelse av HPR nr. Bransjeløsning vil være ansvarlig for rettighetskontroll, spesielt opp mot Helsepersonalregisteret.
-* Sikker kommunikasjon med eHelse: Systemet skal signere meldinger til HELFO og RF i henhold til Rammeverk for elektronisk meldingsutveksling i helsevesenet
+* Sikker kommunikasjon med eHelse: Systemet vil signere meldinger til HELFO og RF i henhold til Rammeverk for elektronisk meldingsutveksling i helsevesenet
     * Systemet vil behandle private nøkler til virksomhetssertifikater uten at forretningstjenester har direkte tilgang til nøklene (OWASP ASV 7.11)
     * Systemet vil tillate trygg oppdatering av virksomhetssertifikater
 * Personopplysninger vil så langt det er mulig lagres i kryptert form. (OWASP ASVS 7.29). Sikker oppbevaring av data (apotekloven, personopplysningsloven): Oppbevaring i EU (personopplysningsloven § 29). Sikkerhetstiltak ihht personopplysningsloven § 13.
 * Personopplysninger vil automatisk fjernes fra systemet etter 12 måneder. Vinduet for historiske data vil være mulig å endre.
 
-Prosjektet skal gjennomføre sikkerhetskontroller ved hver leveranse:
+Prosjektet vil gjennomføre sikkerhetskontroller ved hver leveranse:
 
 * Prosjektet vil gjøre sikkerhetsrevisjon ved hver viktige leveranse. Revisjonen vil spesielt vektlegge:
     * Systemet er satt opp og konfigurert i henhold til korrekte sonemodeller
@@ -309,7 +329,7 @@ Prosjektet skal gjennomføre sikkerhetskontroller ved hver leveranse:
     * OWASP ASVS V9 - Data protection
     * OWASP ASVS V15 - Business logic
     * OWASP ASVS V18 - Web services
-* Prosjektet skal sette opp verktøy for statisk analyse av koden med spesielt fokus på sikkerhetsmessige svakheter
+* Prosjektet vil sette opp verktøy for statisk analyse av koden med spesielt fokus på sikkerhetsmessige svakheter
 * Privacy Impact Assessment i henhold til standardisert veileder
 * Teknisk orientert trusselmodellering der hele teamet deltar
 
@@ -332,26 +352,26 @@ DIFA vil stille krav til kjedenes Identity Provider:
 
 ### Drift, vedlikehold og oppdateringer:
 
-* DIFA skal kunne motta datadump-filer fra eksisterende FarmaPro instanser. Systemet skal effektivt håndtere fulleksport minst en gang i døgnet, slik at FarmaPro kan laste opp filer i en lang overgangsperiode. Eksportfilene skal være lagret kryptert der den private nøkkelen kun er kjent av DIFA-systemet.
+* DIFA vil kunne motta datadump-filer fra eksisterende FarmaPro instanser. Systemet vil effektivt håndtere fulleksport minst en gang i døgnet, slik at FarmaPro kan laste opp filer i en lang overgangsperiode. Eksportfilene vil være lagret kryptert der den private nøkkelen kun er kjent av DIFA-systemet.
 * Administrator kan registrere endringer satser for refusjonsordninger som gjelder fra angitte datoer (alternativt: Informasjonen hentes fra et annet system)
 * Systemet må kunne oppdatere lister over legemidler og produkter som er godkjent for refusjon
-* SLA overvåking: Systemadministrator og systemeier vil kunne se på statistikk over alle tjenestekall per tjeneste og aggregert på tjenesteområder. Statistikken skal inneholde bruksfrekvens og responstidstatistikk og understøtte krav om ytelse, skalerbarhet og oppetid. Statistikk skal kunne vises med oppløsning på månedsnivå og dagsnivå.
+* SLA overvåking: Systemadministrator og systemeier vil kunne se på statistikk over alle tjenestekall per tjeneste og aggregert på tjenesteområder. Statistikken vil inneholde bruksfrekvens og responstidstatistikk og understøtte krav om ytelse, skalerbarhet og oppetid. Statistikk vil kunne vises med oppløsning på månedsnivå og dagsnivå.
     * Dersom Leverandøren også leverer drift faller dette inn under driftsavtalen. Dersom drift skal leveres av en tredjepart vil driftsleverandør være ansvarlig for å produsere rapporter etter utviklingsleverandørens spesifikasjon
 * Ytelse og skalerbarhet: Applikasjonen vil håndtere 500 http requester per sekund på topp. 95% av requestene der bruker må vente på svar skal respondere innen 0,5 sekunder.
     * Kunden spesifisere 200.000 resepter om dagen. Av mangel på mer detaljert statistikk antar leverandøren konservativt at halvparten av dette er i løpet av en time. Det gir opphav til en toppbelastning på 30 resepter per sekund. Arkitekturen legger opp til cirka 12 http requester per sekund med opptil 10 sql queries per request.
-* Tjenesten skal ha 99,7% oppetid målt på månedsbasis med 30 minutter RPO. Opptid skal måles fra point-of-delivery for DIFA.
+* Tjenesten vil ha 99,7% oppetid målt på månedsbasis med 30 minutter RPO. Opptid vil måles fra point-of-delivery for DIFA.
     * Nedetid på eHelse og andre nødvendige integrasjoner skal trekkes fra nedetidsberegningen
     * Dersom teknisk drift leveres av tredjepart skal nedetid på nettverk og servere trekkes fra nedetidsberegningen. Dersom leverandørens opsjon om drift innløses inngår nedetid på nettverk og servere som leverandøren er ansvarlig for i nedetidsberegningen
     * Leverandøren anbefaler å utløse driftsopsjonen for å sikre en fullstendig tjenesteleveranse
-* Enkeltnoder i applikasjonen skal kunne fjernes og legges til uten å berøre brukerne. Applikasjonsservere må være uavhengig av sesjonstilstand.
+* Enkeltnoder i applikasjonen vil kunne fjernes og legges til uten å berøre brukerne. Applikasjonsservere må være uavhengig av sesjonstilstand.
 * Nye versjoner av systemet vil kunne produksjonsettes uten å berøre brukere
-    * Fatale feil ved nye versjoner skal kunne oppdages raskt og rulles tilbake med påvirkning på et minimum antall apotek
-* Feilhåndtering: Systemadministrator skal varsles dersom en kritisk hendelse inntreffer i logger
-    * Systemadministrator skal kunne se årsaken til vanlige problemer et sentral loggverktøy (Splunk)
+    * Fatale feil ved nye versjoner vil kunne oppdages raskt og rulles tilbake med påvirkning på et minimum antall apotek
+* Feilhåndtering: Systemadministrator vil varsles dersom en kritisk hendelse inntreffer i logger
+    * Systemadministrator vil kunne se årsaken til vanlige problemer et sentral loggverktøy (Splunk)
 * Ved nye leveranser vil det dokumenteres hvordan bakoverkompabilitet og fremoverkompabilitet er støttet. Viktige vurderinger i den forbindelse:
     * Klienten angir API versjon som en del av URL. DIFA vil støtte eldre versjoner så langt kjedene er avhengig av dem og de lar seg støtte gitt forholdene til reseptformidleren.
-    * Nye leveranser kan legge til output-felter og ikke-påkrevde input-felter på et eksisterende API. Teknisk sagt skal nye leveranser av eksisterende API støtte Liskovs Subtitution Principle (LSP)
-    * Endringer i API som endrer navn på felter, fjerner felter eller legger til nye påkrevde input-felter skal leveres i form av en ny API versjon.
+    * Nye leveranser kan legge til output-felter og ikke-påkrevde input-felter på et eksisterende API. Teknisk sagt vil nye leveranser av eksisterende API støtte Liskovs Subtitution Principle (LSP)
+    * Endringer i API som endrer navn på felter, fjerner felter eller legger til nye påkrevde input-felter vil leveres i form av en ny API versjon.
     * Dersom kommende endringer i Reseptformidleren krever ikke-bakoverkompatible endringer i DIFA vil DIFA gjøre det mulig å utføre endringer i kjedesystemene _før_ endringene trer i kraft i Reseptformidlere for å gi kjedene fleksibilitet
 
 
@@ -375,347 +395,16 @@ Dersom Reseptformidleren endres til å la ReseptInfo i reseptliste inkludere For
 Alternativt må DIFA laste ned reseptene (M9.3, M9.4) eller bruke resepthistorikk for å gjøre denne beregningen.
 
 
-
 ## Vedlegg: Utkast til product backlog
 
-
-
-# Prosjektgjennomføring
-
-Kjernen av prosjektgjennomføringen er en kontinuerlig, løpende prosess som omsetter behovene som er formulert i product backlog til kjørende programkode i en fungerende løsning som er tilgjengelig for apotekkjedene. Prosessen skiller ikke mellom nyutvikling eller feilretting og videreutvikling.
-
-Et av hovedelementene i prosessen er å produksjonssette hyppig og jevnlig. Dette sikrer tidlig verdiskapning, reduserer risiko og gir mulighet for læring og tilpasning underveis. I normalrytmen vil produksjonssetting gjøres hver uke. Produksjonssetting vil også gjøres uten opplevd nedetid på løsningen ved hjelp av en såkalt rolling wave-strategi der én og én server prosess tas ned, oppgraderes og restartes.
-
-Dette er derimot ikke det samme som at løsningen må gjøres tilgjengelig for alle brukere fra første produksjonssetting. Dette er et valg som gjøres ut fra forretningsmessige hensyn. Tilgang til de ulike delene av løsningen kan styres uavhengig av når de blir produksjonssatt gjennom konfigurasjonsflagg og tilgangsstyring på bruker og kjedenivå.
-
-
-## Organisering og tidsplan (ref bilag 4)
-
-### Resultatmål: Konvertering fra FarmaPro til DIFA
-
-I konkurransegrunnlaget har kunden beskrevet en milepælsplan som starter med dagens reseptur-funksjonalitet som versjon 1.0 og inkluderer ytterligere tjenester i versjon 2.0. Leverandøren frykter at denne planen vil eksponere prosjektet for stor risiko ved første viktige produksjonssetting. Derfor foreslår leverandøren i stedet at prosjektet går opp leveranseapparatet med en versjon som har lavere forretningsmessig risiko. Leverandøren foreslår i stedet å legge inn medisinstart, legemiddelassistert rehabilitering og inhalasjonsveiledning som en prøveversjon som beviser levedyktigheten til prosjektmetoden og plattformen. Med denne planen vil leveransene med stor teknisk kompleksitet ha lav forretningsmessig konsekvens og retrettmuligheter, mens første produksjonsetting med høy forretningsmessige vil ha få nye tekniske problemstillinger.
-
-En total prosjektplan kan være som på følgende figur. Numre angir cirka uketall. Aktivitetene markert med lysegrønt inngår ikke i omfanget i SSA-T men er foreslått levert som en del av SSA-V i form av prosjektavrop for videreutvikling. Det er allikevel inkludert for å gi et bedre totalbilde.   
-
-![Leveranseoversikt](images/gantt-transisjonsplan.png)
-
-Hvert versjon inkluderer spesifikasjon, utvikling og testaktiviteter knyttet til versjonen. Prosjektet vil foreta en teknisk produksjonsetting med cirka ukentlig frekvens, men funksjonalitet vil godkjennes når et funksjonelt område er komplett.
-
-DIFA versjon 1.0 vil leveres gjennom SSA-T som et utviklingsløp og en endelig akseptansetest og godkjenning. Ut over dette vil prosjektet leveres gjennom en smidig utviklingsmetodikk med funksjonelle akseptansetester underveis. Disse skal ikke anses for å være delleveranser under SSA-T. Leverandøren vil i sin testplan sette krav til Kundens medvirkning underveis i prosjektet.     
-
-
-#### Steg 1: Testbart API
-
-Det testbare API'et vil la apotekene teste sine POS systemer mot et API i et simulert, ikke-personsensitivt miljø der Reseptformidleren og HELFO er erstattet med simulatorer. API'et vil også leveres med et enkelt GUI som vil inkludere integrasjon med kjedenes Identify Provider (for eksempel Active Directory).
-
-Ved å levere et versjon som ikke behandler personsensitiv informasjon i produksjonsmiljøet først vil prosjektet sette opp et produksjonsklart miljø uten risiko på brudd på regelverk.
-
-Omfang av versjonen:
-
-| Oppgave                                                                       |
-|-------------------------------------------------------------------------------|
-| Brukergrensesnitt for å legge opp en testresept og gjennomføre ekspedering    |
-| Innlastning av grunnregistre (helsepersonell og legemidler)                   |
-| Kommunikasjon med DIFA API                                                    |
-| Utrulling av server                                                           |
-| Autentisering av DIFA GUI                                                     |
-| Nedlastning av resept (korrekt RF simulator)                                  |
-| Signering av meldinger mot RF                                                 |
-| Papirresept                                                                   |
-| Beregning av enkle refusjonskrav                                              |
-| Farmasøytiske varsler                                                         |
-| Egenandelsgrenser, trinnpris, makspris                                        |
-
-
-#### Steg 2: Farmasøytiske tjenester
-
-Med farmasøytiske tjenester kan apotekene registrere medisinstart, LAR og inhalasjonsveiledning, kreve refusjon fra HELFO, følge opp refusjonskrav og oppfylle minimumskrav i pasientjournalloven og personvernforordningen. Løsningen vil inkludere et brukergrensesnitt for å registrere farmasøytiske tjenester som autentiseres med kjedes brukersystemer.
-
-Versjonen vil inkludere viktige sikkerhetsmekanismer som vil understøtte resepturflyten: Sertifikathåndtering i kommunikasjonen mot HELFO (M18) og nødvendige sikkerhetsmekanismer for å understøtte dette (HSM).
-
-Denne versjonen er ment til å tas i bruk av apotekene. Dette er en versjon med lav risiko: Dersom noe ikke skal være av tilstrekkelig kvalitet kan apotekene benytte eksisterende prosedyrer for å registrere og kreve refusjon for relevante farmasøytiske tjenester. Det vil antageligvis være hensiktsmessig å ta i bruk kun én farmasøytisk tjeneste den første måneden etter versjon og gradvis rulle inn andre tjenester.
-
-I denne versjonen vil løsningen måtte godkjennes av Direktoratet for e-Helse. Kunden er ansvarlig for å etablere korrekt dialog med direktoratet, mens leverandøren er ansvarlig for den operative oppfølgingen av akseptansetesten.
-
-
-#### Steg 3: Resepthistorikk
-
-Versjonen vil inkludere å sette opp datamigrering fra FarmaPro til sentralt resepthistorikk, inkludert et GUI for å gjøre oppslag i resepthistorikk. Versjonen vil inkludere en minimumsløsning av funksjonalitet for å oppfylle pasientjournalloven, spesielt tilgangslogging og pasientinnsyn. I denne versjonen vil spesielt pasientinnsyn være støtte med det minimum som loven krever.
-
-Datamigrering vil implementeres ved at FarmaPro versjon 5.20 nattlig laster opp en kryptert eksport av registre. DIFA importerer differansen ved å sammenligne eksporten fra hvert apotek med informasjonen DIFA allerede har fra apoteket. DIFA vil lese inn eksportfilene umiddelbart og slette disse etter fullført innlesning.
-
-Versjonen vil også inkludere de mest kritiske rapporteringsfunksjonene, spesielt bransjestatistikken.
-
-
-#### Steg 4: Reseptur API
-
-Denne versjonen vil utvide API'et for reseptur med integrasjon mot HELFO og Reseptformidleren og inkludere et enkelt GUI for demo, test og akseptanse av løsningen.
-
-I denne versjonen vil løsningen måtte godkjennes av Direktoratet for e-Helse. Kunden er ansvarlig for å etablere korrekt dialog med direktoratet, mens leverandøren er ansvarlig for den operative oppfølgingen av akseptansetesten.
-
-Denne versjonen fullfører versjon 1.0 av omfanget i løsningsbeskrivelsen, samt farmasøytiske tjenester.
-
-
-#### Steg 5: Reseptur fullstendig (avtalefestet i SSA-V-avtalen)
-
-Denne versjonen vil inkludere rapporter som ikke allerede er levert, samt forbedringer for å etterleve pasientjournalloven. Spesielt foreslår leverandøren at pasientinnsyn ivaretas gjennom et samarbeid med helsenorge.no.
-
-#### Steg 6: Nettapotek (avtalefestet i SSA-V-avtalen)
-
-#### Steg 7: Multidoseapotek (avtalefestet i SSA-V-avtalen)
-
-
-### Kundens ansvar og medvirkning (jf avtalens punkt 6.1)
-
-Kunden skal godkjenne alle akseptansekriterier og ferdigstilte oppgaver innen rimelig tid. Leverandøren vil utarbeide et grunnlag som kunden kan forholde seg til. Kunden skal delta på ukentlige avsjekkingsmøter samt på månedlige koordineringsmøter med apotekkjedene. Kunden må opprettholde dialog med apotekkjedene og myndigheter for å sikre nødvendige avklaringer og beslutninger som berører bransjen eller myndigheter.
-
-Kunden er ansvarlig for å godkjenne spesifikasjoner levert av leverandøren og for å godkjenne produksjonsettinger.
-
-| Rolle                  | Person (eks)       | Stikkord    |
-|------------------------|--------------------|-------------|
-| Leveranseansvarlig     | NN (NAF)           | Vet hva som skjer, hvem som må involveres mer og følger opp alle |
-| Produkteier (e-Helse)  | Ole A. M. (Difa as)| Holder dialog med myndigheter om krav, endringer og behov i e-Helse |
-| Produkteier (apotek)   | Madjid S (Difa as) | Holder dialog med apotekene om behov og leveranser |
-
-### Teamsammensetning - leverandør
-
-![Organisasjonskart](organisasjonskart.png)
-
-Leverandørens team vil bestå av:
-
-* Funksjonelle ressurser, herunder funksjonelt ansvarlig. Funksjonelt ansvarlig vil være ansvarlig for omfang og funksjonelle vurderinger.
-* Utviklingsressurser, herunder løsningsarkitekt. Utviklerne vil beskrive og implementere oppgaver med hjelp fra funksjonelle og testressurser. Teamet vil inneholde både utviklere med lang erfaring og yngre fagpersoner som løser oppgaver med naiv entusiasme.
-* Testressurser, herunder testleder. Vil være ansvarlig for å kvalitetsikre testbeskrivelser, avklare eHelsefaglige finurligheter og verifisere at funksjonalitet oppfyller behovene. Vil også koordinere med testaktiviteter hos direktoratet for e-Helse og hos kjedene.
-* Prosjektleder som vil understøtte resten av teamet og sørge for at avklaringer og beslutninger blir utført uten forsinkelser
-
-Leverandøren har vurdert et samlokalisert team i Oslo og å benytte utenlandske ressurser. For å unngå å utsette kunden for risiko har leverandøren vurdert en sekundærlokasjon innen EU på leverandørens delivery center i Spania.
-
-Leverandørens vurdering er at både testerne og de funksjonelle ekspertene vil være avhengig av kunnskap om norsk lovverk og helsestandarder og således ikke kan forventes å levere godt fra utlandet. Utviklingsteamet kan vært delvis plassert i Spania, men dette vil kreve mye arbeidskrevende oversettelse og reformulering av norske lovverk og standarder og ville dermed kreve mer bemanning både i Norge og Spania for å levere samme omfang. Ettersom utviklingsteamet utgjør under halve bemanningen er besparelsene ikke betydelige. Behovet for oversettelse vil også øke risikoen for feil. Leverandøren anser det derfor som minst risikabelt og billigst å levere prosjektet med kun ressurser i Oslo.
-
-Teamet vil inkludere noen deltidsroller ("hatter") som enkeltpersoner vil utføre i tillegg til sine primære roller:
-
-* Security Champion: Engasjert i personvern- og sikkerhetsmessige problemstillinger og inspirere teamet rundt OWASP, statisk kodeanalyse, dynamisk kodeanalyse osv.
-* Byggmester: Engasjert i å gjøre bygg, utrulling og overvåking smidigere og tryggere
-
-
-## Gjennomføringsmetode
-
-Modellert på leverandørens erfaring fra Helsedirektoratets Fastlegeprosjekt vil leverandøren innføre sterke prosjektmessige føringer for hyppige produksjonssettinger, høy kvalitet og enkle løsninger.
-
-Prosjektets målsetning er *ukentlige produksjonsetting*. Det er da snakk om tekniske produksjonssettinger. Funksjonelle leveranser vil gjerne foregå med en lavere frekvens.
-
-For å oppnå ukentlige produksjonssettinger, foreslår leverandøren følgende prinsipper:
-
-* Produksjonsett raskest mulig
-* Velg de enkle løsningene; utsett unødvendige avgjørelser
-* Endring er helt naturlig
-* Automatiser det som kan automatiseres
-* Fokuser på kvalitet
-
-Disse prinsippene vil være nyttige for å prioritere hensyn rundt planlegging, krav, arkitektur, utvikling, testing og leveranser underveis i prosjektet.
-
-
-### Prosjektets eksterne takt
-
-Leverandøren forventer at det funksjonelle omfanget til prosjektet kommer til å være omforent ved prosjektets start. De mest sentrale oppgavene kommer også til å være de facto detaljspesifisert gjennom grensesnittbeskrivelser fra eHelse og lovmessige bestemmelser. Prosjektet vil derfor starte å ferdigstille funksjonalitet i et miljø som gradvis vil bli mer produksjonsklart med ukentlig frekvens.
-
-Hver uke vil prosjektet avholde en kort minidemo der kunden og alle prosjektmedlemmer forventes å være til stede. Hver måned, med start etter én måned, vil det tilsvarende avholdes en mer formell demo der apotekkjedene også er invitert til å stille. Etter demonstrasjonen vil kunde og teamet avholde en retrospektiv der man ser på hvordan prosessen kan forbedres.
-
-I etterkant av ekstern demo vil prosjektet også vurdere behovet for endringer i product backlog. Både Kunde og Leverandør kan gi innspill til endringer i product backlog. Bytte av oppgaver «like for like», det vil si en oppgave inn og en annen ut, kan gjøres så lenge oppgavene er cirka like store, at det ikke i vesentlig grad påvirker avhengigheter mellom oppgaver og ellers ikke påfører Leverandøren ekstraarbeid. Endringer som påvirker omfang må endringshåndteres i henhold til kontraktens retningslinjer for dette. Uansett grunn til endringer i product backlog må dette avtales og være en enighet om mellom Leverandør og Kunde, og dette må dokumenteres, sammen med de eventuelle konsekvenser endringen medfører.
-
-Første akseptansetest av versjon 0.1 vil forventes klar etter 3 måneder. Denne løsningen vil ikke inneholde reelle data, men vil kunne benyttes av apotekene til å teste sin integrasjon. Versjon 0.2, 0.3 og 1.0 vil forventes med litt høyere frekvens enn kvartalsvis. Funksjonalitet som inngår i versjonene vil produksjonsettes fortløpende med cirka ukentlig frekvens. Uferdig funksjonalitet vil være skrudd av i disse produksjonssettingene.
-
-Akseptansetest vil foregå med representanter for kjedene (?) og direktoratet for e-Helse.
-
-Oppsummert:
-
-* Ukentlige interne demoer
-* Ukentlige produksjonssettinger
-* Månedlige demoer med kjedene med påfølgende retrospektiv
-* Endringer av product backlog i etterkant av ekstern demo ved behov
-* Leveranser med akseptansetesting kvartalsvis eller hyppigere
-
-Retrospektiver har fokus på forbedringer og har som formål å avdekke forbedringstiltak. Leverandøren tar utgangspunkt i Lean og fokus på å fjerne "sløsing", dvs aktiviteter, oppgaver og funksjonalitet som ikke gir verdi for produktet og kunden.
-
-1. Bygg inn kvalitet: gjennom solid utviklingspraksis, eksempelvis: refactoring, parprogrammering, TDD (Test Driven Development), automatisering og oppfølging av test. 
-2. Skap kunnskap: kunnskapsdeling gjennom eksempelvis: kodeevalueringer, dokumentasjon, kunnskapsdelingssesjoner og faglunsjer.
-3. Utsett forpliktelse: Ta beslutninger så sent som mulig, sikre arkitektur som støtter endringer, unngå at oppgaver utredes og blir liggende, utfør besluttede tiltak så raskt som praktisk mulig.
-4. Hyppig produksjonssetting: oppnås gjennom sikring av den rette bemanningen til riktig tid, teknisk praksis, fjerning av sløsing, god kunnskapsdeling og automatisering.
-5. Respekter mennesker: I dette prosjektet handler det om samarbeidskultur på alle nivåer, selvorganisering, bruk av riktig kompetanse på rett sted, variasjon i roller og oppgaver, engasjer utviklere i løsningsutforming, mv. Retrospektivene vil være viktige fora for å fange opp utfordringer rundt dette.
-6. Optimaliser helheten: teamorganisering som er komplett, multi-disiplinert og samlokalisert. Tett samarbeid mellom Kunde og Leverandør for å sikre at de overordnede forretningsbehovene er forstått.
-
-
-#### Oppgavefremdrift
-
-Oppgavene i prosjektet vil styres i TFS. Hver uke i prosjektet vil representeres med en Iteration Path i TFS. Hver release vil representeres som en Area Path. Prosjekt vil rapporter faktisk fremdrift til produksjonsetting hver uke opp mot timeantall. En rapport kan se ut som følger:
-
-
-| Uke              | Ukeslutt       | Avsluttet        | Timer     | Oppgaver      | Feilrettinger |
-|------------------|----------------|-----------------|-----------|---------------|---------------|
-| DIFA\\2017Q3\\w36  | 8/9            | Ja              | 434       | 2             |               |
-| DIFA\\2017Q3\\w37  | 15/9           | Ja              | 454       | 3             | 8             |
-| DIFA\\2017Q3\\w38  | 22/9           | Ja              | 452       | 3             | 10            |
-| DIFA\\2017Q3\\w39  | 29/9           | Ja              | 420       | 2             | 6             |
-| DIFA\\2017Q4\\w40  | 6/10           | Ja              | 454       | 4             | 5             |
-| DIFA\\2017Q4\\w41  | 13/10          | Ja              | 454       | 3             | 5             |
-| DIFA\\2017Q4\\w42  | 20/10          |                 | 450       | 3             |               |
-| DIFA\\2017Q4\\w43  | 27/10          |                 | 450       | 3             |               |
-| DIFA\\2017Q4\\w44  | 3/11           |                 | 450       | 3             |               |
-
-Tabellen viser hvordan det kan se ut midt i uke 42, når uke 36-41 er fullført - her er tallene faktiske og uke 42-44 ligger i fremtiden - her er tallene plan.
-
-
-
-### Prosjektets interne takt
-
-Prosjektets aktiviteter vil være strukturert etter en sortert product backlog. Backloggen vil foreligge i en stabil versjon ved avtaleinngåelse. Leverandørens funksjonell ansvarlig, leverandørens arkitekt og kundens produkteiere vil prioritere og endringshåndtere backloggen. Det forventes kun uvesentlige endringer i det kostnadsmessige omfanget av SSA-T avtalen.
-
-Oppgavene på backlog skal være fortrinnsvis være på cirka 1-2 utvikleruker i omfang. I tillegg vil det være en backlog over feil som har blitt oppdaget ved tidligere levert funksjonalitet.
-
-Utviklingen av oppgavene er ikke synkronisert i sprinter, men skjer fortløpende. Utviklingsteamet vil plukke oppgaver fra backlog når det er ledig utviklingskapasitet. Utviklerne på teamet vil jobbe parvis og vil under stand-up møtet om morgenen eventuelt plukke en ny oppgave blant de høyest sorterte oppgavene på backlog. Utviklerparet vil sette av tid med funksjonell ekspert og tester på teamet for å utforme en testbeskrivelse for oppgaven. Testbeskrivelsen skal godkjennes av kunden ihht til bestemmelsene i Bilag 5.
-
-Utviklerne vil fortløpende utvikle på oppgaven. Hver endring vil automatisk testes i et verktøy for kontinuerlig bygg hver endring vil settes i automatisk drift på et testmiljø som etableres i løpet av første måned. I løpet av første versjon vil leverandøren etablere automatiske statiske kontroller av koden.
-
-Når utviklerne har fullført oppgaven vil de kontrollere den mot testbeskrivelsen i samarbeid med en tester. Funksjonaliteten vil overleveres på neste ukentlige demomøte med kunden. Kunden skal vurdere korrekthet ihht til bestemmelsene i Bilag 6.
-
-Oppsummert:
-
-* Prosjektets omfang er definert i form av en product backlog
-* Kundens produkteiere, leverandørens funksjonelt ansvarlige og leverandørens arkitekt forvalter product backlog
-* Utviklere jobber i par
-* Utviklingsteamet har et kort møte hver morgen
-* Utviklere velger oppgaver fra øverste del av product backlog i TFS
-* Utviklere, tester og funksjonell ekspert utarbeider testbeskrivelse når en oppgave påbegynnes. Testbeskrivelsene vedlikeholdes som TFS Test Plans.
-* Alle endringer testes og driftsettes automatisk
-* 2-4 ferdige oppgaver overleveres til kunden ukentlig
-
-
-### Product backlog elementer
-
-Product backlog vil forvaltes i TFS.
-
-Oppgavene på product backlog skal dekke alle *aktiviteter* som skal til for at oppgaven skal kunne medføre at funksjonalitet kan benyttes av kjedesystem eller apotekbruker i neste produksjonsetting. Avhengig av oppgaven kan det innebære:
-
-* Utarbeide eller oppdatere testbeskrivelser som kan benyttes av kjedene eller direktoratet for eHelse
-* Oppdater testbrukergrensesnitt til å kunne teste funksjonaliteten
-* Oppdater testsimulator for å kunne teste funksjonaliteten
-* Oppdatere API dokumentasjon i Swagger
-* Oppdatere lasttester i JMeter
-* Utvikle automatiske tester for funksjonaliteten med minst 80% testdekning
-* Utvikle selve funksjonaliteten
-* Utvikle relevant unntakshåndtering for funksjonaliteten
-* Utvikle databasescript for å understøtte eventuell nye lagringsbehov
-* Utvikle integrasjon med eksterne parter for å understøtte funksjonaliteten
-
-### Kanban
-
-Oppgavene vil flyte gjennom en kjede med arbeidsprosesser etter et Kanban prinsipp. Illustrasjonen under er lånt av Henrik Kniberg, og viser hvordan en Kanban-tavle kan se ut. I illustrasjonen under er oppgavene lapper på en tavle. Oppgavene flyttes fra venstre mot høyre. Hver kolonne (Next, Analysis, etc) representerer et steg i prosessen (stasjon på samlebåndet). Hvert steg innebærer en foredling av oppgaven, som tar den nærmere produksjon.
-
-Kanbans hovedmekanisme for å sikre en god flyt er å begrense antallet oppgaver som til enhver tid kan befinne seg samtidig på en stasjon. I Kanban-litteraturen kalles dette ofte for «Work In Progress Limit». Begrensningen per stasjon er angitt som røde tall på illustrasjonen under. Denne mekanismen tvinger frem at hindringer blir synlig og skaper samarbeid i teamet. For at dette skal fungere er det avgjørende at teamet respekterer og overholder denne begrensningen.
-
-![Kanban tavle med 5 steg](kanban.jpg)
-
-I DIFA vil leverandøren starte med følgende steg for oppgaver og feilretting:
-
-* Prioritert: Oppgavene på toppen av backlog er kandidater for å bli påbegynt
-* Testbeskrivelse: Når utviklere har kapasitet til å starte på en ny oppgave involverer de funksjonell ekspert og tester for å få beskrevet hvordan oppgaven skal verifiseres. Kunden skal godkjenne testbeskrivelsen ihht tidsrammene beskrevet i bilag 5
-* Utvikling: Når oppgaven er beskrevet utvikles den til testbeskrivelsen passere, testbrukergrensesnittet og simulator er oppdatert til å kunne demonstrere oppgaven, API og systemdokumentasjon er på plass og alle aspekter av oppgaven er utført
-* Systemtest: Når oppgaven er ferdig verifiseres den i systemtestmiljøet av tester
-* Produksjonsatt: Når et sett med oppgaver er verifisert blir en ny versjon rullet ut på produksjonsmiljøet. Ufullstendig funksjonalitet blir skrudd av.
-* Verifisert: Apotekforeningens representant har undersøkt oppgaven for feil i produksjonsmiljøet og rapportert eventuelle problemer i TFS. 1 uke etter produksjonssetting vil oppgaver uten avdekkede feil automatisk regnes som godkjent.
-
-
-### Testbarhet bygget inn
-
-* Teststillas tillater både enkle og vanskelige testscenarioer og kan brukes av kjeder for å teste sine nye systemer
-* Test GUI tillater utforskende testing og kan brukes av e-Helse for å sertifisere løsningen
-* Alle oppgaver leveres med testbeskrivelse i Test Manager. De fleste av disse testbeskrivelsene kan benyttes av e-Helse og apotek for å verifisere
-
-### Parprogrammering
-
-Når man utvikler systemer som er underlagt omfattende regler og med høye kvalitetskrav har leverandøren erfaring med at parprogrammering [https://en.wikipedia.org/wiki/Pair_programming] er en effektiv måte å heve kvalitet og spre kunnskap i team.
-
-Sett med "lean" perspektiv, motvirker parprogrammering klassiske "wastes" i prosjekter:
-
-* Fordi grensegang mellom utvikleres ansvarsområdet blir bedre kjent alle, vil *redundant funksjonalitet* reduseres
-* Fordi flere personer mestrer alle deler av systemet unngår man å *vente* på spesialistkompetanse
-* Fordi effektive arbeidsmetoder spres i teamet unngår man *ineffektivt arbeid*
-* Fordi all kode blir sett av to sett med øyne reduseres *antall feil*
-* Fordi teammedlemmene jobber tetter blir det mindre behov for *avklaring* i overleveringer
-* Fordi teamet konsentrerer seg om et mindre antall oppgaver reduserer man *samtidig pågående oppgaver*
-* Fordi et par besitter mer kompetanse enn et individ er det mindre behov for *overleveringer* under utviklingen av en oppgave
-* Fordi alle får sjansen til å påvirke hverandre unngår vi å *forkaste kunnskap i teamet*
-
-
-### Testing
-
-Testing vil gjøres med utgangspunkt i Leverandørens Metodeverk, Navigator RightTesting™ (vedlagt). Dette er et helhetlig metodeverk for test som bygger på ulike standarder innen test, som ISTQB, IEEE, Cobit og CMMi. Det inkluderer beskrivelse av testnivåer og test-typer, teknikker og verktøy. Metodikken beskriver også gjennomføringsmodell for testaktiviteter samt testorganisasjon og rapportering. Et viktig prinsipp i RightTesting™ er at kostnaden ved feil i programvare øker dess senere de blir korrigert. Derfor gjennomfører leverandøren testing med mål om å avdekke og rette feil så tidlig som mulig i utviklingsprosessen, og aller helst under arbeidet med spesifikasjon/kravutforming.
-
-I motsetning til utviklingsmetodikker som benytter faser eller sprinter, vil testing i Leverandørens foreslåtte metodikk gjøres som en integrert del av den kontinuerlig løpende prosessen. Det vil ikke samles opp oppgaver i sprinter eller faser, som så skal testes samlet. Testing av en oppgave vil gjøres fortløpende etter hvert som den flyttes gjennom de ulike stasjonene og miljøene. 
-
-#### Testfokus under spesifikasjon og utvikling
-
-Når utføringen av en oppgave påbegynnes vil den detaljbeskrives med funksjonelle akseptansekriterier som gir grunnlag for testtilfeller. Testtilfellene vil være med på å *spesifisere* oppgaven som skal utføres. Utviklerne har ansvar for å bruke dette grunnlaget for å bygge testbarhet inn i løsningen ved å jobbe etter Test-Driven Development (TDD). Dette innebærer at all utviklingsaktivitet starter med å skrive automatiserte, kodenære tester. Testene vil til å begynne med kjøre rødt (feile). Deretter skriver utvikleren programkode som gjør at testene kjører grønt (riktig). Denne framgangsmåten sikrer god testdekning, holder fokus på kvalitet og bidrar til godt design av kode og løsning.
-
-Leverandøren vil gjennomføre en opplæringsworkshop i Test-Driven Development ved prosjektstart.
-
-En oppgave inneholder også aktiviteter for å oppdatere brukergrensesnitt og simulatorer for manuell testing, oppdatere Swagger dokumentasjon som gir mulighet for å teste API og oppdater JMeter for å gjennomføre lasttester.
-
-#### Testfokus systemtest
-
-Prosjektet vil sette opp et dedikert miljø for systemtest. Testere er ansvarlig for å teste både manuelt og å oppdatere automatiske testsuiter med relevante testtilfeller. Systemtest vil benytte følgende verktøy:
-
-* Swagger UI
-* Testbrukergrensesnitt utviklet av prosjektet
-* Postman API Tests. Postman importerer API definisjonene fra Swagger og testere legger på verifikasjonssteg
-* Cucumber
-
-#### Testfokus i integrasjonstest og ekstern akseptansetest
-
-DIFA skal integrere mot krevende systemer i eHelse og apotekkjedene. Testbrukergrensesnitt og testsimulator er kritiske komponenter for å understøtte integrasjonstest med disse. Systemdesignet beskriver testmiljøer som skal benyttes av eHelse og av apotekkjedene. Prosjektets testleder er ansvarlig for å koordinere testoppsett og gjennomføring med eksterne parter.
-
-#### Testfokus i produksjon
-
-I produksjon vil leverandøren benytte en såkalt "rolling wave deployment". Når en ny versjon produksjonsettes vil en node tas ned, oppgraderes og restartes. I løpet av prosjektet vil leverandøren etablere "canary deployment" der først en node oppgraderes før et kontrollert sett med enkeltapoteker dirigeres til denne noden. Når noden har besvart et tilstrekkelig antall API requester uten feil vil versjonen rulles ut på alle noder og til alle apotek.
-
-Normalt vil ingen av brukerne merke oppgraderingen. Dersom det er en feil i versjonen som produksjonsettes vil kun "kanariapotekene" oppleve denne feilen. Versjonen vil rulles tilbake og stabil produksjon vil reetableres for alle apotekene.
-
-RedHat OpenShift brukes til å understøtte denne strategien.
-
-#### Brukertest
-
-Brukertest inngår i Sopra Sterias RightTest metodikk. Ettersom DIFA leveres uten betydelig brukergrensesnitt vil det ikke være en del av prosjektet. Dersom enkelte kjeder innløser brukergrensesnitt-opsjonen vil brukertest kunne bestilles som en opsjon.
-
-#### Ytelsestest
-
-Ytelsestest bidrar til å sikre at nødvendige funksjoner i systemet fungerer etter forventet ytelsesnivå. I henhold til Navigator skal det gjennomføres tester for forskjellige ytelsesparametere etter avtale og behov, og der for eksempel responstid, lastfordeling, ressursforbruk (minne, CPU, disk), meldinger/requests behandlet, etc. måles. JMeter eller tilsvarende open source verktøy vil benyttes til lasttesting.
-
-Gjennomgripende ikke-funksjonell testing som ytelsestesting, lasttesting og stresstest vil gjøres på avtalte tidspunkter. Dette kan legges inn som spesialoppgaver i product backlog, for eksempel tett opptil en kritisk oppgave, eller i forkant av en lansering som vil øke antall brukere, etc. Fleksibiliteten i metodikken gjør det mulig å planlegge denne typer testing på en svært effektiv måte.
-
-For å verifisere at miljøet er satt opp korrekt vil det også gjennomføres avbrudstest som en del av driftsavtalen. Denne vil benytte de samme verktøyene som til ytelsestest i utviklingsprosjektet.
-
-
-#### Testdata
-
-For å understøtte personvernhensyn vil systemet kun testes med syntetiske data. Som en del av utviklingsaktivitetene vil det utvikles en testsimulator som kan sette opp systemet med syntetiske data for testing.
-
-
-### Inspeksjon
-
-I forbindelse med hver versjon vil det gjennomføres en kvalitetsgjennomgang av systemet med fokus på:
-
-* API dokumentasjon
-* Testbeskrivelser
-* Installasjonsrutiner og dokumentasjon
-* Drift- og overvåkingsrutiner
-
-Se også kapittel om sikkerhetsgjennomganger.
+Se eget regneark for utkast til produkt backlog for versjon 0.1, 0.2, 0.3 og 1.0.
 
 
 # Systemdesign
 
 Strukturen i systemdesignet er lagt opp etter 4C prinsippet fra Simon Browns bok "Software Architecture for Developer". Innfallsvinkelen beskriver systemet først fra en overordnet kontekst (første C - Context), til elementene som skal kjøre på en driftsplattform (andre C - container), til komponentene og tjenestene som realiserer funksjonaliteten (tredje C - components) til informasjonsmodellen som beskriver forretningskonseptene (siste C - classes). I vår bruk kan Context og Containers sees som uttømmende, mens Components viser prinsippene rundt referansearkitekturen med spesiell fokus på viktige aspekter rundt sikkerhet og kommunikasjon.
 
+![C4-modellen for systemdesign](c4-model.png)
 
 
 ## Overordnede arkitekturprinsipper
@@ -735,51 +424,88 @@ Strukturen i systemdesignet er lagt opp etter 4C prinsippet fra Simon Browns bok
 * Tjenesteorientering: DIFA vil definere et grensesnitt dokumentert med Swagger UI. Alle tjenester vil være underlagt målinger av kallfrekvens og responstid.
 * Samhandling. DIFA vil legge til grunn internasjonale standarder for navngiving og struktur i API, spesielt HL7 standarder. DIFA vil ta førerrollen med å definere stabile meldingsformater som bransjen kan forholde seg til og som understøtter myndighetskrav
 * Kvalitet. DIFA vil validere refusjoner og aksjoner på farmasøytiske varsler og hindre utleveringer der refusjon ikke vil bli godkjent av HELFO. Avviste refusjonskrav vil registreres som B-feil i DIFA forvaltning.
-* Brukervennlighet og effektivitet. DIFA skal ikke investere i et avansert brukergrensesnitt. I stedet vil kravet om fleksibilitet understøtte kjedenes evne til å levere brukervennlige og effektive løsninger. (Dette kan endres dersom omfanget av brukergrensesnitt endres)
+* Brukervennlighet og effektivitet. DIFA vil ikke investere i et avansert brukergrensesnitt. I stedet vil kravet om fleksibilitet understøtte kjedenes evne til å levere brukervennlige og effektive løsninger. (Dette kan endres dersom omfanget av brukergrensesnitt endres)
 
 
 ## Systemlandskap og integrasjoner (4C - Context)
 
-Dette kapittelet gir oversikt over andre systemer og aktører som systemet skal samhandle med. Det er ment for å skape forståelse for hvilke prosesser systemet inngår i og understøtter.
+Dette kapitlet tar for seg arkitektur på abstraksjonsnivået context i C4-modellen, og gir en oversikt over andre systemer og aktører som DIFA skal samhandle med. Kapitlet skal gi en forståelse for hvilke prosesser DIFA inngår i og understøtter.
+
+Kapittelet søker å gi oversikt over systemlandskap og meldingsflyt mellom systemer og personer i de viktigste scenarioene for DIFA og danner grunnlaget for å få oversiktsbildet av DIFA.
+
+* Systemlandskap for DIFA under resepthåndtering
+* Et tilsvarende landskap under testing av DIFA i isolasjon
+* Meldingsflyt mellom personer og systemer når apotekansatt ekspederer en e-resept
+* Meldingsflyt mellom personer og systemer når apotekansatt ekspederer en papirresept
+* Meldingsflyt mellom systemer under refusjonsbehandling
+* Systemlandskap for DIFA ved levering av farmasøytiske tjenester
+* Meldingsflyt mellom personer og systemer når apotekansatt utfører farmasøytisk tjeneste
+
 
 ### Kontekst for reseptur og refusjon
 
+Systemskisse for reseptur inkludert refusjon viser hvordan aktørene i systemet samhandler med DIFA i sentrum.
+
 I målbildet av systemet formidler DIFA kommunikasjonen mellom kjedens systemer (POS, ERP, Nettapotek, Multidose) og systemene som inngår i det norske helsevesenet (Reseptformidlere, HELFO, NAV, HPR, Farmalogg).
 
-Figuren tar kun høyde for normalflyten for reseptur og for eksempel ekspederingsanmodning er utelatt.
+Figuren tar kun høyde for normalflyten for reseptur og for eksempel ekspederingsanmodning er utelatt. I figuren har vi brukt lysegrønne bokser for kjedesystemer, mørkegrønn boks for DIFA, røde bokser for kritiske integrasjonspunkter og gule bokser for andre systemintegrasjoner.
 
 ![Kontekst for reseptur og refusjon](images/context-reseptur.png)
 
 ![Kontekst under testing](images/context-test.png)
 
+### Systemlandskap ved bruk av DIFA GUI opsjon
+
 ![Kontekst ved bruk av GUI (opsjon)](images/context-gui.png)
 
 Noen kjeder kan ønske å benytte brukergrensesnitt for reseptur levert som en del av DIFA. I dette tilfelle vil apotekansatt benytte dette systemet for å forberede resepten og POS for å motta betaling og signatur for resepten. POS vil varsle DIFA om at betalingen er komplett slik at DIFA kan formidle utleveringen til Reseptformidleren og sende Refusjonskrav til HELFO.
 
-### Dynamisk kontekst for reseptur
+Leverandøren forventer at kjeder som bruker DIFA GUI for resepthåndtering vil kunne unngå å måtte teste sine systemer med direktoratet for e-Helse.
+
+
+### Meldingsflyt under ekspedering av e-resept
 
 Når DIFA returnere resepter for ekspedering samles all informasjonen som kjeden trenger for å føre dialogen med apotekansatt i ett kall. Tilsvarende vil DIFA validere alle aspekter ved utleveringsmeldingen.
 
 ![Overordnet flyt for reseptur](images/context-dynamic-reseptur.png)
 
+### Meldingsflyt under ekspedering av papirresept
+
 ![Overordnet flyt for papirreseptur](images/context-papir-reseptur.png)
 
-### Dynamisk kontekst for refusjon
+### Meldingsflyt under refusjonsbehandling
 
 ![Overordnet flyt for refusjon](images/context-dynamic-refusjon.png)
 
-### Kontekst for farmasøytiske tjenester
+### Systemlandskap for farmasøytiske tjenester
 
-DIFA skal veilede, informere, registrere og håndtere refusjon for farmasøytiske tjenester levert i apotek. De mest aktuelle tjenestene er inhalasjonsveiledning og medisinstart, ettersom det er tjenester som allerede leveres i dag. Legemiddel-assistert rehabilitering (LAR) er også en aktuell tjeneste ettersom den har fått refusjonsordning.
+Systemskisse for farmasøytiske tjenester viser samhandling mellom pasient, farmasøyt og DIFA under gjennomføring av farmasøytiske tjenester.
+
+DIFA vil veilede, informere, registrere og håndtere refusjon for farmasøytiske tjenester levert i apotek. De mest aktuelle tjenestene er inhalasjonsveiledning og medisinstart, ettersom det er tjenester som allerede leveres i dag. Legemiddel-assistert rehabilitering (LAR) er også en aktuell tjeneste ettersom den har fått refusjonsordning.
 
 Kjeden kan velge om farmasøyt skal registrere tjenesten i et brukergrensesnitt i DIFA eller i kjedens eget system. Leverandøren anser at det er lite interaksjon med kjedens andre aktiviteter og at det derfor er mest aktuelt å benytte et brukergrensesnitt i DIFA.
 
 ![Kontekst for farmasøytiske tjenester](images/context-apotektjenester.png)
 
+### Meldingsflyt ved gjennomføring av farmasøytisk tjeneste (inhalasjonsveiledning)
+
 ![Overordnet flyt for farmasøytiske tjenester (brukergrensesnitt i DIFA)](images/context-dynamic-apotektjenester.png)
 
 
 ### Integrasjonsoversikt
+
+Leverandøren foreslår følgende kommunikasjonsmekanismer med DIFA:
+
+Kommunikasjonen mellom kjedesystem og DIFA foreslår leverandøren som JSON baserte REST API'er som autentiseres med OpenID connect/Oauth2.  Kommunikasjonen vil foregå over HTTPS forbindelse med 2-veis SSL sertifikater.
+
+Dette er moderne, enkle og utbredte standarder og det er sannsynlig at det vil være det enkleste for kjedene å håndtere. Det mest aktuelle alternativet vil være å eksponere ebXML/KITH standarden for e-Helse, men dette vil antageligvis være mer krevende for kjedene å forholde seg til og vil kreve at kjedene kun benytter norskspråkling teknisk kompetanse til å integrere med DIFA.
+
+I grensesnittene med Reseptformidleren og HELFO vil DIFA benytte standardene fra direktoratet for e-Helse. Leverandøren ser det ikke som aktuelt å utfordre disse standardene. Grensesnittene mot Reseptformidleren og HELFO er beskrevet på https://ehelse.no/e-resept-kjernejournal-og-helsenorgeno/e-resept, samt https://ehelse.no/ebxml-rammeverk-his-10372011
+
+Grensesnitt mot Helsepersonellregister er beskrevet på https://www.nhn.no/hjelp-og-brukerstotte/personregisteret/andreressurser/Introduksjon-til-integrasjon-med-registrene.pdf
+
+I grensesnittet mot FarmaLogg foreslår leverandøren å benytte filformatet som er enklest for FarmaLogg å produsere for å unngå å pålegge FarmaLogg unødig arbeid. Leverandøren foreslår at FarmaLogg utvikler et HTTPS grensesnitt der DIFA kan hente ned FarmaLoggs informasjon etter behov uten at FarmaLogg trenger å etablere jobber for å distribuere dette.
+
 
 | Hvem                 | Hva                  | Hvordan                                     |
 |----------------------|----------------------|---------------------------------------------|
@@ -792,25 +518,29 @@ Kjeden kan velge om farmasøyt skal registrere tjenesten i et brukergrensesnitt 
 | HELFO → DIFA         | Refusjonsstatus      | M22, M23 ebXML over SMTP                    |
 | eHelse               | Egenandelstatus      | DIFA henter status for egenandelfritak      |
 | FarmaLogg            | Legemidler           | DIFA henter. Løsningsforslag: HTTP GET XML  |
-| Helsedir             | Helsepersonell       | DIFA henter HPR personregister.hl7          |
+| Helsedir             | Helsepersonell       | DIFA henter HPR personregister              |
 | helsenorge.no (fremtidig) | Pasientjournal  | DIFA leverer journalopplyninger. (Langsiktig målbilde) |
 
-Grensesnittene mot Reseptformidleren og HELFO er beskrevet på https://ehelse.no/e-resept-kjernejournal-og-helsenorgeno/e-resept, samt https://ehelse.no/ebxml-rammeverk-his-10372011
 
-Grensesnitt mot Helsepersonellregister er beskrevet på https://www.nhn.no/hjelp-og-brukerstotte/personregisteret/andreressurser/Introduksjon-til-integrasjon-med-registrene.pdf
 
 
 ## Applikasjonsarkitektur
 
-Applikasjonsarkitekturen samsvarer med "Container" nivået i arkitekturmodellen. Her vises alle komponenter som skal settes i drift og tjenestene som kjører på disse komponentene. Applikasjonsarkitekturen har to innfallsvinkler: For det første illustrerer den de programvarekomponentene som må utvikles eller kjøpes inn. For det andre viser den hvilken interaksjon systemet vil ha med driftsplattformen og setter rammene som SSA-D.
+Applikasjonsarkitekturen samsvarer med "Container" nivået i arkitekturmodellen. Her vises alle komponenter som vil settes i drift og tjenestene som kjører på disse komponentene.
+
+Applikasjonsarkitekturen har to innfallsvinkler: For det første illustrerer den de programvarekomponentene som må utvikles eller anskaffes. For det andre viser den hvilken interaksjon systemet vil ha med driftsplattformen.
+
+Modulene i systemet vil gjenspeiler de funksjonelle hovedområdene: reseptur, farmasøytiske tjenester, pasientjournal, rapporter. I tillegg vil DIFA synkronisere informasjon fra Farmalogg, Helsepersonalregisteret, Helse enhetsregisteret, og et register til. Figuren viser også hvordan kommunikasjon foregår over Norsk helsenett.
+
+På figuren vises DIFA i grønt, eksisterende systemer som anses som stabile i blått og systemer som vil etableres eller endres i parallell med DIFA i gult.
 
 ![Kjøretidsenheter i systemet (produksjon)](images/container.png)
 
 ### Systemoversikt
 
-Denne tabellen viser en oversikt over de komponentene som har selvstendig liv i produksjonsmiljøet. Oversikten vil justeres og oppdateres under behov under utvikling av systemet.
+Systemoversikten viser omfanget av det som skal leveres og driftes som en del av DIFA. Tabellen under viser de komponentene som har selvstendig liv i produksjonsmiljøet. Oversikten vil justeres og oppdateres under behov under utvikling av systemet.
 
-Leverandøren har beskrevet systemet som en Java-plattform, men er fortsatt åpen for at den kan kjøre på .NET core i stedet for. Man vurderer også SQL Server i stedet for PostgreSQL.
+Leverandøren har beskrevet systemet som en Java-plattform. Man vurderer også SQL Server i stedet for PostgreSQL.
 
 | System               | Teknologi | Beskrivelse                                     |
 |----------------------|-----------|-------------------------------------------------|
@@ -830,52 +560,72 @@ Alle systemer som har et grensesnitt med eksterne systemer inkluderer funksjonal
 
 Miljøene i denne beskrivelsen utgjør Bilag 3 for SSA-D avtalen for DIFA. Ytterligere detaljer om driftsmiljøet kan finnes i Bilag 2 for SSA-D.
 
-### Produksjonsmiljø (Teknisk drift)
+### Maskinvare og nettverk som inngår i DIFA
+
+DIFA må fungere med høy ytelse og feiltoleranse. Figuren viser at DIFA kjører på flere fysiske lokasjoner med replikering. På hver lokasjon kjører flere kopier av programvaren for å håndtere last og oppnå feiltoleranse. 
 
 ![Produksjonsmiljø](images/system-prod.png)
 
-### Platform-as-a-Service (PaaS konsept)
+### Grensesnitt mellom programvare og driftsmiljø (PaaS-konsept)
 
-Difa vil leveres på OpenShift - en docker-basert cloud infrastruktur. OpenShift håndterer laget mellom virtuelle maskiner (VMWare) og Docker-containere. Utviklingsprosjektet vil levere docker images. Applikasjonsdrift (DevOps) vil være ansvarlig for å oppgradere og skalere docker-containere på hardware som er levert innen driftsavtalen. Ytterligere konsekvenser av driftsplattformen er beskrevet i SSA-D-avtalen.
+DIFA vil leveres på OpenShift - en docker-basert cloud infrastruktur med en Java-basert arkitektur. OpenShift håndterer laget mellom virtuelle maskiner (VMWare) og Docker-containere. Utviklingsprosjektet vil levere docker images. Applikasjonsdrift (DevOps) vil være ansvarlig for å oppgradere og skalere docker-containere på hardware som er levert innen driftsavtalen.
 
-Figuren viser systemet beskrevet på en Java-plattform, men det er fortsatt ikke besluttet om prosjektet skal benytte Java eller .NET core. Skissen vil se tilsvarende ut på .NET.
-
-![PaaS konsept (Java-variant)](images/container-reference-paas.png)
-
-![PaaS konsept (.NET-variant)](images/container-reference-paas-dotnet.png)
+![PaaS konsept](images/container-reference-paas.png)
 
 Teknologier:
 
 | Område                | Alternativer                  |
 |-----------------------|-------------------------------|
 | FrontEnd              | HTML, CSS, JavaScript         |
-| View-rammeverk        | Vue.js (React)                |
+| View-rammeverk        | Vue.js                        |
 | AJAX rammeverk        | SuperAgent                    |
 | View test-rammeverk   | Mocha                         |
 | Server API            | JSON over HTTPS POST          |
-| API rammeverk         | ASP.NET core eller Jetty      |
-| Autentisering         | ADAL eller ADAL4J             |
-| Serverside JSON       | NewtonSoft eller json-buddy   |
-| Loggerammeverk        | .NET built-in eller logback   |
-| Databaserammeverk     | Entity Framework, Dabber eller JDBC |
-| Database              | SQL Server eller PostgreSQL   |
+| API rammeverk         | Jetty                         |
+| Autentisering         | ADAL4J                        |
+| Serverside JSON       | json-buddy                    |
+| Loggerammeverk        | logback                       |
+| Databaserammeverk     | JDBC                          |
+| Database              | PostgreSQL                    |
 
 ### Testmiljøer
 
 For å understøtte de forskjellige testaktivitetene vil det være behov for et stort antall testmiljøer. De fleste av disse miljøene vil ha minimale ytelsesbehov og vil leve samme på samme VMWare-instans (unntatt stresstestmiljøet). Utviklingsprosjektet kan sette opp nye testmiljøer etter behov innenfor den infrastrukturen som er levert i forbindelse med prosjektet.
 
-Dersom drift skal leveres av tredjepart så vil driftsleverandør være ansvarlig for å levere testmiljøer i god tid før planlagte produksjonsettinger.
+I de følgende underkapitler beskrives:
+* Systemtestmiljø
+* Kjedenes integrasjonsmiljø
+* E-Helseintegrasjonstestmiljø
+* Stresstestmiljø
+
+#### Systemtestmiljø
+
+Figuren viser at testmiljøet leveres med teststillas som tar plassen til reseptformidleren og Helfo. Testmiljøet bruker en kopi av legemiddeldata fra Farmalogg, og HPR-register fra testversjonen av H-dir. Helseenhetsregister fra produksjon benyttes.
 
 ![System og utviklingstest](images/container-test.png)
 
+#### Kjedenes integrasjonstestmiljø
+
+Figuren viser et integrasjonstestmiljø levert til en kjede. DIFA vil inkludere drift av et slik miljø for hver apotekkjede og kan sette opp flere miljøer på forespørsel. Hvert miljø vil normalt være skalert for funksjonell testing og ikke for stresstesting.
+
+Miljøet leveres med simulatorer av RF og HELFO for å enkelt kunne sette opp scenarioer som kjedene ønsker å teste. Simulatorene kan styres via et web-grensesnitt og via et REST API.
+
+Databasene og simulatorene i miljøet kan resettes gjennom et web-grensesnittet slik at kjedene kan få et forutsigbart testmiljø når de har behov for det.
+
 ![Kjedes integrasjonstest](images/container-test-kjede.png)
+
+#### Akseptansetestmiljø for e-Helse
+
+For å understøtte Direktoratet for e-Helse sin akseptansetest vil leverandøren sette opp et miljø med et testbrukergrensesnitt. Miljøet vil være koblet mot e-Helse sitt testmiljø for RF.
+
+Leverandøren gjør imidlertid oppmerksom på at direktoratet for e-Helse antageligvis ønsker å teste alle endringer i kjedens brukergrensesnitt der dette berører resepthåndtering.
 
 ![e-Helse sertifisering](images/container-test-ehelse.png)
 
 ![Stress test](images/container-test-stress.png)
 
 
-## Component (Plattform & Teknologi)
+## Plattform & Teknologi
 
 Dette kapittelet viser hvordan systemet er sett for seg implementert. Kapittelet er delt i to deler: Først beskriver dokumentet den sentrale funksjonaliteten knyttet til reseptur. Så beskriver vi generelle gjennomgripende implementasjon av sikkerhet og tilgangskontroll.
 
@@ -887,11 +637,29 @@ Leverandøren foreslår at Farmasøyt benytter DIFA GUI til å foreta farmasøyt
 
 Dette kapittelet beskriver overordnet API struktur mellom kjedes systemer og DIFA. Som en del av versjon 0.1 vil leverandøren detaljspesifisere API og levere en fungerende testversjon som kjedene kan bruke i sin testing i god tid før DIFA 1.0 leveres.
 
+#### Apotekansatt ekspederer resept i kjedesystem med DIFA sitt API
+
+Følgende figur viser hvordan hele scenarioet for reseptekspedering fungerer. *Figuren går over to sider.* Apotekansatt ekspederer resepten gjennom følgende syv steg:
+
+1.  Apotekansatt søker opp pasienten i folkeregisteret
+2.  Apotekansatt henter liste over resepter klart til ekspedering
+3.  Apotekansatt starter ekspedering av et sett med resepter
+4.  Apotekansatt gjennomfører generisk bytte (velger legemiddel)
+5.  Apotekansatt oppdaterer reseptetikett og gjennomfører teknisk kontroll av pakning og etikett
+6.  Farmasøyt gjennomfører farmasøytkontroll og dokumenterer eventuelle aksjoner som ble tatt på grunnlag av varsler
+7.  Apotekansatt tar imot betaling og signatur og DIFA markerer resepten som utlevert
+
 ![Grensegang mellom kjedene og DIFA 1 av 2](images/container-gui-kjede-pos.png)
 
 ![Grensegang mellom kjedene og DIFA 2 av 2](images/container-gui-kjede-pos_001.png)
 
-### Brukergrensesnitt - opsjon: GUI som benytter kjedesystem
+### Variant: Under test kan kan ekspedere resepter i DIFA sitt inkluderte test-GUI
+
+![GUI for kjede uten opsjon 1 av 2](images/container-gui-kjede-noAPI.png)
+
+![GUI for kjede uten opsjon 2 av 2](images/container-gui-kjede-noAPI.png)
+
+### Opsjon: DIFA test-GUI kan utvides til å brukes i produksjon
 
 Noen kjeder kan ønske å benytte et brukergrensesnitt for reseptur levert som en del av DIFA. Følgende skisse viser hvordan det kan fungere. Leverandøren vil spesielt gjøre oppmerksom på:
 
@@ -903,11 +671,6 @@ Noen kjeder kan ønske å benytte et brukergrensesnitt for reseptur levert som e
 
 ![Brukergrensesnitt som benytter kjedesystem 2 av 2](images/container-gui-kjede-API_001.png)
 
-### Brukergrensesnitt: Inkludert "toskjerms GUI"
-
-![GUI for kjede uten opsjon 1 av 2](images/container-gui-kjede-noAPI.png)
-
-![GUI for kjede uten opsjon 2 av 2](images/container-gui-kjede-noAPI.png)
 
 ### Referansearkitektur
 
@@ -915,8 +678,17 @@ Denne figuren vise navngiving av forskjellige elementer av løsningen.
 
 ![Referansearkitektur](images/component-reference-architecture.png)
 
-
 ### Implementasjon av et typisk scenario: Nedlastning av resepter
+
+Følgende figur gir et dypdykk på hvordan ett steg i arbeidsflyten vil bli implementert internt i DIFA. Figuren viser:
+
+1. Kjedesystemet ber DIFA om å starte en reseptekspedering
+2. DIFA autentiserer at brukeren kjeden angir i tjenestekallet har lov til å ekspedere resepten
+3. DIFA gjør nødvendig interaksjon med Reseptformidleren for å laste ned resepten
+4. Under kommunikasjonen med reseptformidleren benytter DIFA apotekets virksomhetsnøkkel for å signere meldingen
+5. DIFA beriker reseptekspederingsmeldingen med legemiddelinformasjon, byttegruppe etc.
+6. DIFA lagrer reseptekspederingen i egen database
+7. DIFA returnere reseptkurven til kjedesystemet
 
 ![Nedlastning av resepter](images/component-ekspeder-resept.png)
 
@@ -952,13 +724,30 @@ Dersom DIFA ikke skal eksponere kravet om ebXML-signering til kjedene, så må D
 
 ### Konvertering
 
-Fra kravspec: vordan duplikater skal unngås, avvikshåndtering, prinsipper for datakvalitet og vask, sentral uthenting vs. fysisk uthenting i hvert apotek, versjonshåndtering og sortering av data (dato), sikkerhet knyttet til mellomlagring iht Normen og øvrige krav.
+* Leverandøren planlegger en Service Pack til FarmaPro 5.20 som vil eksportere data fra FarmaPro databasene i alle apotek som XML-filer (XML i databasen vil Base64-encodes), kryptere disse filene med et public key som eies av DIFA.
+* FarmaPro serverne vil laste opp data hver natt til en tjeneste i DIFA. Denne tjenesten vil eksponeres over apoteknettet.
+* DIFA vil lagre siste versjon av dataene i kryptert form i sikker sone
+* DIFA vil automatisk laste inn endringene fra alle apoteker hver natt
 
-Fra kravspec: Det må etableres løsninger i overgangsfasen som ivaretar alle utestående sluttoppgjør og transaksjoner.   
+For å unngå duplikater vil en av følgende strategier brukes:
 
+* Når DIFA starter å lese et data fra et apotek vil DIFA hente opp en cache av den dataen som ligger i DIFA sin database under innlesningen.
+* For data som har endringstidspunkt i FarmaPro ("updated_at" kolonne eller tilsvarende) vil DIFA ikke laste inn data som ikke har endret seg. FarmaPro vil fortsatt laste opp fullstendig datasett ved hver eksport for å kunne håndte innlesning på nytt av feilede data.
+* For data som ikke har endringstidspunkt vil DIFA foreta en felt-for-felt sammenligning av (kortvarig cache av) data i DIFA databasen for å finne endringer
+
+For å håndtere feil vil følgende strategi brukes:
+
+* DIFA vil lagre hele raden som feiler i en egen tabell i databasen samt beskrivelse av feilen
+* DIFA utviklingspersonell vil ettergå feilene og gjøre oppdateringer i koden for å sikre innlesning i fremtiden. Endringene vil normalt produksjonssettes i løpet av en uke
+* Ettersom FarmaPro eksporterer et helt datasett vil neste innlesning etter neste produksjonsetting normalt fungere. 
+
+Inntil et apotek går over til å benytte DIFA vil alle refusjonssvar gå til FarmaPro og sluttoppgjør vil naturlig inngå i neste datamigrering. Etter at et apotek har gått over til å benytte DIFA vil M23 komme til DIFA og DIFA vil oppdatere relevante rader. DIFA vil innføre tiltak for å unngå at neste dataeksport fra apoteket overskriver oppdateringen. Mekanismen for dette vil beskrives i detaljspesifikasjonen av versjon 0.3.
 
 
 ## Informasjonsarkitektur
+
+Dette kapittelet beskriver sammenhengen mellom begrepene i datamodellen på et konseptuelt nivå. Kapittelet dekker Resepthåndtering, Legemidler og Farmasøytiske tjenester. Leverandøren har valgt å fokusere på disse områdene da vi anser de som de mest sentrale i løsningen.
+
 
 I grensesnittet mellom kjedesystemene og bransjesystemet ser leverandøren for oss at disse begrepene har engelske navn med utgangspunkt i HL7-standarder, spesielt FHIR standarden og Common Product Model Følgende modell viser sentrale begreper i reseptur og hvordan de henger sammen.
 
@@ -968,20 +757,29 @@ Det er viktig for modellene å skille informasjon som krever behandling under pe
 
 ![Resepturbegreper](images/class-reseptur-logisk.png)
 
+### Begrepsmodell for legemidler
+
+«Ka e et lægemiddel?» spurte Marte om. Det er ikke så lett å svare på, for det er mange begreper som har nøyaktige betydninger men som kan være vanskelig å skille fra hverandre.
+
+Figuren viser begrepene som inngår i definisjonen av et legemiddel og sammenhengen mellom dem. Figuren tar utgangspunkt i felleskatalogen/legemiddelverkets begrepsmodell oversatt til engelsk.
+
+* Substance (virkestoff): Et kjemisk stoff som er kategorisert med en ATC kode. For eksempel metylfenidat (N06B A04)
+* SubstanceConcentration: Virkestoff med styrke, for eksempel 5 mg/g eller 50 mg/tablett.
+* Medication (legemiddelmerkevare): Et produkt solgt fra en produsent. For eksempel «Ritalin»
+* MedicationPackaging (legemiddelpakning): En vare som kan utleveres i apotek. For eksempel «Ritalin, tabletter 10 mg, 200 stk»
+* SubstitutionGroup (byttegruppe): En gruppe med legemidler som kan utleveres som alternativer til hverandre. For eksempel er «Medikinet, tabletter 10 mg, 100 stk» i byttegruppen til «Ritalin, tabletter 10 mg, 200 stk»
+
+Begrepsmodelen har utelatt interaksjoner (substance interactions). Dette er fordi interaksjoner kan inntreffe på alle nivåer i Substance (virkestoff) hierarkiet og dermed er vanskelig å beskrive i en formell modell. For eksempel har substance Metylfenidat både en interaksjon med substance Moklobemid (N06B A04), men også med den farmakologiske undergruppen Hydantoinderivater (N03A B). Interaksjoner opererer også på grupper av substance, noe som også ikke egner seg for en grafisk fremstilling.
+
+For å forenkle forståelsen inkluderer modellen ikke næringsmidler eller handelsvarer.
+
 ![Legemiddelbegreper](images/class-medication.png)
+
+### Begrepsmodell for farmasøytiske tjenester
+
+Leverandøren oppfatter farmasøytiske tjenester som veiledning gjennom et sett med steg og innsamling av informasjon om hvordan veiledningssamtalen gikk. Det kan være naturlig å bygge en fleksibel modell der steg, spørsmål og svaralternativer kan konfigureres dynamisk. Dette vil understøtte endringer i farmasøytiske tjenester og innføring av nye farmasøytiske tjenester uten systemendringer.
+
+Informasjonsmodellen i figuren beskriver dette. Hvor vidt en såpass fleksibel modell er hensiktsmessig vil avgjøres under detaljspesifiseringen av farmasøytiske tjenester.
 
 ![Farmasøytiske tjenester (konseptuell)](images/class-farmasøytisk-konseptuell.png)
 
-
-
-# Administrative forhold
-
-## Garantiens omfang
-
-Leverandøren er ikke ansvarlig for feil i apotekkjeders bruk av API der denne bruken strider mot dokumenterte API. Leverandøren er ikke ansvarlig for feil i apotekkjeders oppsett eller bruk av Identity Provider.
-
-## Generelt om fri programvare (jfr. avtalens punkt 10.7)
-
-Programvaren leveres som en tjeneste med et definert grensesnitt. Leverandøren er ansvarlig for korrekt bruk av lisenser i programvare som brukes i produksjon av tjenesten. Leverandøren er ansvarlig for rettsmangler ved fri programvare. Leverandøren vil som hovedregel kun benytte fri programvare som ikke har en gjensidighetsklausul. I praksis betyr dette at programvare ikke vil benyttes under GNU Public License (GPL) og Affero GPL.
-
-Ved nye versjoner vil systemdokumentasjon inneholde en oppdatert oversikt over all programvare som benyttes som en del av versjonen.
