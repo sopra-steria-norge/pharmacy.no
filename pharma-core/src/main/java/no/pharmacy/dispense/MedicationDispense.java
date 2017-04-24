@@ -46,7 +46,10 @@ public class MedicationDispense {
     private boolean confirmedByPharmacist = false;
 
     @Getter @Setter
-    private boolean packagingControlled;
+    private boolean packagingControlled = false;
+
+    @Getter @Setter
+    private String scannedGtin, scannedDosageLabel;
 
     @Getter
     private boolean dispensed;
@@ -69,11 +72,11 @@ public class MedicationDispense {
     }
 
     public Money getCoveredAmount() {
-        return getMedication().getCoveredAmount(getPrice());
+        return getMedication() != null ? getMedication().getCoveredAmount(getPrice()) : null;
     }
 
     public Money getUncoveredAmount() {
-        return getMedication().getUncoveredAmount(getPrice());
+        return getMedication() != null ? getMedication().getUncoveredAmount(getPrice()) : null;
     }
 
     private List<MedicationInteraction> getInteractions(MedicationDispense historicalDispense) {
@@ -88,12 +91,16 @@ public class MedicationDispense {
     }
 
     public boolean isPharmacistControlComplete() {
+        return isWarningsAddressed() && confirmedByPharmacist;
+    }
+
+    public boolean isWarningsAddressed() {
         for (MedicationDispenseAction action : this.actions.values()) {
             if (!action.isAddressed()) {
                 return false;
             }
         }
-        return confirmedByPharmacist;
+        return true;
     }
 
     void createWarnings(MedicationHistory history) {
@@ -118,7 +125,7 @@ public class MedicationDispense {
         return medication != null ? medication.getProductId() : null;
     }
 
-    public String getDosageBarcode() {
+    public String getExpectedDosageBarcode() {
         byte[] hash = CryptoUtil.sha256(getPrintedDosageText());
         int i = (hash[0]&0x7f) << 24 | (hash[1]&0xff) << 16 | (hash[2]&0xff) << 8 | (hash[3]&0xff);
         return String.valueOf(i);
@@ -126,6 +133,10 @@ public class MedicationDispense {
 
     public void setDispensed() {
         this.dispensed = true;
+    }
+
+    public boolean isPackagingControlledCorrect() {
+        return getExpectedDosageBarcode().equals(scannedDosageLabel) && getMedication().getGtin().equals(scannedGtin);
     }
 
 }

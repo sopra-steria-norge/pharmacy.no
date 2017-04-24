@@ -29,7 +29,7 @@ public class RefundGroup {
     private Money getCoveredSum() {
         Money result = Money.zero();
         for (MedicationDispense dispense : medicationDispense) {
-            if (dispense.getPrice() == null) {
+            if (dispense.getCoveredAmount() == null) {
                 return null;
             }
             result = result.plus(dispense.getCoveredAmount());

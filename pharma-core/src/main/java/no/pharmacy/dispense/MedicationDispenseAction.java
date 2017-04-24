@@ -32,8 +32,20 @@ public class MedicationDispenseAction {
         return warning.getCode();
     }
 
-    public String getInteractionId() {
+    public String getId() {
         return warning.getInteraction().getId();
+    }
+
+    public String getWarningDisplay() {
+        return warning.getInteraction().getSubstanceCodes() + " " + warning.getInteraction().getSeverity();
+    }
+
+    public String getWarningDetails() {
+        return "Interakasjon med " + warning.displayInteractingDispense();
+    }
+
+    public String getWarningDetails2() {
+        return warning.getInteraction().getClinicalConsequence();
     }
 
 }

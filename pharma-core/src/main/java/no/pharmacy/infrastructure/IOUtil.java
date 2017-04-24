@@ -2,10 +2,7 @@ package no.pharmacy.infrastructure;
 
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -16,20 +13,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -107,14 +99,6 @@ public class IOUtil {
         }
     }
 
-    public static void copy(File source, File target) throws IOException {
-        try (FileInputStream input = new FileInputStream(source)) {
-            try (FileOutputStream output = new FileOutputStream(target)) {
-                copy(input, output);
-            }
-        }
-    }
-
     public static void copy(List<String> lines, File file) throws IOException {
         try (FileWriter writer = new FileWriter(file)) {
             copy(lines, writer);
@@ -139,16 +123,6 @@ public class IOUtil {
             writer.write(content);
         } finally {
             writer.close();
-        }
-    }
-
-    public static void copy(byte[] buf, File file) throws IOException {
-        copy(new ByteArrayInputStream(buf), file);
-    }
-
-    public static void copy(InputStream input, File file) throws IOException {
-        try (OutputStream output = new FileOutputStream(file)) {
-            copy(input, output);
         }
     }
 
@@ -213,21 +187,6 @@ public class IOUtil {
         return StandardCharsets.UTF_8;
     }
 
-    public static Map<String, List<String>> parseQuery(String query) throws UnsupportedEncodingException {
-        final Map<String, List<String>> query_pairs = new LinkedHashMap<String, List<String>>();
-        final String[] pairs = query.split("&");
-        for (String pair : pairs) {
-            final int idx = pair.indexOf("=");
-            final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;
-            if (!query_pairs.containsKey(key)) {
-                query_pairs.put(key, new LinkedList<String>());
-            }
-            final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : null;
-            query_pairs.get(key).add(value);
-        }
-        return query_pairs;
-    }
-
     public static List<String> readLines(File file) throws IOException {
         if (!file.exists()) {
             return new ArrayList<>();
@@ -240,31 +199,6 @@ public class IOUtil {
             }
         }
         return lines;
-    }
-
-    public static byte[] toByteArray(File file) throws IOException {
-        if (file == null) {
-            return null;
-        }
-        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-            try (FileInputStream input = new FileInputStream(file)) {
-                copy(input, buffer);
-                return buffer.toByteArray();
-            }
-        }
-    }
-
-    public static byte[] toByteArray(InputStream input) throws IOException {
-        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-            copy(input, buffer);
-            return buffer.toByteArray();
-        }
-    }
-
-    public static byte[] toByteArray(URLConnection connection) throws IOException {
-        try (InputStream input = IOUtil.checkResponse(connection).getInputStream()) {
-            return toByteArray(input);
-        }
     }
 
     public static HttpURLConnection checkResponse(URLConnection connection) throws IOException, RestException {

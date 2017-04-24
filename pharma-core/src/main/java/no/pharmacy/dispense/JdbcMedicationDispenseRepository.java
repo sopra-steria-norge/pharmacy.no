@@ -13,6 +13,7 @@ import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
 import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 import no.pharmacy.medication.MedicationRepository;
+import no.pharmacy.medicationorder.MedicationOrderSummary;
 
 public class JdbcMedicationDispenseRepository extends JdbcSupport implements MedicationDispenseRepository {
 
@@ -206,6 +207,34 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
                 .value("warning_remark", action.getRemark())
                 .executeUpdate();
         }
+    }
+
+    @Override
+    public void savePrescriptionQuery(MedicationOrderQuery query) {
+        for (MedicationOrderSummary prescription : query.getPrescriptions()) {
+            insertInto("prescription_query_results")
+                .value("query_id", query.getId())
+                .value("medication_name", prescription.getMedicationName())
+                .value("prescriber_name", prescription.getPrescriberName())
+                .value("prescription_id", prescription.getPrescriptionId())
+                .value("date_written", prescription.getDateWritten())
+                .executeInsert();
+        }
+    }
+
+    @Override
+    public List<MedicationOrderSummary> listPrescriptionsFromQuery(UUID id) {
+        return queryForList("select * from prescription_query_results where query_id = ?", Arrays.asList(id),
+                this::readMedicationOrderSummary);
+    }
+
+    private MedicationOrderSummary readMedicationOrderSummary(ResultSet rs) throws SQLException {
+        MedicationOrderSummary prescription = new MedicationOrderSummary();
+        prescription.setMedicationName(rs.getString("medication_name"));
+        prescription.setPrescriberName(rs.getString("prescriber_name"));
+        prescription.setPrescriptionId(rs.getString("prescription_id"));
+        prescription.setDateWritten(toLocalDate(rs.getDate("date_written")));
+        return prescription;
     }
 
 }

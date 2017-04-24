@@ -35,7 +35,8 @@ public class DispenseOrder implements MedicationHistory {
 
     @Override
     public List<MedicationDispense> getDispenses() {
-        return medicationDispenses;
+        // TODO: Inline
+        return getMedicationDispenses();
     }
 
     public MedicationDispense addMedicationOrder(MedicationOrder medicationOrder) {
@@ -59,6 +60,9 @@ public class DispenseOrder implements MedicationHistory {
     public Money getUncoveredTotal() {
         Money result = Money.zero();
         for (MedicationDispense dispense : medicationDispenses) {
+            if (dispense.getUncoveredAmount() == null) {
+                return null;
+            }
             result = result.plus(dispense.getUncoveredAmount());
         }
         return result;
@@ -67,7 +71,7 @@ public class DispenseOrder implements MedicationHistory {
     public Money getCoveredTotal() {
         Money result = Money.zero();
         for (MedicationDispense dispense : medicationDispenses) {
-            if (dispense.getPrice() == null) {
+            if (dispense.getCoveredAmount() == null) {
                 return null;
             }
             result = result.plus(dispense.getCoveredAmount());

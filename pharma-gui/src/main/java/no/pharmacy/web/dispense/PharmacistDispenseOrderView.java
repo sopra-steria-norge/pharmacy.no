@@ -67,9 +67,9 @@ public class PharmacistDispenseOrderView implements HtmlView {
                     .name(warningId + "[remark]").val(action.getRemark());
 
             warningsDiv.add(Xml.el("div",
-                    Xml.el("h4", "Advarsel: " + action.getWarning().getInteraction().getSubstanceCodes() + " " + action.getWarning().getInteraction().getSeverity()),
-                    Xml.el("div", "Interakasjon med " + action.getWarning().displayInteractingDispense()),
-                    Xml.el("div", action.getWarning().getInteraction().getClinicalConsequence()).addClass("clinicalConsquence"),
+                    Xml.el("h4", "Advarsel: " + action.getWarningDisplay()),
+                    Xml.el("div", action.getWarningDetails()),
+                    Xml.el("div", action.getWarningDetails2()).addClass("clinicalConsquence"),
                     Xml.el("div", actionRemark, actionSelect)));
         }
         return warningsDiv;

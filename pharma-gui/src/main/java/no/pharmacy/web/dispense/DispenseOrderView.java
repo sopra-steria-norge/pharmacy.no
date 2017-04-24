@@ -108,7 +108,7 @@ public class DispenseOrderView implements HtmlView {
             .type("number")
             .name("medicationOrder[" + dispense.getId() + "][" + medication.getProductId() + "][price]")
             .attr("step", "any");
-        Element productDetails = Xml.el("div", "Details for " + medication.getDisplay())
+        Element productDetails = Xml.el("div", medication.getDetails())
                 .addClass("medicationDescription");
         if (Objects.equals(dispense.getMedication(), medication)) {
             productIdField.checked(true);

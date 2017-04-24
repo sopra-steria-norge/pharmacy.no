@@ -38,7 +38,7 @@ public class PackagingControlView implements HtmlView {
             String dosageTextBarcode = dosageTextBarcodes.get(dispense);
             Element scannedDosageEl = dispenseEl.find("...", ".scannedDosageTextBarcode").first();
             scannedDosageEl.name(prefix + "[dosageTextBarcode]").val(dosageTextBarcode);
-            if (dosageTextBarcode != null && !dosageTextBarcode.equals(dispense.getDosageBarcode())) {
+            if (dosageTextBarcode != null && !dosageTextBarcode.equals(dispense.getExpectedDosageBarcode())) {
                 scannedDosageEl.addClass("error");
                 failed = true;
             }
@@ -55,7 +55,7 @@ public class PackagingControlView implements HtmlView {
             dispenseEl.find("...", ".printedDosageText").first().text(dispense.getPrintedDosageText());
             dispenseEl.find("...", ".dosageText").first().text(dispense.getAuthorizingPrescription().getDosageText());
             dispenseEl.find("...", ".expectedPackagingBarcode").first().text(dispense.getMedication().getGtin());
-            dispenseEl.find("...", ".expectedDosageTextBarcode").first().text(dispense.getDosageBarcode());
+            dispenseEl.find("...", ".expectedDosageTextBarcode").first().text(dispense.getExpectedDosageBarcode());
             dispensesEl.add(dispenseEl);
         }
         return doc;

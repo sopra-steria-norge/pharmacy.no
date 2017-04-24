@@ -31,7 +31,7 @@ public class DispenseOrderTest {
         dispenseOrder.createWarnings();
 
         Assertions.assertThat(ritalinDispense.getWarningActions())
-            .extracting(a -> a.getInteractionId())
+            .extracting(a -> a.getId())
             .contains("ID_06688DFC-BF07-4113-A6E4-9F8F00E5A536");
     }
 

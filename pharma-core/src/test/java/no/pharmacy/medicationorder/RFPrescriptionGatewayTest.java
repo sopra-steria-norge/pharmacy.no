@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -35,6 +36,10 @@ public class RFPrescriptionGatewayTest {
     private PersonReference prescriber = testData.sampleDoctor();
 
     private String employeeId = testData.samplePractitioner().getReference().getReference();
+
+    private MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(TestDataSource.pharmacistInstance(), new JdbcMedicationRepository(TestDataSource.medicationInstance()));
+
+    private DispenseOrderService dispenseOrderService = new DispenseOrderService(gateway, medicationDispenseRepository, patientRepository);
 
     @Test
     public void shouldRetrievePrescriptionList() {
@@ -81,20 +86,32 @@ public class RFPrescriptionGatewayTest {
 
     @Test
     public void shouldStartDispenseOrder() {
-        MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(TestDataSource.pharmacistInstance(), new JdbcMedicationRepository(TestDataSource.medicationInstance()));
-        DispenseOrderService dispenseOrderService = new DispenseOrderService(gateway, medicationDispenseRepository, patientRepository);
-
         String nationalId = testData.unusedNationalId();
         MedicationOrder medicationOrder1 = fakeReseptFormidler.addPrescription(nationalId, testData.sampleMedication(), prescriber);
         MedicationOrder medicationOrder2 = fakeReseptFormidler.addPrescription(nationalId, testData.sampleMedication(), prescriber);
 
-        DispenseOrder dispenseOrder = dispenseOrderService.startDispenseOrder(nationalId,
+        DispenseOrder dispenseOrder = dispenseOrderService.startDispenseOrder(
                 Arrays.asList(medicationOrder1.getPrescriptionId(), medicationOrder2.getPrescriptionId()));
 
         assertThat(dispenseOrder.getDispenses())
             .extracting(MedicationDispense::getAuthorizingPrescription)
             .extracting(MedicationOrder::getPrescriptionId)
             .containsOnly(medicationOrder1.getPrescriptionId(), medicationOrder2.getPrescriptionId());
+    }
+
+    @Test
+    public void shouldStartPrescriptionQuery() {
+        String nationalId = testData.unusedNationalId();
+        MedicationOrder medicationOrder1 = fakeReseptFormidler.addPrescription(nationalId, testData.sampleMedication(), prescriber);
+        MedicationOrder medicationOrder2 = fakeReseptFormidler.addPrescription(nationalId, testData.sampleMedication(), prescriber);
+
+        UUID id = dispenseOrderService.startPrescriptionQuery(null, employeeId, nationalId);
+
+        assertThat(medicationDispenseRepository.listPrescriptionsFromQuery(id))
+            .extracting(MedicationOrderSummary::getMedicationName)
+            .contains(medicationOrder1.getMedicationName(), medicationOrder2.getMedicationName());
+        assertThat(medicationDispenseRepository.listPrescriptionsFromQuery(id).get(0))
+            .hasNoNullFieldsOrProperties();
     }
 
 }

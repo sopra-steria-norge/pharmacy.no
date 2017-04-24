@@ -45,7 +45,7 @@ public class MedicationDispenseRepositoryTest {
             .isEqualToIgnoringGivenFields(order.getMedicationOrders().get(0), "alternatives");
         assertThat(retrievedOrder.getMedicationDispenses().get(0))
             .isEqualToComparingFieldByField(dispense)
-            .hasNoNullFieldsOrPropertiesExcept("medication");
+            .hasNoNullFieldsOrPropertiesExcept("medication", "scannedGtin", "scannedDosageLabel");
     }
 
     @Test

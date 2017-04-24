@@ -64,6 +64,10 @@ public class Medication {
             .collect(Collectors.toList());
     }
 
+    public String getDetails() {
+        return "Details for " + getDisplay();
+    }
+
 
 
 }

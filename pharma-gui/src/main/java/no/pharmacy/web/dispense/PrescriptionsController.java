@@ -118,9 +118,8 @@ public class PrescriptionsController extends HttpServlet {
             resp.sendRedirect("/dispenseOrder/" + req.getParameter("dispenseOrderId"));
         } else {
             String[] prescriptionIds = req.getParameterValues("prescriptionId");
-            String nationalId = req.getParameter("nationalId");
             DispenseOrder dispenseOrder = dispenseOrderService
-                    .startDispenseOrder(nationalId, Arrays.asList(prescriptionIds));
+                    .startDispenseOrder(Arrays.asList(prescriptionIds));
             resp.sendRedirect("/dispenseOrder/" + dispenseOrder.getIdentifier());
         }
     }
