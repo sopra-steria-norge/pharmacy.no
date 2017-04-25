@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.MedicationOrder;
+import no.pharmacy.infrastructure.IOUtil;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.Medication;
@@ -34,9 +35,10 @@ public class PharmaTestData {
 
     public synchronized JdbcMedicationRepository getMedicationRepository() {
         if (medicationRepository == null) {
-            DataSource dataSource = TestDataSource.createDataSource("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications", "db/db-medications");
+            String jdbcUrl = System.getProperty("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications");
+            DataSource dataSource = TestDataSource.createDataSource(jdbcUrl, "db/db-medications");
             medicationRepository = new JdbcMedicationRepository(dataSource);
-            medicationRepository.refresh(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString()));
+            medicationRepository.refresh(IOUtil.url(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString())));
         }
         return medicationRepository;
     }

@@ -50,16 +50,14 @@ public class TestDataSource {
 
 
     public static DataSource createMemDataSource(String name) {
-        return createDataSource("test." + name + ".jdbc.url", "jdbc:h2:mem:" + name, "db/db-" + name);
+        return createDataSource(System.getProperty("test." + name + ".jdbc.url", "jdbc:h2:mem:" + name), "db/db-" + name);
     }
 
     public static DataSource createFileDataSource(String name) {
-        return createDataSource("test." + name + ".file.jdbc.url", "jdbc:h2:file:./target/db/" + name, "db/db-" + name);
+        return createDataSource(System.getProperty("test." + name + ".file.jdbc.url", "jdbc:h2:file:./target/db/" + name), "db/db-" + name);
     }
 
-    public static DataSource createDataSource(String property, String jdbcDefaultUrl, String migrations) {
-        String jdbcUrl = System.getProperty(property, jdbcDefaultUrl);
-
+    public static DataSource createDataSource(String jdbcUrl, String migrations) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(jdbcUrl); // config.setJdbcUrlFromProperty(property, jdbcDefault);
         config.setUsername("sa");

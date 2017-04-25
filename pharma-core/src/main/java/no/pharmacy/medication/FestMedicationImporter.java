@@ -5,9 +5,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
 import javax.sql.DataSource;
@@ -34,14 +36,20 @@ public class FestMedicationImporter {
     private static final Logger logger = LoggerFactory.getLogger(FestMedicationImporter.class);
 
     void saveFest(URL url, JdbcMedicationRepository repository) {
-        try {
-            if (url.getProtocol().startsWith("http")) {
-                saveFest(downloadFestDoc(url), repository);
-            } else {
-                saveFest(Xml.read(new File(url.getFile())), repository);
+        if (url.getProtocol().startsWith("http")) {
+            saveFest(downloadFestDoc(url), repository);
+        } else if (url.getPath().endsWith(".gz")) {
+            try (Reader reader = new InputStreamReader(new GZIPInputStream(url.openStream()))) {
+                saveFest(Xml.read(reader), repository);
+            } catch (IOException e) {
+                throw ExceptionUtil.softenException(e);
             }
-        } catch (IOException e) {
-            throw ExceptionUtil.softenException(e);
+        } else {
+            try (Reader reader = new InputStreamReader(url.openStream())) {
+                saveFest(Xml.read(reader), repository);
+            } catch (IOException e) {
+                throw ExceptionUtil.softenException(e);
+            }
         }
     }
 
@@ -88,24 +96,30 @@ public class FestMedicationImporter {
     }
 
 
-    List<Medication> readMedicationPackages(Element katLegemiddelpakning) { List<Medication> result = new ArrayList<>();
+    List<Medication> readMedicationPackages(Element katLegemiddelpakning) {
+        List<Medication> result = new ArrayList<>();
         for (Element oppfLegemiddelpakning : katLegemiddelpakning.elements()) {
-            Element legemiddelpakning = oppfLegemiddelpakning.find("Legemiddelpakning").first();
-            Medication medication = new Medication();
-            medication.setDisplay(legemiddelpakning.find("NavnFormStyrke").firstTextOrNull());
-            medication.setProductId(legemiddelpakning.find("Varenr").firstTextOrNull());
-            medication.setGtin(legemiddelpakning.find("Ean").firstTextOrNull());
-            medication.setSubstitutionGroup(legemiddelpakning.find("PakningByttegruppe", "RefByttegruppe").firstTextOrNull());
-            medication.setTrinnPrice(getTrinnPrice(legemiddelpakning));
-            ElementSet atcCodes = legemiddelpakning.find("Atc");
-            if (atcCodes.isPresent()) {
-                medication.setSubstance(atcCodes.first().attr("V"));
-            }
-            medication.setXml(legemiddelpakning.toXML());
-            result.add(medication);
+            result.add(readMedication(oppfLegemiddelpakning));
         }
 
         return result;
+    }
+
+
+    Medication readMedication(Element oppfLegemiddelpakning) {
+        Element legemiddelpakning = oppfLegemiddelpakning.find("Legemiddelpakning").first();
+        Medication medication = new Medication();
+        medication.setDisplay(legemiddelpakning.find("NavnFormStyrke").firstTextOrNull());
+        medication.setProductId(legemiddelpakning.find("Varenr").firstTextOrNull());
+        medication.setGtin(legemiddelpakning.find("Ean").firstTextOrNull());
+        medication.setSubstitutionGroup(legemiddelpakning.find("PakningByttegruppe", "RefByttegruppe").firstTextOrNull());
+        medication.setTrinnPrice(getTrinnPrice(legemiddelpakning));
+        ElementSet atcCodes = legemiddelpakning.find("Atc");
+        if (atcCodes.isPresent()) {
+            medication.setSubstance(atcCodes.first().attr("V"));
+        }
+        medication.setXml(legemiddelpakning.toXML());
+        return medication;
     }
 
 
@@ -121,32 +135,40 @@ public class FestMedicationImporter {
 
     List<MedicationInteraction> readInteractions(Element katInteraksjon) {
         ArrayList<MedicationInteraction> result = new ArrayList<>();
-        interaction: for (Element interaksjon : katInteraksjon.find("OppfInteraksjon", "Interaksjon")) {
-            MedicationInteraction interaction = new MedicationInteraction();
-            interaction.setId(interaksjon.find("Id").first().text());
-            interaction.setClinicalConsequence(interaksjon.find("KliniskKonsekvens").firstTextOrNull());
-            interaction.setInteractionMechanism(interaksjon.find("Interaksjonsmekanisme").firstTextOrNull());
-            interaction.setSeverity(MedicalInteractionSeverity.byValue(interaksjon.find("Relevans").first().attr("V")));
+        for (Element interaksjon : katInteraksjon.find("OppfInteraksjon", "Interaksjon")) {
+            MedicationInteraction interaction = readInteraction(interaksjon);
 
-            for (Element substance : interaksjon.find("Substansgruppe")) {
-                // TODO: This is incorrect if one Substansgruppe has several Substans
-                ElementSet atcCodes = substance.find("Substans", "Atc");
-                if (atcCodes.isEmpty()) {
-                    continue interaction;
-                }
-                interaction.getSubstanceCodes().add(atcCodes.first().attr("V"));
+            if (interaction != null) {
+                result.add(interaction);
             }
-
-            result.add(interaction);
         }
         return result;
     }
 
 
+    private MedicationInteraction readInteraction(Element interaksjon) {
+        MedicationInteraction interaction = new MedicationInteraction();
+        interaction.setId(interaksjon.find("Id").first().text());
+        interaction.setClinicalConsequence(interaksjon.find("KliniskKonsekvens").firstTextOrNull());
+        interaction.setInteractionMechanism(interaksjon.find("Interaksjonsmekanisme").firstTextOrNull());
+        interaction.setSeverity(MedicalInteractionSeverity.byValue(interaksjon.find("Relevans").first().attr("V")));
+
+        for (Element substance : interaksjon.find("Substansgruppe")) {
+            // TODO: This is incorrect if one Substansgruppe has several Substans
+            ElementSet atcCodes = substance.find("Substans", "Atc");
+            if (atcCodes.isEmpty()) {
+                return null;
+            }
+            interaction.getSubstanceCodes().add(atcCodes.first().attr("V"));
+        }
+        return interaction;
+    }
+
+
     private void saveFest(Document festDoc, MedicationRepository medicationRepository) {
         logger.info("Inserting medications");
-        for (Medication medication : readMedicationPackages(festDoc.find("KatLegemiddelpakning").first())) {
-            medicationRepository.save(medication);
+        for (Element oppfLegemiddelpakning : festDoc.find("KatLegemiddelpakning").first().elements()) {
+            medicationRepository.save(readMedication(oppfLegemiddelpakning));
         }
         logger.info("Inserted medications");
 
@@ -158,7 +180,8 @@ public class FestMedicationImporter {
     }
 
     public static void main(String[] args) {
-        DataSource dataSource = TestDataSource.createDataSource("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications", "db/db-medications");
+        DataSource dataSource = TestDataSource.createDataSource(
+                System.getProperty("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications"), "db/db-medications");
         JdbcMedicationRepository repository = new JdbcMedicationRepository(dataSource);
         FestMedicationImporter importer = new FestMedicationImporter();
         importer.saveFest(FEST_URL, repository);

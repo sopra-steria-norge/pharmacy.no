@@ -1,6 +1,5 @@
 package no.pharmacy.medication;
 
-import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -129,15 +128,11 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcMedicationRepository.class);
 
-    public void refresh(String festUrl) {
+    public void refresh(URL festUrl) {
         if (isEmpty()) {
             logger.info("Refreshing medications from FEST");
-            try {
-                FestMedicationImporter importer = new FestMedicationImporter();
-                importer.saveFest(new URL(festUrl), this);
-            } catch (IOException e) {
-                throw ExceptionUtil.softenException(e);
-            }
+            FestMedicationImporter importer = new FestMedicationImporter();
+            importer.saveFest(festUrl, this);
         }
     }
 

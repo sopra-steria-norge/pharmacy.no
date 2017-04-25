@@ -6,6 +6,8 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.Random;
 
+import javax.sql.DataSource;
+
 import org.eaxy.Element;
 import org.eaxy.Namespace;
 import org.eaxy.Validator;
@@ -64,7 +66,7 @@ public class FestMedicationImporterTest {
                                     .attr("DN", "Nothing"),
                                 M30.el("MerknadTilByttbarhet", "false")))));
 
-        Medication medication = importer.readMedicationPackages(katWrapper(legemiddelpakning)).get(0);
+        Medication medication = importer.readMedication(oppfWrapper(legemiddelpakning));
         assertThat(medication).hasNoNullFieldsOrProperties();
 
         assertThat(medication.getDisplay())
@@ -162,9 +164,11 @@ public class FestMedicationImporterTest {
 
     @Test
     public void shouldReadWholeFile() throws Exception {
+        DataSource dataSource = TestDataSource.createDataSource("jdbc:h2:mem:full-medications", "db/db-medications");
+
         FestMedicationImporter importer = new FestMedicationImporter();
         importer.saveFest(new URL("file:src/main/resources/seed/fest-mini.xml.gz"),
-                new JdbcMedicationRepository(TestDataSource.medicationInstance()));
+                new JdbcMedicationRepository(dataSource));
     }
 
     private Element katWrapper(Element el) {
