@@ -85,7 +85,7 @@ public class PharmaServer {
         HandlerList handlers = new HandlerList();
         handlers.addHandler(new ShutdownHandler(SHUTDOWN_TOKEN, true, true));
 
-        PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> PharmaTestData.sampleName(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
+        PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> new PharmaTestData().samplePatient(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
         MedicationRepository medicationRepository = createMedicationRepository();
         PractitionerRepository practitionerRepository = createPractitionerRepository();
         HealthcareServiceRepository healthcareServiceRepository = createHealthcareServiceRepository();
@@ -99,6 +99,7 @@ public class PharmaServer {
         guiHandler.setMedicationRepository(medicationRepository);
         guiHandler.setPatientRepository(patientRepository);
         guiHandler.setHealthcareServiceRepository(healthcareServiceRepository);
+        guiHandler.setPractitionerRepository(practitionerRepository);
         guiHandler.setPrescriptionGateway(new RFPrescriptionGateway(reseptFormidler, medicationRepository, patientRepository));
         guiHandler.setRepository(new JdbcMedicationDispenseRepository(createPharmaDataSource(), medicationRepository));
 
@@ -143,11 +144,11 @@ public class PharmaServer {
     }
 
     private DataSource createPharmaDataSource() {
-        return createFileDataSource("pharmacist");
+        return createLocalFileDataSource("pharmacist");
     }
 
     private DataSource createPatientDataSource() {
-        return createFileDataSource("patient");
+        return createLocalFileDataSource("patient");
     }
 
     private DataSource createMedicationDataSource() {
@@ -160,6 +161,10 @@ public class PharmaServer {
 
     private DataSource createFileDataSource(String name) {
         return createDataSource("jdbc:h2:file:./target/db/" + name, "db/db-" + name);
+    }
+
+    private DataSource createLocalFileDataSource(String name) {
+        return createDataSource("jdbc:h2:file:./target/db-local/" + name, "db/db-" + name);
     }
 
     private DataSource createDataSource(String jdbcUrl, String migrations) {

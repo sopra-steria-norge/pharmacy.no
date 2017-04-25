@@ -34,11 +34,17 @@ public class JwtToken {
     private String[] tokenValues;
     private JsonObject jwtHeader;
     private JsonObject payload;
+    private String idToken;
 
     public JwtToken(String idToken) {
+        this.idToken = idToken;
         tokenValues = idToken.split("\\.");
         jwtHeader = parseBase64Json(tokenValues[0]);
         payload = parseBase64Json(tokenValues[1]);
+    }
+
+    public String getIdToken() {
+        return idToken;
     }
 
     public boolean isValid() {

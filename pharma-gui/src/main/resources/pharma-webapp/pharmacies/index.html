@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Reseptekspedering | pharmacy.no</title>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/3.5.2/superagent.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+<script src="/pharma-test/js/prescriptions-simulator.js"></script> <!-- TODO move contents of this script! -->
+
+<style>
+li.completed {
+	color: silver;
+}
+li.completed::before {
+	content: "✔"
+}
+
+.customerSignature {
+	border: 1px solid black;
+}
+
+
+#signature-pad { border: 1px solid black; }
+
+.m-signature-pad--body
+  canvas {
+    border-radius: 4px;
+    border: 1px solid black;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.02) inset;
+  }
+</style>
+</head>
+<body>
+
+	<div id="app">
+	</div>
+
+	<script>
+const Header = Vue.component('Header', {
+	template: `<div>
+		<h4 style="text-align: right">Hei, {{currentUser.display_name}} ({{organization.display}})</h4>
+	</div>`,
+	props: {
+		currentUser: Object,
+		organization: Object
+	}
+});
+
+const ShowDispenseOrder = Vue.component('ShowDispenseOrder', {
+	template: `<div>
+		<h2 v-if="dispenseOrder.patient">Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
+		
+		<div v-for="dispense in dispenseOrder.medicationDispenses">
+			<h3 class='prescribedMedication'>{{dispense.dispensedMedication.display}}</h3>
+			<ul>
+				<li>Forskrevet av: <span class='prescriber'>{{dispense.authorizingPrescription.prescriber.name}}</span></li>
+				<li>Forskrevet legemiddel: <span class='prescriber'>{{dispense.authorizingPrescription.medicationName}}</span></li>
+				<li>Forskrevet dato: {{dispense.authorizingPrescription.dateWritten}}</li>
+			</ul>
+			<h4>Doseringstekst</h4>
+
+			<table>
+				<tr>
+					<td>Forskrevet:</td>
+					<td>Oppdatert:</td>
+				</tr>
+				<tr>
+					<td><textarea disabled="disabled" cols="25" rows="6">{{dispense.authorizingPrescription.dosageText}}</textarea></td>
+					<td><textarea disabled="disabled" cols="25" rows="6" v-model="dispense.printedDosageText"></textarea></td>
+				</tr>
+			</table>
+			
+			<div v-if="dispense.warningActions.length">
+				<h4>Advarsler</h4>
+				
+				<ul>
+					<li v-for="action in dispense.warningActions">{{action.warningDetails}} ({{action.action}})</li>
+				</ul>
+			</div>
+		</div>
+
+		<div v-if="dispenseOrder.prices">
+			<h2>Pris</h2>		
+			<ul>
+				<li><strong>Refusjon:</strong> {{dispenseOrder.prices.refundTotal}}</li>
+				<li><strong>Egenandel:</strong> {{dispenseOrder.prices.patientCopay}}</li>
+				<li><strong>Mellomlegg pasient:</strong> {{dispenseOrder.prices.patientUncovered}}</li>
+				<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
+			</ul>
+		</div>
+		
+		<div v-if="dispenseOrder.customerSignature">
+			<h2>Kundens signatur</h2>
+			<img :src="dispenseOrder.customerSignature" class="customerSignature" />
+		</div>
+	</div>`,
+	props: {
+		dispenseOrder: Object
+	}
+});
+
+const Index = Vue.component('Index', {
+	template: `
+	<div>
+		<Header :currentUser="currentUser" :organization="organization" />
+		
+		<div v-if="pharmacist">
+			<a :href="'#' + organization.id + '/pharmacistOrders'">Farmasøytkontroll</a>
+		</div>
+		
+		<h2>Finn person</h2>
+	
+		<form @submit.prevent="findPerson">	
+			<label>
+				Fødselsenummer:
+				<input type="number" maxlength="11" v-model="patient.nationalId" placeholder="Fødselsnummer" autofocus />
+			</label>
+			<div>Eller</div>
+			<label>
+				Fødselsdato:
+				<input type="date" v-model="patient.dateOfBirth" placeholder="Fødselsdato" />
+			</label>
+			<label>
+				Etternavn:
+				<input type="text" v-model="patient.lastName" placeholder="Etternavn" />
+			</label>
+			<label>
+				Fornavn:
+				<input type="text" v-model="patient.firstName" placeholder="Fornavn" />
+			</label>
+			<div>
+				<button name="action">Finn</button>
+			</div>
+		</form>
+
+		<ul>
+			<li v-for="person in personList">
+				{{person.lastName}}, {{person.firstName}}
+				<button @click="startPatientInfo(person)">Åpne reseptinformasjon</button>
+			</li>
+		</ul>
+
+
+		<h2>Ekspeder resept</h2>
+		
+		<label>
+			Fødselsenummer:
+			<input type="number" maxlength="11" v-model="patient.nationalId" placeholder="Fødselsnummer" />
+		</label>
+		<div>Eller</div>
+		<label>
+			Referansenr:
+			<input type="text" v-model="patient.referenceNumber" placeholder="Referansenr" />
+		</label>
+		<div>Eller</div>
+		<label>
+			Fødselsdato:
+			<input type="date" v-model="patient.dateOfBirth" placeholder="Fødselsdato" />
+		</label>
+		<label>
+			Etternavn:
+			<input type="text" v-model="patient.lastName" placeholder="Etternavn" />
+		</label>
+		<label>
+			Fornavn:
+			<input type="text" v-model="patient.firstName" placeholder="Fornavn" />
+		</label>
+		<div>
+			<button name="action" @click="startPrescriptionSearch">Finn</button>
+		</div>
+	</div>`,
+	props: {
+		currentUser: Object,
+		organization: Object,
+		patientNationalId: String
+	},
+	data: function() {
+		return {
+			pharmacist: (this.currentUser.authorizations.indexOf("PHARMACIST") != -1),
+			patient: {
+				referenceNumber: "",
+				nationalId: this.patientNationalId,
+				firstName: "",
+				lastName: "",
+				dateOfBirth: "",
+				phoneticSearch: false
+			},
+			personList: []
+		}
+	},
+	methods: {
+		startPrescriptionSearch: function() {
+			var url = "/pharmacies/api/" + this.organization.id + "/prescriptionQueries";
+			submitJsonPost(url, this.patient);
+		},
+		findPerson: function() {
+			var that = this;
+			superagent.post('/pharmacies/api/' + this.organization.id + '/queryPerson')
+				.send(this.patient)
+				.accept('json')
+				.then(function(res) {
+					that.personList = res.body;
+				});
+
+		},
+		startPatientInfo: function(person) {
+			window.location.hash = this.organization.id + "/patientInfo/" + person.id;
+		}
+	}
+});
+
+const PrescriptionList = Vue.component('prescriptionList', {
+	template: `<div>
+		<Header :currentUser="currentUser" :organization="organization" />
+		<h1>Reseptlist</h1>
+		
+		<ul>
+			<li v-for="prescription in prescriptionList">
+				<label>
+					<input type="checkbox" :value="prescription.id" v-model="selectedPrescriptions">
+					{{prescription.dateWritten}} / {{prescription.prescriber.name}} / {{prescription.medicationName}}
+				</label>
+			</li>
+		</ul>
+		
+		<button :disabled="!dispenseable" @click="startDispenseOrder">Ekspeder resepter</button>
+
+		<button @click="cancelQuery">Kanseller spørring</button>
+	</div>`,
+	props: {
+		currentUser: Object,
+		organization: Object
+	},
+	computed: {
+		dispenseable: function() {
+			return this.selectedPrescriptions.length > 0;
+		}
+	},
+	data: function() {
+		return {
+			queryId: null,
+			selectedPrescriptions: [],
+			prescriptionList: []
+		};
+	},
+	methods: {
+		startDispenseOrder: function() {
+			var url = "/pharmacies/api/" + this.organization.id + "/dispenseOrders";
+			submitJsonPost(url, {queryId: this.queryId, prescriptions: this.selectedPrescriptions});
+		},
+		cancelQuery: function() {
+			console.log("Not implemented");
+		}
+	},
+	beforeMount: function() {
+		var currentRoute = window.location.hash.substr(1).split(/\//);
+		this.queryId = currentRoute[2];
+		var that = this;
+		superagent.get('/pharmacies/api/' + this.organization.id + '/prescriptionQueries/' + this.queryId)
+			.accept('json')
+			.then(function(res) {
+				that.prescriptionList = res.body;
+			});
+	}
+});
+
+const SelectMedication = Vue.component('SelectMedication', {
+	template: `<label>
+		<input type="radio"
+			:name='"cancelMedicationOrder[" + dispense.id + "]"'
+			v-model="dispense.dispensedMedicationId"
+			:value="medication.productId" />
+	{{medication.display}}
+	<span v-if="medication.trinnPrice">(Trinnpris: Kr {{medication.trinnPrice}})</span>
+	<a href="#" @click.prevent='expanded = !expanded'>[info]</a>
+	<div v-if="dispense.dispensedMedicationId == medication.productId">
+		Utsalgspris
+		<input type="number" step="any" v-model="dispense.price" />
+	</div>
+	<div v-if='expanded'>
+		{{medication.details}}
+	</div>
+</label>`,
+	props: [ 'medication', 'dispense' ],
+	data: function() {
+		return {
+			expanded: false
+		}
+	}
+});
+
+const DispenseOrder = Vue.component('DispenseOrder', {
+	template: `<div>
+		<Header :currentUser="currentUser" :organization="organization" />
+		<h2 v-if="dispenseOrder.patient">Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
+		
+		<div v-for="dispense in dispenseOrder.medicationDispenses">
+			<h3 class='prescribedMedication'>{{dispense.authorizingPrescription.medicationName}}</h3>
+			<ul>
+				<li>Forskrevet av: <span class='prescriber'>{{dispense.authorizingPrescription.prescriber.name}}</span></li>
+				<li>Forskrevet dato: {{dispense.authorizingPrescription.dateWritten}}</li>
+			</ul>
+			<h4>Doseringstekst</h4>
+
+			<table>
+				<tr>
+					<td>Forskrevet:</td>
+					<td>Oppdatert:</td>
+				</tr>
+				<tr>
+					<td><textarea disabled="disabled" cols="25" rows="6">{{dispense.authorizingPrescription.dosageText}}</textarea></td>
+					<td><textarea cols="25" rows="6" v-model="dispense.printedDosageText"></textarea></td>
+				</tr>
+			</table>
+
+			<h4>Alternative legemidler</h4>
+			
+			<ol>
+				<li v-for='medication in dispense.authorizingPrescription.alternatives'>
+					<SelectMedication :medication="medication" :dispense='dispense' />
+				</li>
+			</ol>
+			<label>
+				Reservasjon:
+				<select>
+					<option></option>
+					<option>Legereservasjon</option>
+					<option>Pasientreservasjon</option>
+					<option>Apotekresevasjon</option>
+				</select>
+			</label>
+
+			<h4>Kanseller</h4>
+			<ul>
+				<li><label><input type='radio' :name='"cancelMedicationOrder[" + dispense.id + "]"'
+					v-model="dispense.dispensedMedicationId"
+					value=""/>Kanseller</label></li>
+			</ul>
+		</div>
+		
+		<button @click="update">Oppdater</button>
+
+		<div v-if="dispenseOrder.prices">
+			<h2>Pris</h2>		
+			<ul>
+				<li><strong>Refusjon:</strong> {{dispenseOrder.prices.refundTotal}}</li>
+				<li><strong>Egenandel:</strong> {{dispenseOrder.prices.patientCopay}}</li>
+				<li><strong>Mellomlegg pasient:</strong> {{dispenseOrder.prices.patientUncovered}}</li>
+				<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
+			</ul>
+
+			<a v-if="!dispenseOrder.packagingControlComplete"
+				:href="'#' + organization.id + '/packageControl/' + this.id">Utfør teknisk kontroll</a>
+		</div>
+
+		<div v-if="dispenseOrder.packagingControlComplete && dispenseOrder.pharmacistControlComplete">
+			<a :href="'#' + organization.id + '/completeDispense/' + this.id">Utlever</a>
+		</div>
+	</div>
+	</div>`,
+	props: {
+		currentUser: Object,
+		organization: Object
+	},
+	data: function() {
+		return {
+			dispenseOrder: {},
+			id: null
+		};
+	},
+	methods: {
+		update: function() {
+			var url = "/pharmacies/api/" + this.organization.id + "/dispenseOrders/" + this.id;
+			submitJsonPost(url, this.dispenseOrder);
+		},
+	},
+	beforeMount: function() {
+		var currentRoute = window.location.hash.substr(1).split(/\//);
+		this.id = currentRoute[2];
+		var that = this;
+		superagent.get('/pharmacies/api/' + this.organization.id + '/dispenseOrders/' + this.id)
+			.accept('json')
+			.then(function(res) {
+				that.dispenseOrder = res.body;
+			});
+	}
+});
+
+
+const CompleteDispense = Vue.component('CompleteDispense', {
+	template: `<div>
+		<Header :currentUser="currentUser" :organization="organization" />
+		
+		<ShowDispenseOrder :dispenseOrder="dispenseOrder" />
+
+		<h2>Mottakers signatur</h2>
+			<div id="signature-pad" class="m-signature-pad">
+				<div class="m-signature-pad--body">
+					<canvas width="475px" height="225px"></canvas>
+				</div>
+				<div class="m-signature-pad--footer">
+					<div class="description">Mottakers signatur</div>
+					<button type="button" id="clearSignatureButton">Prøv igjen</button>
+				</div>
+			</div>
+			<button @click="update">Bekreft utlevering</button>
+	</div>`,
+	props: {
+		currentUser: Object,
+		organization: Object
+	},
+	data: function() {
+		return {
+			dispenseOrder: {},
+			signaturePad: null,
+			id: null
+		};
+	},
+	methods: {
+		update: function() {
+			this.dispenseOrder.customerSignature = this.signaturePad.toDataURL();
+			var url = "/pharmacies/api/" + this.organization.id + "/confirmDispense/" + this.id;
+			submitJsonPost(url, this.dispenseOrder);
+		},
+	},
+	beforeMount: function() {
+		var currentRoute = window.location.hash.substr(1).split(/\//);
+		this.id = currentRoute[2];
+		var that = this;
+		superagent.get('/pharmacies/api/' + this.organization.id + '/dispenseOrders/' + this.id)
+			.accept('json')
+			.then(function(res) {
+				that.dispenseOrder = res.body;
+
+				var canvas = document.querySelector("#signature-pad canvas");
+				that.signaturePad = new SignaturePad(canvas);
+				
+				document.getElementById("clearSignatureButton").addEventListener("click", function() {
+					that.signaturePad.clear();
+				});
+
+				document.title = "Utlevering | pharmacy.no"
+			});
+	}
+});
+
+const PackageControl = Vue.component('PackageControl', {
+	template: `<div>
+		<Header :currentUser="currentUser" :organization="organization" />
+
+		<h2 v-if="dispenseOrder.patient">Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
+
+		
+		<div v-for="dispense in dispenseOrder.medicationDispenses">
+			<h3 class='prescribedMedication'>{{dispense.dispensedMedication.display}}</h3>
+			<table>
+				<tr>
+					<td>Forskrevet:</td>
+					<td>Oppdatert:</td>
+				</tr>
+				<tr>
+					<td><textarea disabled="disabled" cols="25" rows="6">{{dispense.authorizingPrescription.dosageText}}</textarea></td>
+					<td><textarea disabled="disabled" cols="25" rows="6" v-model="dispense.printedDosageText"></textarea></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button tabindex="-1">Print</button></td>
+				</tr>
+				<tr>
+					<td>
+						<input v-model="dispense.scannedDosageLabel" autofocus="autofocus" placeholder="Skan doseringstekst" />
+					</td>
+					<td>
+						<input v-model="dispense.scannedPackagingBarcode" placeholder="Skan pakning" />
+					</td>
+				</tr>
+				<tr>
+					<td>{{dispense.expectedDosageTextBarcode}}</td>
+					<td>{{dispense.dispensedMedication.gtin}}</td>
+				</tr>
+			</table>
+
+		</div>
+		
+		<button @click="update">Oppdater</button>
+
+	</div>
+	</div>`,
+	props: {
+		currentUser: Object,
+		organization: Object
+	},
+	data: function() {
+		return {
+			dispenseOrder: {},
+			id: null
+		};
+	},
+	methods: {
+		update: function() {
+			var url = "/pharmacies/api/" + this.organization.id + "/packageControl/" + this.id;
+			submitJsonPost(url, this.dispenseOrder);
+		},
+	},
+	beforeMount: function() {
+		var currentRoute = window.location.hash.substr(1).split(/\//);
+		this.id = currentRoute[2];
+		var that = this;
+		superagent.get('/pharmacies/api/' + this.organization.id + '/dispenseOrders/' + this.id)
+			.accept('json')
+			.then(function(res) {
+				that.dispenseOrder = res.body;
+				document.title = "Teknisk kontroll | pharmacy.no";
+			});
+	}
+});
+
+const PatientHistoryQuery = Vue.component('PatientHistoryQuery', {
+	template: `<div>
+		<Header :currentUser="currentUser" :organization="organization" />
+		
+		<div v-if="dispense">
+			<a :href="'#' + organization.id + '/patientHistoryQuery/' + id + '/'">[..]</a>
+
+			<ShowDispenseOrder :dispenseOrder="dispense" />
+		</div>
+		<div v-else-if="history">
+			<h2>Resepthistorikk for {{history.patient.lastName}}, {{history.patient.firstName}}</h2>
+			
+			<ul>
+				<li v-for="order in history.orders">
+					Dispense:
+					{{order.dateDispensed}} {{order.dispenser}}
+					<a :href="'#' + organization.id + '/patientHistoryQuery/' + id + '/' + order.id">
+						[Detaljer]
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>`,
+	props: [ "organization", "currentUser", "hash" ],
+	data: function() {
+		var currentRoute = window.location.hash.substr(1).split(/\//);
+		return {
+			id: currentRoute[2],
+			history: null
+		}
+	},
+	computed: {
+		dispense: function() {
+			if (!this.history) {
+				return null;
+			}
+			var currentRoute = this.hash.substr(1).split(/\//);
+			if (currentRoute[3]) {
+				return this.history.orders.find(function(o) {
+					return o.id == currentRoute[3];
+				});
+			}
+		}
+	},
+	beforeMount: function() {
+		var that = this;
+		superagent.get('/pharmacies/api/' + this.organization.id + '/patientHistoryQuery/' + this.id)
+			.accept('json')
+			.then(function(res) {
+				that.history = res.body;
+				document.title = "Resepthistorikk | pharmacy.no";
+			});
+	}
+});
+
+const PatientInfo = Vue.component('PatientInfo', {
+	template: `<div>
+		<Header :currentUser="currentUser" :organization="organization" />
+		<div v-if="patient">
+			<h1>Hent pasienthistorikk for {{patient.lastName}}, {{patient.firstName}}</h1>
+
+			<form @submit.prevent="queryPatientInfo">
+				<label>
+					Årsak:
+					<select v-model='patientHistoryQuery.purpose'>
+						<option value="PATIENT_REQUEST">Forespørsel fra pasient</option>
+						<option value="GUARDIAN_REQUEST">Forespørsel fra pårørende</option>
+						<option value="COUNTY_REQUEST">Forespørsel fra fylkesmann per brev</option>
+					</select>
+				</label>
+
+				<label v-if="patientHistoryQuery.purpose == 'COUNTY_REQUEST'">
+					Scannet brev:
+					<input type="file" @change="uploadScannedDocumentation" />
+				</label>
+
+				<div v-if="patientHistoryQuery.purpose == 'PATIENT_REQUEST' || patientHistoryQuery.purpose == 'GUARDIAN_REQUEST'">
+					<label>
+						Legitimasjon:
+						<select v-model='patientHistoryQuery.requestorIdentitificationType'>
+							<option value="driversLicense">Førerkort</option>
+							<option value="passport">Pass</option>
+						</select>
+					</label>
+					<label>
+						Nummer:
+						<input type="text" v-model='patientHistoryQuery.requestorIdentitificationNumber' />
+					</label>
+				</div>
+
+				<button>Hent pasienthistorikk</button>
+			</form>
+
+		</div>
+	</div>`,
+	props: {
+		currentUser: Object,
+		organization: Object
+	},
+	data: function() {
+		return {
+			patient: null,
+			patientHistoryQuery: {
+				patientId: null,
+				purpose: null,
+				requestorIdentitificationType: null,
+				requestorIdentitificationNumber: null,
+				documentation: null
+			}
+		}
+	},
+	methods: {
+		uploadScannedDocumentation: function(e) {
+			const that = this;
+			const file = (e.target.files || e.dataTransfer.files) [0];
+			console.log(file);
+		    const reader = new FileReader();
+		    reader.onload = function(e) {
+				that.patientHistoryQuery.documentation = e.target.result;
+		    }
+		    reader.readAsDataURL(file);
+		},
+		queryPatientInfo: function() {
+			console.log("submit");
+			superagent.post("/pharmacies/api/" + this.organization.id + "/patientHistoryQuery")
+				.send(this.patientHistoryQuery)
+				.then(function(res) {
+					window.location = res.headers.location.replace("/pharmacies/api/", "/pharmacies/#");
+				});
+		}
+	},
+	beforeMount: function() {
+		var currentRoute = window.location.hash.substr(1).split(/\//);
+		this.id = currentRoute[2];
+		var that = this;
+		superagent.get('/pharmacies/api/' + this.organization.id + '/persons/' + this.id)
+			.accept('json')
+			.then(function(res) {
+				that.patient = res.body;
+				that.patientHistoryQuery.patientId = that.patient.id;
+				document.title = "Pasientinformasjon | pharmacy.no";
+			});		
+	}
+});
+
+const PharmacistOrderList = Vue.component('PharmacistOrderList', {
+	template: `<div>
+		<h4 style="text-align: right">Hei, {{currentUser.display_name}} ({{organization.display}})</h4>
+		<h1>Farmasøytkontroll</h1>
+		
+		<div v-if="dispenseOrder">
+			<h2>Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
+
+			<div v-for="dispense in dispenseOrder.medicationDispenses">
+				<h3>{{dispense.dispensedMedication.display}}</h3>
+
+				<ul>
+					<li>Forskrevet av {{dispense.authorizingPrescription.prescriber.name}}</li>
+					<li>Forskrevet dato {{dispense.authorizingPrescription.dateWritten}}</li>
+				</ul>
+
+				<div v-for="action in dispense.warningActions">
+					<h4>Advarsel {{action.warningDisplay}}</h4>
+					<div>{{action.warningDetails}}</div>
+					<div>{{action.warningDetails2}}</div>
+					<div>
+						<input v-model="action.remark" placeholder="Notat" />
+						<select v-model="action.action">
+							<option></option>
+							<option value='1'>Konferert med lege</option>
+							<option value='2'>Konferert med pasient</option>
+							<option value='0'>Ignorert</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<button @click="update">Bekreft farmasøytkontroll</button>
+		</div>
+		<ul v-else-if="dispenseOrders">
+			<li v-for="order in dispenseOrders"  :class="{completed: order.pharmacistControlComplete}">
+				<label>
+					<strong>{{order.dispenser}}</strong>
+					{{order.patient.lastName}}, {{order.patient.firstName}}
+					<a :href="'#' + organization.id + '/pharmacistOrders/' + order.id" @click="fetchDispenseOrder(order.id)">Farmasøytkontroll</a>
+				</label>
+			</li>
+		</ul>
+	</div>`,
+	props: {
+		currentUser: Object,
+		organization: Object,
+		hash: String
+	},
+	data: function() {
+		return {
+			dispenseOrders: [],
+			dispenseOrder: null
+		};
+	},
+	computed: {
+		id: function() {
+			var currentRoute = this.hash.substr(1).split(/\//);
+			return currentRoute[2];
+		}
+	},
+	methods: {
+		update: function() {
+			var url = "/pharmacies/api/" + this.organization.id + "/pharmacistOrders/" + this.id;
+			submitJsonPost(url, this.dispenseOrder);
+		},
+		fetchDispenseOrder: function(id) {
+			var that = this;
+			superagent.get('/pharmacies/api/' + this.organization.id + '/dispenseOrders/' + id)
+				.accept('json')
+				.then(function(res) {
+					that.dispenseOrder = res.body;
+			});
+		}
+	},
+	beforeMount: function() {
+		var that = this;
+		if (this.id) {
+			this.fetchDispenseOrder(this.id);
+		} else {
+			superagent.get('/pharmacies/api/' + this.organization.id + '/pharmacistOrders/')
+			.accept('json')
+			.then(function(res) {
+				that.dispenseOrders = res.body;
+			});
+		}
+	}
+});
+
+
+
+const NotFound = { template: '<p>Page not found</p>' }
+const Home = { template: '<p>home page</p>' }
+const About = { template: '<p>about page</p>' }
+const Login = {
+	template: `<ul>
+	<li><a href="/pharmacies/api/login/?authority=difa">log in with DIFA</a></li>
+	<li><a href="/pharmacies/api/login/?authority=difa">log in with NMD</a></li>
+	<li><a href="/pharmacies/api/login/?authority=difa">log in with Apotek 1</a></li>
+	<li><a href="/pharmacies/api/login/?authority=difa">log in with Boots</a></li>
+	<li><a href="/pharmacies/api/login/?authority=difa">log in with Sykehusapotekene</a></li>
+	</ul>`
+}
+const SelectOrganization = Vue.component('selectOrganization', {
+	template: `<div>
+	<p>Select organization for {{currentUser}}</p>
+	
+	<ul>
+		<li v-for='organization in currentUser.organizations'>
+			<a :href="'#' + organization.id + '/index'">
+			select {{organization.display}}
+			</a>
+		</li>
+	</ul>
+	
+	</div>`,
+	props: {
+		currentUser: {type: Object, required: true}
+	}
+});
+
+const commonRoutes = {
+	'': Home,
+	'login': Login,
+	'selectOrganization': SelectOrganization
+}
+
+const routes = {
+	'about': About,
+	'index': Index,
+	'prescriptionQueries': PrescriptionList,
+	'dispenseOrders': DispenseOrder,
+	'pharmacistOrders': PharmacistOrderList,
+	'completeDispense': CompleteDispense,
+	'patientInfo': PatientInfo,
+	'patientHistoryQuery': PatientHistoryQuery,
+	'packageControl': PackageControl
+}
+var app = new Vue({
+	el: '#app',
+	data: {
+		currentUser: null,
+		hash: window.location.hash
+	},
+	computed: {
+		ViewComponent () {
+			if (!this.hash.length) {
+				window.location.hash = "default/index";
+				return;
+			}
+
+			var currentRoute = this.hash.substr(1).split(/\//);
+			var organization = currentRoute[0];
+			var action = currentRoute[1];
+
+			if (!action || !action.length) {
+				window.location.hash = organization + "/index";
+				return;
+			}
+
+			if (commonRoutes[action]) {
+				return commonRoutes[action];
+			}
+			
+			if (organization === "default" && this.currentUser) {
+				
+				if (this.currentUser.organizations.length == 1) {
+					window.location.hash = this.currentUser.organizations[0].id + "/" + action;
+					// TODO: This won't work for hashes with :id parts
+					return;
+				}
+				window.location.hash = "default/selectOrganization";
+				return;
+			}
+			
+			if (this.currentUser) {
+				return routes[action] || NotFound
+			}
+		},
+		currentOrganization: function() {
+			var currentRoute = this.hash.substr(1).split(/\//);
+			var organizationId = currentRoute[0];
+			if (!this.currentUser || !organizationId) {
+				return;
+			}
+			for (var org of this.currentUser.organizations) {
+				if (org.id === organizationId) {
+					return org;
+				}
+			}
+		}
+	},
+	render (createElement) {
+		var queryDict = {}
+		location.search.substr(1).split("&").forEach(function(item) {
+			queryDict[item.split("=")[0]] = item.split("=")[1]
+		});
+
+		return createElement(this.ViewComponent, {
+			props: {
+				currentUser: this.currentUser,
+				organization: this.currentOrganization,
+				hash: this.hash,
+				patientNationalId: queryDict["patientNationalId"]
+			}
+		});
+	}
+})
+
+window.onload = function() {
+	superagent.get('/pharmacies/api/me')
+	.accept('json')
+	.then(function(res) {
+		app.currentUser = res.body;
+	}, function(err) {
+		if (err.status === 401) {
+			window.location.hash = "default/login";
+		} else {
+			console.log("error", err.status);
+		}
+	});	
+}
+
+window.onhashchange = function() {
+	app.hash = window.location.hash;
+}
+
+</script>
+</body>
+</html>

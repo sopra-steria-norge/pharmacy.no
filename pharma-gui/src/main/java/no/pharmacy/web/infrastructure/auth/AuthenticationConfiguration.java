@@ -49,6 +49,7 @@ public class AuthenticationConfiguration {
                 + "&nonce=" + UUID.randomUUID();
     }
 
+    // TODO: The rest of the class should probably be moved to some new HttpURL class
     private static String encodeUTF8(String s) {
         try {
             return URLEncoder.encode(s, "UTF-8");
@@ -65,7 +66,7 @@ public class AuthenticationConfiguration {
         return getAuthority(req) + req.getRequestURI();
     }
 
-    private static String getAuthority(HttpServletRequest req) {
+    public static String getAuthority(HttpServletRequest req) {
         int port = req.getServerPort();
         boolean isDefaultPort = isSecure(req) && port == 443 || port == 80;
         return (isSecure(req) ? "https" : "http") + "://" + req.getServerName() + (isDefaultPort ? "" : ":" + port);
