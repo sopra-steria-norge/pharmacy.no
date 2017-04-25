@@ -90,20 +90,25 @@ public class JdbcSupport {
 
     private void setParameters(PreparedStatement stmt, List<Object> parameters) throws SQLException {
         for (int i = 0; i < parameters.size(); i++) {
-            Object parameter = parameters.get(i);
-            if (parameter instanceof Money) {
-                stmt.setBigDecimal(i+1, ((Money)parameter).toBigDecimal());
-            } else if (parameter instanceof Reference) {
-                stmt.setString(i+1, ((Reference)parameter).getReference());
-            } else if (parameter instanceof Enum<?>) {
-                stmt.setString(i+1, ((Enum<?>)parameter).name());
-            } else if (parameter instanceof ZonedDateTime) {
-                stmt.setTimestamp(i+1, new Timestamp(((ZonedDateTime)parameter).toInstant().toEpochMilli()));
-            } else if (parameter instanceof Instant) {
-                stmt.setTimestamp(i+1, new Timestamp(((Instant)parameter).toEpochMilli()));
-            } else {
-                stmt.setObject(i+1, parameter);
-            }
+            setParameter(stmt, i, parameters.get(i));
+        }
+    }
+
+    private void setParameter(PreparedStatement stmt, int i, Object parameter) throws SQLException {
+        if (parameter instanceof Money) {
+            stmt.setBigDecimal(i+1, ((Money)parameter).toBigDecimal());
+        } else if (parameter instanceof Reference) {
+            stmt.setString(i+1, ((Reference)parameter).getReference());
+        } else if (parameter instanceof Enum<?>) {
+            stmt.setString(i+1, ((Enum<?>)parameter).name());
+        } else if (parameter instanceof ZonedDateTime) {
+            stmt.setTimestamp(i+1, new Timestamp(((ZonedDateTime)parameter).toInstant().toEpochMilli()));
+        } else if (parameter instanceof Instant) {
+            stmt.setTimestamp(i+1, new Timestamp(((Instant)parameter).toEpochMilli()));
+        } else if (parameter instanceof Optional) {
+            setParameter(stmt, i, ((Optional<?>)parameter).orElse(null));
+        } else {
+            stmt.setObject(i+1, parameter);
         }
     }
 
@@ -223,6 +228,10 @@ public class JdbcSupport {
 
     public void setSecretKey(SecretKey secretKey) {
         this.secretKey = secretKey;
+    }
+
+    public SelectBuilder selectStarFrom(String tableName) {
+        return new SelectBuilder(this, tableName);
     }
 
 }

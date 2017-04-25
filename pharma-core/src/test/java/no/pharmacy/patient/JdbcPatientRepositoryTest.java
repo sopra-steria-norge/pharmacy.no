@@ -1,6 +1,7 @@
 package no.pharmacy.patient;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,9 +38,9 @@ public class JdbcPatientRepositoryTest {
     @Test
     public void shouldFindSavedPerson() throws Exception {
         String nationalId = testData.unusedNationalId();
-        String patientName = PharmaTestData.sampleName();
-        PersonReference patient = repository.savePatient(nationalId, patientName);
-        assertThat(patient.getDisplay()).isEqualTo(patientName);
+        PersonReference samplePatient = testData.samplePatient();
+        PersonReference patient = repository.savePatient(nationalId, samplePatient.getFirstName(), samplePatient.getLastName());
+        assertThat(patient.getDisplay()).isEqualTo(samplePatient.getDisplay());
         assertThat(repository.findPatient(patient.getReference()))
             .isEqualToComparingFieldByField(patient);
         assertThat(repository.findPatientByNationalId(nationalId))
@@ -49,19 +50,73 @@ public class JdbcPatientRepositoryTest {
     @Test
     public void shouldLookupUnregisteredPeople() {
         String nationalId = testData.unusedNationalId();
-        String patientName = PharmaTestData.sampleName();
+        PersonReference patientName = testData.samplePatient();
         personGateway.putPerson(nationalId, patientName);
 
         assertThat(repository.findPatientByNationalId(nationalId).getDisplay())
-            .isEqualTo(patientName);
+            .isEqualTo(patientName.getDisplay());
     }
+
+    @Test
+    public void shouldFindPeopleByName() {
+        String nationalId = testData.unusedNationalId();
+
+        PersonReference samplePatient = testData.samplePatient();
+        PersonReference patient = repository.savePatient(nationalId, samplePatient.getFirstName(), samplePatient.getLastName());
+
+        PersonQuery query = new PersonQuery();
+        query.setFirstName(patient.getFirstName());
+        query.setLastName(patient.getLastName());
+        assertThat(repository.queryPatient(query))
+            .contains(patient);
+
+        query.setFirstName("This is not " + patient.getFirstName());
+        assertThat(repository.queryPatient(query))
+            .doesNotContain(patient);
+    }
+
+    public void shouldRejectIncompleteQueries() {
+        PersonQuery query = new PersonQuery();
+        assertThatThrownBy(() -> { repository.queryPatient(query); })
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("must contain");
+
+        query.setLastName(testData.samplePatient().getLastName());
+        assertThatThrownBy(() -> { repository.queryPatient(query); })
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("must contain");
+
+        query.setLastName(null);
+        query.setFirstName(testData.samplePatient().getFirstName());
+        assertThatThrownBy(() -> { repository.queryPatient(query); })
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("must contain");
+    }
+
+    @Test
+    public void shouldFindPeopleByNationalId() {
+        String nationalId = testData.unusedNationalId();
+
+        PersonReference samplePatient = testData.samplePatient();
+        PersonReference patient = repository.savePatient(nationalId, samplePatient.getFirstName(), samplePatient.getLastName());
+
+        PersonQuery query = new PersonQuery();
+        query.setNationalId(nationalId);
+        assertThat(repository.queryPatient(query))
+            .contains(patient);
+
+        query.setNationalId(testData.unusedNationalId());
+        assertThat(repository.queryPatient(query))
+            .doesNotContain(patient);
+    }
+
 
     @Test
     public void shouldDecodeNationalId() {
         String nationalId = testData.unusedNationalId();
-        String patientName = PharmaTestData.sampleName();
+        PersonReference samplePatient = testData.samplePatient();
 
-        PersonReference patient = repository.savePatient(nationalId, patientName);
+        PersonReference patient = repository.savePatient(nationalId, samplePatient.getFirstName(), samplePatient.getLastName());
         assertThat(repository.lookupPatientNationalId(patient))
             .isEqualTo(nationalId);
     }

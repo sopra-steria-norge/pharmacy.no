@@ -35,7 +35,7 @@ public class JdbcPractitionerRepository implements PractitionerRepository {
 
     private PersonReference read(ResultSet rs) throws SQLException {
         return new PersonReference(rs.getString("hpr_number"),
-                rs.getString("first_name") + " " + rs.getString("last_name"));
+                rs.getString("first_name"), rs.getString("last_name"));
     }
 
     @Override

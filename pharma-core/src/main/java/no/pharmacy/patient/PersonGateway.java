@@ -1,7 +1,9 @@
 package no.pharmacy.patient;
 
+import no.pharmacy.core.PersonReference;
+
 public interface PersonGateway {
 
-    String nameByNationalId(String nationalId);
+    PersonReference nameByNationalId(String nationalId);
 
 }

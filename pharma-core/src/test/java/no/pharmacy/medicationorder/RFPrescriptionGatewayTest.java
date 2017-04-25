@@ -27,7 +27,7 @@ public class RFPrescriptionGatewayTest {
 
     private PharmaTestData testData = new PharmaTestData();
 
-    private PatientRepository patientRepository = new JdbcPatientRepository(TestDataSource.patientInstance(), s -> PharmaTestData.sampleName(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
+    private PatientRepository patientRepository = new JdbcPatientRepository(TestDataSource.patientInstance(), s -> testData.samplePatient(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
 
     private FakeReseptFormidler fakeReseptFormidler = new FakeReseptFormidler(testData.getMedicationRepository(), patientRepository);
 
@@ -76,7 +76,7 @@ public class RFPrescriptionGatewayTest {
         dispense.setPrintedDosageText("Updated dosage text");
         dispense.setConfirmedByPharmacist(true);
         dispense.setPackagingControlled(true);
-        dispense.setDispensed();
+        dispense.setDateDispensed(PharmaTestData.randomPastDate(14));
 
         gateway.completeDispense(dispense, employeeId);
 
