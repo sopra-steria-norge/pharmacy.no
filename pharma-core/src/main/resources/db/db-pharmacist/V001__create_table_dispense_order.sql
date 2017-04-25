@@ -3,5 +3,6 @@ create table dispense_orders (
 	patient_id varchar(40) not null,
 	patient_name text not null,
 	dispensed boolean,
+	date_dispensed date,
 	customer_signature text
 );

@@ -1,10 +1,12 @@
 package no.pharmacy.dispense;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,10 +51,7 @@ public class MedicationDispense {
     private boolean packagingControlled = false;
 
     @Getter @Setter
-    private String scannedGtin, scannedDosageLabel;
-
-    @Getter
-    private boolean dispensed;
+    private LocalDate dateDispensed;
 
     @Override
     public String toString() {
@@ -131,12 +130,14 @@ public class MedicationDispense {
         return String.valueOf(i);
     }
 
-    public void setDispensed() {
-        this.dispensed = true;
+    public boolean isDispensed() {
+        return dateDispensed != null;
     }
 
-    public boolean isPackagingControlledCorrect() {
-        return getExpectedDosageBarcode().equals(scannedDosageLabel) && getMedication().getGtin().equals(scannedGtin);
+    public void controlPackage(String scannedDosageLabel, String scannedGtin) {
+        packagingControlled = getExpectedDosageBarcode().equals(scannedDosageLabel)
+                && getMedication() != null
+                && getMedication().getGtin().equals(scannedGtin);
     }
 
 }

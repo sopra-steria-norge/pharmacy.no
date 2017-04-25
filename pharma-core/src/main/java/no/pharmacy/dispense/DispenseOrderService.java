@@ -40,6 +40,8 @@ public class DispenseOrderService {
         }
 
         dispenseOrder.setPatient(patientRepository.findPatientByNationalId(potentialNationalIds.iterator().next()));
+        dispenseOrder.createWarnings();
+
 
         medicationDispenseRepository.saveDispenseOrder(dispenseOrder);
         return dispenseOrder;

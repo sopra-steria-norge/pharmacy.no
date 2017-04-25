@@ -1,17 +1,20 @@
 package no.pharmacy.dispense;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
 
+@EqualsAndHashCode
 @ToString(of = { "identifier" })
 public class DispenseOrder implements MedicationHistory {
 
@@ -32,6 +35,9 @@ public class DispenseOrder implements MedicationHistory {
 
     @Getter
     private boolean dispensed;
+
+    @Getter @Setter
+    private LocalDate dateDispensed;
 
     @Override
     public List<MedicationDispense> getDispenses() {
@@ -135,9 +141,10 @@ public class DispenseOrder implements MedicationHistory {
 
     public void setDispensed() {
         this.dispensed = true;
+        this.dateDispensed = LocalDate.now();
 
         for (MedicationDispense medicationDispense : medicationDispenses) {
-            medicationDispense.setDispensed();
+            medicationDispense.setDateDispensed(dateDispensed);
         }
     }
 

@@ -18,7 +18,6 @@ import no.pharmacy.medicationorder.MedicationOrderSummary;
 import no.pharmacy.patient.HealthRecordQuery;
 import no.pharmacy.patient.HealthRecordQuery.HealthRecordQueryPurpose;
 
-// TODO: It probably would be better to push more logic into smaller and more uniform table gateway classes
 public class JdbcMedicationDispenseRepository extends JdbcSupport implements MedicationDispenseRepository {
 
     private MedicationRepository medicationRepository;
