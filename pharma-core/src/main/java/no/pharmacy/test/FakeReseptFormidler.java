@@ -70,7 +70,7 @@ public class FakeReseptFormidler implements MessageGateway {
         MedicationOrder medicationOrder = new MedicationOrder(product);
         medicationOrder.setPrescriber(prescriber);
         medicationOrder.setPrescriptionId(UUID.randomUUID().toString());
-        medicationOrder.setDateWritten(LocalDate.now().minusDays(PharmaTestData.random(14)));
+        medicationOrder.setDateWritten(PharmaTestData.randomPastDate(14));
         medicationOrder.setSubject(patientRepository.findPatientByNationalId(nationalId));
 
         this.prescriptionsForPerson.computeIfAbsent(nationalId, s -> new ArrayList<>())

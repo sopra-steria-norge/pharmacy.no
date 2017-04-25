@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -14,7 +15,10 @@ import no.pharmacy.core.PersonReference;
 import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.medicationorder.MedicationOrderSummary;
+import no.pharmacy.patient.HealthRecordQuery;
+import no.pharmacy.patient.HealthRecordQuery.HealthRecordQueryPurpose;
 
+// TODO: It probably would be better to push more logic into smaller and more uniform table gateway classes
 public class JdbcMedicationDispenseRepository extends JdbcSupport implements MedicationDispenseRepository {
 
     private MedicationRepository medicationRepository;
@@ -90,6 +94,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
             .where("id", order.getIdentifier())
             .set("customer_signature", order.getCustomerSignature())
             .set("dispensed", order.isDispensed())
+            .set("date_dispensed", order.getDateDispensed())
             .executeUpdate();
 
         for (MedicationDispense dispense : order.getMedicationDispenses()) {
@@ -109,6 +114,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         result.setIdentifier(rs.getString("id"));
         result.setCustomerSignature(rs.getString("customer_signature"));
         result.setDispensed(rs.getBoolean("dispensed"));
+        result.setDateDispensed(toLocalDate(rs.getDate("date_dispensed")));
         result.setPatient(new PersonReference(rs.getString("patient_id"), rs.getString("patient_name")));
 
         result.getMedicationOrders().addAll(findMedicationOrders(result.getIdentifier()));
@@ -141,6 +147,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
                         .orElse(null));
                 dispense.setConfirmedByPharmacist(rs.getBoolean("confirmed_by_pharmacist"));
                 dispense.setPackagingControlled(rs.getBoolean("packaging_controlled"));
+                dispense.setDateDispensed(toLocalDate(rs.getDate("date_dispensed")));
                 result.add(dispense);
 
                 previousId = prescriptionId;
@@ -194,6 +201,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
             .set("medication_id", dispense.getMedicationId())
             .set("confirmed_by_pharmacist", dispense.isConfirmedByPharmacist())
             .set("packaging_controlled", dispense.isPackagingControlled())
+            .set("date_dispensed", dispense.getDateDispensed())
             .executeUpdate();
 
         executeUpdate("delete from medication_dispense_actions where dispense_id = ?", Arrays.asList(dispense.getId()));
@@ -235,6 +243,47 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         prescription.setPrescriptionId(rs.getString("prescription_id"));
         prescription.setDateWritten(toLocalDate(rs.getDate("date_written")));
         return prescription;
+    }
+
+    @Override
+    public UUID saveHealthRecordQuery(HealthRecordQuery query) {
+        UUID queryId = UUID.randomUUID();
+        insertInto("health_record_queries")
+            .value("query_id", queryId)
+            .value("patient_id", query.getPatientId())
+            .value("operator_hpr_number", query.getOperatorHprNumber())
+            .value("operator_id_token", query.getOperatorJwtToken())
+            .value("organization_her_number", query.getOrganizationHerNumber())
+            .value("purpose", query.getPurpose())
+            .value("documentation", query.getDocumentation())
+            .value("requestor_id_type", query.getRequestorIdType())
+            .value("requestor_id_number", query.getRequestorIdNumber())
+            .executeUpdate();
+        return queryId;
+    }
+
+    @Override
+    public List<DispenseOrder> listDispensesForPatient(UUID patientId) {
+        return queryForList("select * from dispense_orders where patient_id = ?", Arrays.asList(patientId),
+                this::read);
+    }
+
+    @Override
+    public HealthRecordQuery retrieveHealthRecordQuery(UUID queryId) {
+        return retrieveSingle("select * from health_record_queries where query_id = ?", Arrays.asList(queryId), this::readHealthRecordQuery).get();
+    }
+
+    private HealthRecordQuery readHealthRecordQuery(ResultSet rs) throws SQLException {
+        HealthRecordQuery query = new HealthRecordQuery();
+        query.setPatientId(UUID.fromString(rs.getString("patient_id")));
+        query.setOperatorHprNumber(rs.getString("operator_hpr_number"));
+        query.setOperatorJwtToken(rs.getString("operator_id_token"));
+        query.setOrganizationHerNumber(rs.getString("organization_her_number"));
+        query.setPurpose(HealthRecordQueryPurpose.valueOf(rs.getString("purpose")));
+        query.setDocumentation(Optional.ofNullable(rs.getString("documentation")));
+        query.setRequestorIdType(Optional.ofNullable(rs.getString("requestor_id_type")));
+        query.setRequestorIdNumber(Optional.ofNullable(rs.getString("requestor_id_number")));
+        return query;
     }
 
 }

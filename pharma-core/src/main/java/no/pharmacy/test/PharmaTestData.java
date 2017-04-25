@@ -206,4 +206,12 @@ public class PharmaTestData {
     public static String sampleProductId() {
         return randomNumericString(6);
     }
+
+    public String sampleHerNumber() {
+        return randomNumericString(6);
+    }
+
+    public static LocalDate randomPastDate(int maxDaysAgo) {
+        return LocalDate.now().minusDays(random(maxDaysAgo));
+    }
 }
