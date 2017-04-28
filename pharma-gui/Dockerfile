@@ -1,7 +1,7 @@
 FROM openjdk:8-jre-alpine
 
-env AD_AUTHORITY https://difa-adfs-if.difa.ad/adfs
-env AD_CLIENT_ID a2846c81-5959-4187-8bec-76cb4faae2cb
+ENV AD_AUTHORITY https://difa-adfs-if.difa.ad/adfs
+ENV AD_CLIENT_ID a2846c81-5959-4187-8bec-76cb4faae2cb
 
 COPY target/pharma-gui-*.jar /pharmacy.no/
 # COPY data-dumps/* /data-dumps/
