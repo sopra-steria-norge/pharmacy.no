@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import org.jsonbuddy.JsonObject;
 import org.jsonbuddy.parse.JsonParser;
 import org.slf4j.Logger;
@@ -35,7 +36,10 @@ public class JwtToken {
     private JsonObject payload;
     private String idToken;
 
-    public JwtToken(String idToken) {
+    private URL authority;
+
+    public JwtToken(URL authority, String idToken) {
+        this.authority = authority;
         this.idToken = idToken;
         tokenValues = idToken.split("\\.");
         jwtHeader = parseBase64Json(tokenValues[0]);
@@ -150,7 +154,7 @@ public class JwtToken {
             throw new IllegalArgumentException("Illegal algorithm " + alg());
         }
         Signature signature = Signature.getInstance("SHA256withRSA");
-        signature.initVerify(getCertificate().getPublicKey());
+        signature.initVerify(getCertificate(keyId()).getPublicKey());
         signature.update((tokenValues[0] + "." + tokenValues[1]).getBytes());
         return signature.verify(base64Decode(tokenValues[2]));
     }
@@ -159,31 +163,26 @@ public class JwtToken {
         return jwtHeader.requiredString("alg");
     }
 
-    private Certificate getCertificate() throws CertificateException {
-        if (iss().startsWith("https://sts.windows.net/")) {
-            String tenant = payload.requiredString("tid");
-            String keyUrl = "https://login.microsoftonline.com/" + tenant + "/discovery/v2.0/keys";
-            return getCertificate(keyUrl, jwtHeader.requiredString("kid"));
-        } else if (iss().startsWith("https:")) {
-            // TODO: Use authority
-            https://authortiy/.wellknown/...
-            return getCertificate(iss() + "/discovery/keys", jwtHeader.requiredString("kid"));
-        } else {
-            throw new IllegalArgumentException("Unknown issuer " + iss());
-        }
+    private String keyId() {
+        return jwtHeader.requiredString("kid");
     }
 
-    private static synchronized Certificate getCertificate(String keyUrl, String keyId) throws CertificateException {
+    private Certificate getCertificate(String keyId) throws CertificateException {
         if (!certificates.containsKey(keyId)) {
             try {
-                logger.debug("Getting JWK from {}", keyUrl);
-                JsonObject keyJson = httpGetJsonObject(new URL(keyUrl));
+                URL jwksUrl = new URL(fetchOpenidConfiguration().requiredString("jwks_uri"));
+                logger.debug("Getting JWK from {}", jwksUrl);
+                JsonObject keyJson = httpGetJsonObject(jwksUrl);
                 certificates.put(keyId, decodeCertificate(getKey(keyJson, keyId)));
             } catch (IOException e) {
                 throw ExceptionUtil.softenException(e);
             }
         }
         return certificates.get(keyId);
+    }
+
+    private JsonObject fetchOpenidConfiguration() throws IOException {
+        return httpGetJsonObject(new URL(authority + "/.well-known/openid-configuration"));
     }
 
     private static synchronized Certificate decodeCertificate(String key) throws CertificateException {

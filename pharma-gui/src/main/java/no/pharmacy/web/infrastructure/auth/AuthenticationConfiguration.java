@@ -9,6 +9,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import no.pharmacy.infrastructure.ExceptionUtil;
+import no.pharmacy.infrastructure.IOUtil;
 import no.pharmacy.infrastructure.auth.JwtToken;
 
 public class AuthenticationConfiguration {
@@ -77,7 +78,7 @@ public class AuthenticationConfiguration {
     }
 
     public OpenIdPrincipal decodeUserPrincipal(String idToken) {
-        JwtToken jwt = new JwtToken(idToken);
+        JwtToken jwt = new JwtToken(IOUtil.url(authority), idToken);
         if (!jwt.isValid()) {
             return null;
         }
