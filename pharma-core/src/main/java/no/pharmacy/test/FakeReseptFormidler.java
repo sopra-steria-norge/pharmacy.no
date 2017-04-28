@@ -87,7 +87,14 @@ public class FakeReseptFormidler implements MessageGateway {
 
     @Override
     public Element processRequest(Element request) {
-        return logResponse(validator.validate(createResponse(logRequest(validator.validate(request)))));
+        return logResponse(validateMessage(createResponse(logRequest(validateMessage(request)))));
+    }
+
+    private Element validateMessage(Element request) {
+        if (!request.getName().equals(HEAD.name("MsgHead"))) {
+            throw new IllegalArgumentException("Should be MsgHead, was " + request);
+        }
+        return validator.validate(request);
     }
 
     private Element logResponse(Element element) {
@@ -100,63 +107,27 @@ public class FakeReseptFormidler implements MessageGateway {
         return element;
     }
 
-    private Element createResponse(Element request) {
+    private Element createResponse(Element message) {
+        Element request = message.find("Document", "RefDoc", "Content", "*").first();
+        Element senderOrganization = message.find("MsgInfo", "Sender", "Organisation").first();
+
         if (request.tagName().equals("ForesporselReseptUtleverer")) {
-
             String nationalId = request.find("Fnr").first().text();
-
-            Element prescriptionList = M92.el("Reseptliste");
-            for (MedicationOrder medicationOrder : prescriptionsForPerson.getOrDefault(nationalId, new ArrayList<>())) {
-                prescriptionList.add(M92.el("Reseptinfo",
-                        M92.el("Forskrivningsdato", medicationOrder.getDateWritten().toString()),
-                        M92.el("Fornavn", medicationOrder.getSubject().getDisplay()),
-                        M92.el("Etternavn", medicationOrder.getSubject().getDisplay()),
-                        M92.el("RekvirentId", medicationOrder.getPrescriber().getReference()),
-                        M92.el("NavnRekvirent", medicationOrder.getPrescriber().getDisplay()),
-                        M92.el("NavnFormStyrke", medicationOrder.getMedication().getDisplay()),
-                        M92.el("EndretFarmasoyt"),
-                        M92.el("ReseptId", medicationOrder.getPrescriptionId()),
-                        M92.el("Status"),
-                        M92.el("Vergeinnsynsreservasjon", "false")
-                        ));
-            }
-            return prescriptionList;
+            List<MedicationOrder> medicalOrders = prescriptionsForPerson.getOrDefault(nationalId, new ArrayList<>());
+            return generateM92Envelope(medicalOrders, senderOrganization);
         } else if (request.tagName().equals("M93")) {
-            MedicationOrder order = prescriptionsById.get(request.find("ReseptId").first().text());
-
-            Element prescription = M1.el("Resept",
-                    M1.el("Forskrivningsdato", order.getDateWritten().toString()),
-                    M1.el("Utloper", LocalDate.now().plusMonths(1).toString()),
-                    M1.el("ReseptDokLegemiddel",
-                            M1.el("Varegruppekode").attr("V", "L"),
-                            M1.el("Reiterasjon", "1"),
-                            F.el("Forskrivning",
-                                    F.el("DosVeiledEnkel", order.getDosageText()),
-                                    F.el("Legemiddelpakning",
-                                            F.el("NavnFormStyrke", order.getMedicationName()),
-                                            F.el("Reseptgruppe"),
-                                            F.el("Varenr", order.getMedication().getProductId())
-                                            ))
-                            ),
-                    M1.el("OppdatertFest", LocalDate.now().minusDays(5).atStartOfDay(ZoneId.systemDefault()).toInstant().toString())
-                    );
-            Element prescriptionDoc = HEAD.el("MsgHead",
-                    msgInfo("ERM1", order.getPrescriber(), order.getSubject()),
-                    includedDocument(prescription));
-            return HEAD.el("MsgHead",
-                    msgInfo("ERM94", null, null),
-                    includedDocument(M94.el("ReseptNedlasting", M94.el("Status"))),
-                    encodedDocument(prescriptionDoc));
+            String prescriptionId = request.find("ReseptId").first().text();
+            MedicationOrder order = prescriptionsById.get(prescriptionId);
+            return generateM94Envelope(order, senderOrganization);
         } else if (request.tagName().equals("Utleveringsrapport")) {
             String prescriptionId = request.find("Utlevering", "ReseptId").first().text();
-            String dosageText = request.find("Utlevering", "ReseptDokLegemiddel", "Forskrivning").check().find("DosVeiledEnkel").firstTextOrNull();
+            String dosageText = request.find("Utlevering", "ReseptDokLegemiddel", "Forskrivning").check()
+                    .find("DosVeiledEnkel").firstTextOrNull();
             printedDosageTexts
                 .computeIfAbsent(prescriptionId, s -> new ArrayList<>())
                 .add(dosageText);
-
-
             return HEAD.el("MsgHead",
-                    msgInfo("M10", null, null),
+                    msgInfo("M10", organizationReseptFormidleren(), senderOrganization, null),
                     HEAD.el("Document",
                             HEAD.el("RefDoc",
                                     HEAD.el("MsgType").attr("V", "XML"),
@@ -166,8 +137,55 @@ public class FakeReseptFormidler implements MessageGateway {
         }
     }
 
+    private Element generateM92Envelope(List<MedicationOrder> medicalOrders, Element sender) {
+        Element prescriptionList = M92.el("Reseptliste");
+        for (MedicationOrder medicationOrder : medicalOrders) {
+            prescriptionList.add(M92.el("Reseptinfo",
+                    M92.el("Forskrivningsdato", medicationOrder.getDateWritten().toString()),
+                    M92.el("Fornavn", medicationOrder.getSubject().getDisplay()),
+                    M92.el("Etternavn", medicationOrder.getSubject().getDisplay()),
+                    M92.el("RekvirentId", medicationOrder.getPrescriber().getReference()),
+                    M92.el("NavnRekvirent", medicationOrder.getPrescriber().getDisplay()),
+                    M92.el("NavnFormStyrke", medicationOrder.getMedication().getDisplay()),
+                    M92.el("EndretFarmasoyt"),
+                    M92.el("ReseptId", medicationOrder.getPrescriptionId()),
+                    M92.el("Status"),
+                    M92.el("Vergeinnsynsreservasjon", "false")
+                    ));
+        }
+        return HEAD.el("MsgHead",
+                msgInfo("ERM92", organizationReseptFormidleren(), sender, null),
+                includedDocument(prescriptionList));
+    }
+
+    private Element generateM94Envelope(MedicationOrder order, Element senderOrganization) {
+        Element prescription = M1.el("Resept",
+                M1.el("Forskrivningsdato", order.getDateWritten().toString()),
+                M1.el("Utloper", LocalDate.now().plusMonths(1).toString()),
+                M1.el("ReseptDokLegemiddel",
+                        M1.el("Varegruppekode").attr("V", "L"),
+                        M1.el("Reiterasjon", "1"),
+                        F.el("Forskrivning",
+                                F.el("DosVeiledEnkel", order.getDosageText()),
+                                F.el("Legemiddelpakning",
+                                        F.el("NavnFormStyrke", order.getMedicationName()),
+                                        F.el("Reseptgruppe"),
+                                        F.el("Varenr", order.getMedication().getProductId())
+                                        ))
+                        ),
+                M1.el("OppdatertFest", LocalDate.now().minusDays(5).atStartOfDay(ZoneId.systemDefault()).toInstant().toString())
+                );
+        Element prescriptionDoc = HEAD.el("MsgHead",
+                msgInfo("ERM1", order.getPrescriber(), order.getSubject()),
+                includedDocument(prescription));
+        return HEAD.el("MsgHead",
+                msgInfo("ERM94", organizationReseptFormidleren(), senderOrganization, null),
+                includedDocument(M94.el("ReseptNedlasting", M94.el("Status"))),
+                encodedDocument(prescriptionDoc));
+    }
+
     private Element encodedDocument(Element element) {
-        validator.validate(element);
+        validateMessage(element);
         return HEAD.el("Document",
                 HEAD.el("RefDoc",
                         HEAD.el("MsgType").attr("V", "XML"),
@@ -185,9 +203,7 @@ public class FakeReseptFormidler implements MessageGateway {
     }
 
     private Element msgInfo(String type, PersonReference prescriber, PersonReference subject) {
-        Element senderOrganization = HEAD.el("Organisation",
-                HEAD.el("OrganisationName", "Reseptformidleren (test)"),
-                HEAD.el("Ident", HEAD.el("Id", "965336796"), HEAD.el("TypeId").attr("V", "ENH")));
+        Element senderOrganization = organizationReseptFormidleren();
         if (prescriber != null) {
             senderOrganization.add(HEAD.el("HealthcareProfessional",
                     HEAD.el("FamilyName", prescriber.getLastName()),
@@ -195,22 +211,38 @@ public class FakeReseptFormidler implements MessageGateway {
                     HEAD.el("Ident", HEAD.el("Id", prescriber.getReference()), HEAD.el("TypeId"))
                     ));
         }
+        Element receiver = HEAD.el("Organisation",
+                HEAD.el("OrganisationName", "Kjell, Drugs and Rock 'n' Roll "),
+                HEAD.el("Ident", HEAD.el("Id", "80624"), HEAD.el("TypeId").attr("V", "HER")));
+        Element patient = null;
+        if (subject != null) {
+            patient = HEAD.el("Patient",
+                    HEAD.el("FamilyName", subject.getLastName()),
+                    HEAD.el("GivenName", subject.getFirstName()),
+                    HEAD.el("Ident",
+                            HEAD.el("Id", patientRepository.lookupPatientNationalId(subject)),
+                            HEAD.el("TypeId").attr("V", "FNR")));
+        }
+        return msgInfo(type, senderOrganization, receiver, patient);
+    }
+
+    private Element organizationReseptFormidleren() {
+        return HEAD.el("Organisation",
+                HEAD.el("OrganisationName", "Reseptformidleren (test)"),
+                HEAD.el("Ident", HEAD.el("Id", "965336796"), HEAD.el("TypeId").attr("V", "ENH")));
+    }
+
+    private Element msgInfo(String type, Element sender, Element receiver, Element patient) {
         Element result = HEAD.el("MsgInfo",
                 HEAD.el("Type").attr("V", type),
                 HEAD.el("MIGversion", "v1.2 2006-05-24"),
                 HEAD.el("GenDate", Instant.now().toString()),
                 HEAD.el("MsgId", UUID.randomUUID().toString()),
-                HEAD.el("Sender", senderOrganization),
-                HEAD.el("Receiver", HEAD.el("Organisation",
-                        HEAD.el("OrganisationName", "Kjell, Drugs and Rock 'n' Roll "),
-                        HEAD.el("Ident", HEAD.el("Id", "80624"), HEAD.el("TypeId").attr("V", "HER")))));
-        if (subject != null) {
-            result.add(HEAD.el("Patient",
-                    HEAD.el("FamilyName", subject.getLastName()),
-                    HEAD.el("GivenName", subject.getFirstName()),
-                    HEAD.el("Ident",
-                            HEAD.el("Id", patientRepository.lookupPatientNationalId(subject)),
-                            HEAD.el("TypeId").attr("V", "FNR"))));
+                HEAD.el("Sender", sender),
+                // TODO: This should be taken from the request
+                HEAD.el("Receiver", receiver));
+        if (patient != null) {
+            result.add(patient);
         }
         return result;
     }

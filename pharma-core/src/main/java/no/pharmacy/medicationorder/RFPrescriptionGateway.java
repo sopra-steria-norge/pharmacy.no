@@ -1,9 +1,11 @@
 package no.pharmacy.medicationorder;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 import org.eaxy.Document;
 import org.eaxy.Element;
@@ -18,6 +20,8 @@ import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.patient.PatientRepository;
 
 public class RFPrescriptionGateway implements PrescriptionGateway {
+
+    private static final Namespace HEAD = new Namespace("http://www.kith.no/xmlstds/msghead/2006-05-24", "HEAD");
 
     private static final Namespace M1 = new Namespace("http://www.kith.no/xmlstds/eresept/m1/2013-10-08", "M1");
     private static final Namespace M91 = new Namespace("http://www.kith.no/xmlstds/eresept/m91/2013-10-08", "M91");
@@ -43,9 +47,43 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
         if (nationalId == null) {
             return new ArrayList<>();
         }
-        Element orderListRequest = createOrderListRequest(nationalId, employeeId);
-        Element orderListResponse = messageGateway.processRequest(orderListRequest);
+        Element orderListResponse = messageGateway.processRequest(
+                msgHead(msgInfo("ERM92", sender(), getReseptFormidleren()),
+                        createOrderListRequest(nationalId, employeeId)));
         return decodeMedicationOrderListResponse(orderListResponse);
+    }
+
+    private Element sender() {
+        return HEAD.el("Organisation",
+                HEAD.el("OrganisationName", "Kjell, Drugs and Rock 'n' Roll "),
+                HEAD.el("Ident", HEAD.el("Id", "80624"), HEAD.el("TypeId").attr("V", "HER")));
+    }
+
+    private Element getReseptFormidleren() {
+        Element reseptFormidler = HEAD.el("Organisation",
+                HEAD.el("OrganisationName", "Reseptformidleren (test)"),
+                HEAD.el("Ident", HEAD.el("Id", "965336796"), HEAD.el("TypeId").attr("V", "ENH")));
+        return reseptFormidler;
+    }
+
+    private Element msgHead(Element msgInfo, Element request) {
+        return HEAD.el("MsgHead",
+                msgInfo,
+                HEAD.el("Document",
+                        HEAD.el("RefDoc",
+                                HEAD.el("MsgType").attr("V", "XML"),
+                                HEAD.el("Content",
+                                        request))));
+    }
+
+    private Element msgInfo(String type, Element sender, Element receiver) {
+        return HEAD.el("MsgInfo",
+            HEAD.el("Type").attr("V", type),
+            HEAD.el("MIGversion", "v1.2 2006-05-24"),
+            HEAD.el("GenDate", Instant.now().toString()),
+            HEAD.el("MsgId", UUID.randomUUID().toString()),
+            HEAD.el("Sender", sender),
+            HEAD.el("Receiver", receiver));
     }
 
     private Document findPrescriptionDocument(Element orderListResponse) {
@@ -64,7 +102,7 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
 
     private List<MedicationOrderSummary> decodeMedicationOrderListResponse(Element orderListResponse) {
         List<MedicationOrderSummary> summary = new ArrayList<>();
-        for (Element prescriptionInfo : orderListResponse.find("Reseptinfo")) {
+        for (Element prescriptionInfo : orderListResponse.find("Document", "RefDoc", "Content", "Reseptliste", "Reseptinfo").check()) {
             MedicationOrderSummary medicationOrderSummary = new MedicationOrderSummary();
             medicationOrderSummary.setPrescriptionId(prescriptionInfo.find("ReseptId").first().text());
             medicationOrderSummary.setMedicationName(prescriptionInfo.find("NavnFormStyrke").first().text());
@@ -100,20 +138,22 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
     }
 
     @Override
-    public MedicationOrder startMedicationOrderDispense(String prescriptionId, String referenceNumber,
-            String employeeId) {
-        Element dispenseMedicationOrderRequest = createDispenseMedicationOrderRequest(prescriptionId, employeeId);
-        Element medicationOrderResponse = messageGateway.processRequest(dispenseMedicationOrderRequest);
+    public MedicationOrder startMedicationOrderDispense(String prescriptionId, String referenceNumber, String employeeId) {
+        Element medicationOrderResponse = messageGateway.processRequest(
+                msgHead(
+                        msgInfo("ERM93", sender(), getReseptFormidleren()),
+                        createDispenseMedicationOrderRequest(prescriptionId, employeeId)));
         return decodeMedicationOrder(prescriptionId, medicationOrderResponse);
     }
 
     private MedicationOrder decodeMedicationOrder(String prescriptionId, Element medicationOrderResponse) {
         Document prescriptionDocument = findPrescriptionDocument(medicationOrderResponse);
         MedicationOrder medicationOrder = new MedicationOrder();
-        String productId = prescriptionDocument.find("Document", "RefDoc", "Content", "Resept", "ReseptDokLegemiddel", "Forskrivning", "Legemiddelpakning", "Varenr").first().text();
+        Element prescription = prescriptionDocument.find("Document", "RefDoc", "Content", "Resept").first();
+        String productId = prescription.find("ReseptDokLegemiddel", "Forskrivning", "Legemiddelpakning", "Varenr").first().text();
         medicationOrder.setMedication(medicationRepository.findByProductId(productId).get());
-        medicationOrder.setDateWritten(LocalDate.parse(prescriptionDocument.find("Document", "RefDoc", "Content", "Resept", "Forskrivningsdato").first().text()));
-        medicationOrder.setDosageText(prescriptionDocument.find("Document", "RefDoc", "Content", "Resept", "ReseptDokLegemiddel", "Forskrivning", "DosVeiledEnkel").first().text());
+        medicationOrder.setDateWritten(LocalDate.parse(prescription.find("Forskrivningsdato").first().text()));
+        medicationOrder.setDosageText(prescription.find("ReseptDokLegemiddel", "Forskrivning", "DosVeiledEnkel").first().text());
         medicationOrder.setPrescriptionId(prescriptionId);
         Element prescriber = prescriptionDocument.find("MsgInfo", "Sender", "Organisation", "HealthcareProfessional").first();
         medicationOrder.setPrescriber(new PersonReference(
@@ -141,9 +181,9 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
 
     @Override
     public void completeDispense(MedicationDispense dispense, String employeeId) {
-        Element request = createMedicationDispenseRequest(dispense, employeeId);
-
-        messageGateway.processRequest(request);
+        messageGateway.processRequest(msgHead(
+                msgInfo("ERM10", sender(), getReseptFormidleren()),
+                createMedicationDispenseRequest(dispense, employeeId)));
     }
 
     private Element createMedicationDispenseRequest(MedicationDispense dispense, String employeeId) {
