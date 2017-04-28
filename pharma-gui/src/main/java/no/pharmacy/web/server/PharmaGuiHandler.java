@@ -13,6 +13,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import lombok.Setter;
+import no.pharmacy.dispense.DispenseOrderService;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.medicationorder.PrescriptionGateway;
@@ -58,8 +59,9 @@ public class PharmaGuiHandler {
             handler.setInitParameter("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
         }
 
-        addServlet(new PrescriptionsController(prescriptionGateway, repository, patientRepository), "/prescriptions/");
-        addServlet(new DispenseOrderController(prescriptionGateway, repository, medicationRepository), "/dispenseOrder/*");
+        DispenseOrderService dispenseOrderService = new DispenseOrderService(prescriptionGateway, repository, patientRepository);
+        addServlet(new PrescriptionsController(prescriptionGateway, repository, patientRepository, dispenseOrderService), "/prescriptions/");
+        addServlet(new DispenseOrderController(repository, medicationRepository, dispenseOrderService), "/dispenseOrder/*");
         addServlet(new PharmacistController(repository), "/pharmacist/*");
         addServlet(new SelectPharmacyController(healthcareServiceRepository), "/selectPharmacy/*");
         addServlet(new PharmacyGuiController(

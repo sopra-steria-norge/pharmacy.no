@@ -47,6 +47,18 @@ public class DispenseOrderService {
         return dispenseOrder;
     }
 
+    public void completeDispenseOrder(DispenseOrder dispenseOrder) {
+        dispenseOrder.setDispensed();
+
+        medicationDispenseRepository.update(dispenseOrder);
+
+        for (MedicationDispense dispense : dispenseOrder.getDispenses()) {
+            prescriptionsGateway.completeDispense(dispense, "123");
+        }
+
+        // TODO: Send M18
+    }
+
     public UUID startPrescriptionQuery(String hprNumber, String herNumber, String nationalId) {
         MedicationOrderQuery query = new MedicationOrderQuery(herNumber, hprNumber);
         List<MedicationOrderSummary> prescriptions = prescriptionsGateway.requestMedicationOrdersToDispense(null, nationalId, herNumber);

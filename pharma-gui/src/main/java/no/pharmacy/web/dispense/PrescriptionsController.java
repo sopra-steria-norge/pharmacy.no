@@ -31,12 +31,11 @@ public class PrescriptionsController extends HttpServlet {
     public PrescriptionsController(
             PrescriptionGateway prescriptionsGateway,
             MedicationDispenseRepository medicationDispenseRepository,
-            PatientRepository patientRepository) {
+            PatientRepository patientRepository, DispenseOrderService dispenseOrderService) {
         this.prescriptionsGateway = prescriptionsGateway;
         this.medicationDispenseRepository = medicationDispenseRepository;
         this.patientRepository = patientRepository;
-
-        dispenseOrderService = new DispenseOrderService(prescriptionsGateway, medicationDispenseRepository, patientRepository);
+        this.dispenseOrderService = dispenseOrderService;
     }
 
     @Override

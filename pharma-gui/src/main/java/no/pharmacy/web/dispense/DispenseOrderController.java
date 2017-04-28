@@ -9,23 +9,23 @@ import javax.servlet.http.HttpServletResponse;
 import org.eaxy.Document;
 import no.pharmacy.core.Money;
 import no.pharmacy.dispense.DispenseOrder;
+import no.pharmacy.dispense.DispenseOrderService;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationRepository;
-import no.pharmacy.medicationorder.PrescriptionGateway;
 
 public class DispenseOrderController extends HttpServlet {
 
     private MedicationDispenseRepository prescriptionRepository;
     MedicationRepository medicationRepository;
-    private PrescriptionGateway prescriptionGateway;
+    private DispenseOrderService dispenseOrderService;
 
-    public DispenseOrderController(PrescriptionGateway prescriptionGateway, MedicationDispenseRepository medicationDispenseRepository,
-            MedicationRepository medicationRepository) {
-        this.prescriptionGateway = prescriptionGateway;
+    public DispenseOrderController(MedicationDispenseRepository medicationDispenseRepository, MedicationRepository medicationRepository,
+            DispenseOrderService dispenseOrderService) {
         this.prescriptionRepository = medicationDispenseRepository;
         this.medicationRepository = medicationRepository;
+        this.dispenseOrderService = dispenseOrderService;
     }
 
     @Override
@@ -114,13 +114,8 @@ public class DispenseOrderController extends HttpServlet {
             }
         } else if (parts[2].equals("dispense")) {
             order.setCustomerSignature(req.getParameter("customerSignature"));
-            order.setDispensed();
 
-            prescriptionRepository.update(order);
-
-            for (MedicationDispense dispense : order.getDispenses()) {
-                prescriptionGateway.completeDispense(dispense, "123");
-            }
+            dispenseOrderService.completeDispenseOrder(order);
 
             String uri = req.getRequestURI();
             resp.sendRedirect(uri.substring(0,  uri.lastIndexOf('/')));

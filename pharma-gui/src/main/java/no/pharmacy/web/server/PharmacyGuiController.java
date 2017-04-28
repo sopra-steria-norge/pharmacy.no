@@ -441,8 +441,9 @@ public class PharmacyGuiController extends HttpServlet {
 
             JsonObject prescriptions = JsonParser.parseToObject(req.getParameter("JSON"));
             order.setCustomerSignature(prescriptions.requiredString("customerSignature"));
-            order.setDispensed();
-            repository.update(order);
+
+            dispenseOrderService.completeDispenseOrder(order);
+
             return "/pharmacies/#" + herNumber + "/index";
         });
 
