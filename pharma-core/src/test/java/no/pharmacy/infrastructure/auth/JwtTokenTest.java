@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -15,13 +16,13 @@ import org.junit.Test;
 public class JwtTokenTest {
 
     private String sampleToken =
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImEzUU4wQlpTN3M0bk4tQmRyamJGMFlfTGRNTSIsImtpZCI6ImEzUU4wQlpTN3M0bk4tQmRyamJGMFlfTGRNTSJ9.eyJhdWQiOiIzZWY0NDdjZS1kZmQ0LTRjYzItYTA2MS1hOTBlNmJkYjY1MTMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9iYmY3N2E4Zi03ZmE4LTQ1YTAtODFkYi03YWQzNDVhMzQ5YzAvIiwiaWF0IjoxNDkxMzI5NDM2LCJuYmYiOjE0OTEzMjk0MzYsImV4cCI6MTQ5MTMzMzMzNiwiYW1yIjpbInB3ZCJdLCJjX2hhc2giOiItWUlCdmVSeW1yOVc5VC1DbzFLdmtnIiwiZmFtaWx5X25hbWUiOiJCcm9kd2FsbCIsImdpdmVuX25hbWUiOiJKb2hhbm5lcyIsImlwYWRkciI6Ijk1LjM0LjEwNS4yMzkiLCJuYW1lIjoiSm9oYW5uZXMgQnJvZHdhbGwiLCJub25jZSI6Ijg4ODhlOThhLWNiNjYtNGQyOS04ZDM0LTQ1YzBlNGZkYmY2OCIsIm9pZCI6IjRiMjg5MGJmLWI5NmEtNGE4ZC1iZjE2LTU3NjRmMGJkYzEyOSIsIm9ucHJlbV9zaWQiOiJTLTEtNS0yMS00MDU3NzczNzI0LTQyNDg2MTA3MzQtMzU1MTUxODkxMC0zMzcwMSIsInBsYXRmIjoiMyIsInN1YiI6IjNMV3J3MWZNeFF6cVdDbmlwdW95T2RRUC1hMXQwVFZ6eG9oaVBfX2VtQjAiLCJ0aWQiOiJiYmY3N2E4Zi03ZmE4LTQ1YTAtODFkYi03YWQzNDVhMzQ5YzAiLCJ1bmlxdWVfbmFtZSI6ImpvaGFubmVzLmJyb2R3YWxsQHJlbWEubm8iLCJ1cG4iOiJqb2hhbm5lcy5icm9kd2FsbEByZW1hLm5vIiwidXRpIjoiOEFLTGI0YkYza0NudlozZ2pHOG9BQSIsInZlciI6IjEuMCJ9.YdYahrRcar5x1hYjCFEgdo8td52qJ0Dvwi12vUAWl02mamwD4V1xjV6weXzQe9PBHlAkNSiEfWaKyiZN5ldXlIEdMb29GX4-r6D7U5v-bR2urXRQP0YS7oKR7-5YOJV-LAQ5Z7nWm1Vhp3_7gak7srn3YtBdjH1p-GdDClFGrZYHEyVOOUrYvJncUwmFhbGSa9H8YNjEtRUJN0r-1iw4saioUld9y4oS71uUmTM3R1srlU01GP7X_PJj1oDUX24eg_Iss0EDfE4gY3-AofZsYfNBzUjqQIXjV9R_2ysR0Mua3kCxo0B3ktldlxKPNuzeialpFx3VSDIdwUVuJBULTA";
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6InV1a2hnb2VBbGdLR0NxTzlmWVlWNGZOMWtUZyIsImtpZCI6InV1a2hnb2VBbGdLR0NxTzlmWVlWNGZOMWtUZyJ9.eyJhdWQiOiJhMjg0NmM4MS01OTU5LTQxODctOGJlYy03NmNiNGZhYWUyY2IiLCJpc3MiOiJodHRwczovL2RpZmEtYWRmcy1pZi5kaWZhLmFkL2FkZnMiLCJpYXQiOjE0OTM0MDc4NjUsImV4cCI6MTQ5MzQxMTQ2NSwiYXV0aF90aW1lIjoxNDkzNDA3ODE3LCJub25jZSI6Ijk4M2NiZGJkLWE5ZTktNGEwNC04ZjY3LWE1ZDI0Mzc5MGE0MSIsInN1YiI6IlZOZTZMdjBVK1hhaWlGT1pVdmFpY0puWCtER0lISmZIL0ovVzQzd3Q2ZnM9IiwidXBuIjoiam9oYW5uZXNib290c0BkaWZhLmFkIiwicHdkX2V4cCI6IjI1OTI1NDAiLCJ1bmlxdWVfbmFtZSI6IkpvaGFubmVzIEFwb3Rla25payIsIkhFUi1udW1iZXJzIjoiOTAzOTYiLCJVc2VyR3JvdXBzIjoiZGlmYVxcRG9tYWluIFVzZXJzIiwiSFBSLW51bWJlciI6IjIwMTQ3NzciLCJyb2xlIjoiUm9sZSIsImFwcHR5cGUiOiJQdWJsaWMiLCJhcHBpZCI6ImEyODQ2YzgxLTU5NTktNDE4Ny04YmVjLTc2Y2I0ZmFhZTJjYiIsImF1dGhtZXRob2QiOiJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YWM6Y2xhc3NlczpQYXNzd29yZFByb3RlY3RlZFRyYW5zcG9ydCIsInZlciI6IjEuMCIsInNjcCI6Im9wZW5pZCJ9.nN3_PpMEt9JgCxZyCxVx7hDrpALhDUuB3ZjpuKFFAiH0IPWKE3cvxKu_j_5NVRBT6U3kL96wfwa6FxsfoXnXUhMqULqztpErZK7Sy1QD3VWWxljbm1cmkHtudSMBAEsqZx209lcft_wmQHkbG9KBWZ6ZbE-kftCpGNk8ppC7oEYYqJg_rnBNR5ppi6nDqHk8hGyth7xPN5p1AMVv8EFjdfjkSlmLtKknL4iemRRo_uDcuVlESF8b2CLbmFR80LHpGpI9LrYfNd5A-1N8bltcPIT8lSwDhWIvRKP6ULPhdF1aI-dGL_FyNL-ecyknphuh1cXMbtQ4H2qeWH3dGpCX8g";
     private JwtToken jwtToken = new JwtToken(sampleToken);
-    private Instant tokenCreationTime = Instant.ofEpochMilli(1491330363304L);
+    private Instant tokenCreationTime = Instant.ofEpochMilli(1493407817000L);
 
     @Test
     public void shouldReadTokenProperties() throws Exception {
-        assertThat(jwtToken.aud()).isEqualTo("3ef447ce-dfd4-4cc2-a061-a90e6bdb6513");
+        assertThat(jwtToken.aud()).isEqualTo("a2846c81-5959-4187-8bec-76cb4faae2cb");
     }
 
     @Test
@@ -31,6 +32,9 @@ public class JwtTokenTest {
 
     @Test
     public void shouldAcceptNonexpiredToken() throws Exception {
+        assertThat(tokenCreationTime.atZone(ZoneId.systemDefault()).getYear()).isEqualTo(2017);
+        assertThat(jwtToken.authTime()).hasValue(tokenCreationTime);
+        assertThat(jwtToken.claim("auth_time")).hasValue(String.valueOf(tokenCreationTime.toEpochMilli()/1000));
         assertThat(jwtToken.verifyTimeValidity(tokenCreationTime)).isTrue();
     }
 

@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import org.jsonbuddy.JsonObject;
 import org.jsonbuddy.parse.JsonParser;
 import org.slf4j.Logger;
@@ -63,7 +62,7 @@ public class JwtToken {
     }
 
     public boolean verifyTimeValidity(Instant instant) {
-        if (instant.isBefore(nbf().orElse(Instant.MIN))) {
+        if (instant.isBefore(nbf().orElse(authTime().orElse(Instant.MIN)))) {
             logger.warn("JWT not valid yet! " + payload);
             return false;
         }
@@ -107,6 +106,10 @@ public class JwtToken {
 
     private Optional<Instant> nbf() {
         return payload.longValue("nbf").map(Instant::ofEpochSecond);
+    }
+
+    public Optional<Instant> authTime() {
+        return payload.longValue("auth_time").map(Instant::ofEpochSecond);
     }
 
     /**
@@ -163,6 +166,7 @@ public class JwtToken {
             return getCertificate(keyUrl, jwtHeader.requiredString("kid"));
         } else if (iss().startsWith("https:")) {
             // TODO: Use authority
+            https://authortiy/.wellknown/...
             return getCertificate(iss() + "/discovery/keys", jwtHeader.requiredString("kid"));
         } else {
             throw new IllegalArgumentException("Unknown issuer " + iss());
@@ -242,5 +246,6 @@ public class JwtToken {
     private Optional<String> upn() {
         return claim("upn");
     }
+
 
 }
