@@ -261,6 +261,10 @@ public class PharmacyGuiController extends HttpServlet {
         return pharmacyPrincipal;
     }
 
+    // TODO: There are three ways we respond to a post - we need a unifying concept:
+    //   1. Redirect (a persumed browser) to /pharmacies#<location>
+    //   2. 201 Created with location header to a (presumed API) client
+    //   3. Write JSON to the response (200 ok)s
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String pathInfo = req.getPathInfo();
@@ -285,6 +289,7 @@ public class PharmacyGuiController extends HttpServlet {
             match.matches();
             String herNumber = match.group(1);
 
+            // TODO: This should be encapsulated and used everywhere
             JsonObject queryJson;
             if (request.getContentType().equals("application/json")) {
                 queryJson = parseJsonObject(req);
@@ -293,6 +298,7 @@ public class PharmacyGuiController extends HttpServlet {
             }
 
 
+            // TODO Should save query time and use it to validate that it's only used for a limited time
             HealthRecordQuery query = new HealthRecordQuery();
             query.setOrganizationHerNumber(herNumber);
             query.setOperatorHprNumber(principal.getHprNumber());

@@ -27,6 +27,7 @@ import ch.qos.logback.classic.Level;
 import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
 import no.pharmacy.infrastructure.CryptoUtil;
 import no.pharmacy.infrastructure.logging.LogConfiguration;
+import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.medicationorder.RFPrescriptionGateway;
@@ -122,7 +123,8 @@ public class PharmaServer {
         JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(createMedicationDataSource());
         // TODO: Implement with lastmodified timestamp and checksum
         // TODO: Implement with timestamp entry checking
-        medicationRepository.refresh(getClass().getResource("/seed/fest-mini.xml.gz"));
+        //medicationRepository.refresh(getClass().getResource("/seed/fest-mini.xml.gz"));
+        medicationRepository.refresh(FestMedicationImporter.FEST_URL);
         return medicationRepository;
     }
 

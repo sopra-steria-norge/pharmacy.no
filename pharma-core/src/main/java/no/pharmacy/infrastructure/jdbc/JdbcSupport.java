@@ -197,6 +197,7 @@ public class JdbcSupport {
         }
     }
 
+    // TODO: The encryption is very weak. Can you see why? Can you fix it? :-)
     public String encrypt(String plainText) {
         if (plainText == null) {
             return null;

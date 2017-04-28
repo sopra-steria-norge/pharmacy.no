@@ -6,6 +6,7 @@ import java.util.UUID;
 import no.pharmacy.dispense.DispenseOrder;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 
+// TODO This class doesn't carry it's own weight - it purely delegates
 public class HealthRecordService {
 
     private MedicationDispenseRepository medicationDispenseRepository;
