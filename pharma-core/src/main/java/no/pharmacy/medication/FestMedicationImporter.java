@@ -62,7 +62,7 @@ public class FestMedicationImporter {
             File festFile = new File("target/fest251.zip");
 
             logger.info("Downloading {}", url);
-            IOUtil.copy(url, festFile);
+            IOUtil.copy(url, festFile, new File("target/tmp"));
             logger.info("Downloaded {} into {}", url, festFile);
 
             try (ZipInputStream zip = new ZipInputStream(new FileInputStream(festFile))) {

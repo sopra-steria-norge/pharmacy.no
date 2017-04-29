@@ -24,7 +24,11 @@ import java.util.Base64;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.pharmacy.infrastructure.rest.RestException;
 import no.pharmacy.infrastructure.rest.RestHttpException;
@@ -32,6 +36,8 @@ import no.pharmacy.infrastructure.rest.RestHttpNotFoundException;
 import no.pharmacy.infrastructure.rest.RestInvalidUserException;
 
 public class IOUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(IOUtil.class);
 
     public static void post(String content, URL url) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -86,16 +92,33 @@ public class IOUtil {
         copy(content, new OutputStreamWriter(out, charset));
     }
 
-    public static void copy(URL url, File file) throws IOException {
+    public static void copy(URL url, File file, File tempDir) throws IOException {
+        File dir = file.getParentFile();
+        ensureDirectory(dir);
         if (!file.exists() || file.length() == 0) {
+            ensureDirectory(tempDir);
+            File tempFile = new File(tempDir, file.getName());
+            logger.debug("Downloading {} to temporary file {}", url, tempFile);
             try (InputStream input = url.openStream()) {
-                try (FileOutputStream output = new FileOutputStream(file)) {
+                try (FileOutputStream output = new FileOutputStream(tempFile)) {
                     copy(input, output);
                 }
+                logger.debug("Moving temporary file {} to {}", tempFile, file);
+                tempFile.renameTo(file);
+            } finally {
+                tempFile.delete();
             }
+        } else {
+            logger.debug("{} already downloaded", file);
         }
         if (!file.isFile() || !file.canRead()) {
             throw new RuntimeException("Failed to create readable file " + url);
+        }
+    }
+
+    private static void ensureDirectory(File dir) throws IOException {
+        if (!dir.isDirectory() &&  !dir.mkdirs()) {
+            throw new IOException("Failed to create directory " + dir);
         }
     }
 
@@ -109,6 +132,12 @@ public class IOUtil {
         for (String string : lines) {
             writer.write(string);
             writer.write("\n");
+        }
+    }
+
+    public static void copy(InputStream inputStream, File file) throws IOException {
+        try (OutputStream output = new FileOutputStream(file)) {
+            copy(inputStream, output);
         }
     }
 
@@ -265,4 +294,21 @@ public class IOUtil {
         }
         return resourceStream;
     }
+
+    public static File extract(ZipFile zipFile, ZipEntry entry, File dir) {
+        File target = new File(dir, entry.getName());
+        if (target.lastModified() > new File(zipFile.getName()).lastModified()) {
+            logger.debug("Not extracting {} - already newer than {}", target, zipFile.getName());
+            return target;
+        }
+        try {
+            ensureDirectory(dir);
+            logger.debug("Extracting {}!{} to {}", zipFile.getName(), entry, target);
+            copy(zipFile.getInputStream(entry), target);
+            return target;
+        } catch (IOException e) {
+            throw ExceptionUtil.softenException(e);
+        }
+    }
+
 }
