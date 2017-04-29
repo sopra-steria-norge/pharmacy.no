@@ -20,6 +20,8 @@ public class TestDataSource {
 
     private static DataSource organizationsDataSource;
 
+    private static DataSource practitionersDataSource;
+
     public synchronized static DataSource medicationInstance() {
         if (medicationsDataSource == null) {
             medicationsDataSource = createMemDataSource("medications");
@@ -39,6 +41,13 @@ public class TestDataSource {
             patientDataSource = createMemDataSource("patient");
         }
         return patientDataSource;
+    }
+
+    public static DataSource practitionersInstance() {
+        if (practitionersDataSource == null) {
+            practitionersDataSource = createMemDataSource("practitioners");
+        }
+        return practitionersDataSource;
     }
 
     public static synchronized DataSource organizationsDataSource() {

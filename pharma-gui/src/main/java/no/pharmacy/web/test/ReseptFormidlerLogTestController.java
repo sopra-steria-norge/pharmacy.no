@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.MessageLogEntry;
 import no.pharmacy.test.PrescriptionSimulator;
 

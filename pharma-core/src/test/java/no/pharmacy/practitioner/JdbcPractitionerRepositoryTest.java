@@ -13,12 +13,12 @@ import no.pharmacy.test.TestDataSource;
 public class JdbcPractitionerRepositoryTest {
 
     private JdbcPractitionerRepository repository = new JdbcPractitionerRepository(
-            TestDataSource.createMemDataSource("practitioners"),
+            TestDataSource.practitionersInstance(),
             CryptoUtil.aesKey("sdgsdg lsdngdlsdnglsndg".getBytes()));
 
     @Test
     public void shouldImportHpr() throws Exception {
-        repository.refresh(getClass().getResource("/seed/hpr-mini/"));
+        repository.refresh(JdbcPractitionerRepository.SEED_URL);
 
         assertThat(repository.listDoctors())
                 .extracting(PersonReference::getReference)
@@ -35,15 +35,15 @@ public class JdbcPractitionerRepositoryTest {
 
     @Test
     public void shouldOnlyImportAuthorizationsOnce() throws Exception {
-        repository.refresh(getClass().getResource("/seed/hpr-mini/"));
-        repository.refresh(getClass().getResource("/seed/hpr-mini/"));
+        repository.refresh(JdbcPractitionerRepository.SEED_URL);
+        repository.refresh(JdbcPractitionerRepository.SEED_URL);
         assertThat(repository.getAuthorizations(1002104))
             .containsOnlyOnce(PractionerAuthorization.DOCTOR);
     }
 
     @Test
     public void shouldImportUpdates() throws IOException {
-        repository.refresh(getClass().getResource("/seed/hpr-mini/"));
+        repository.refresh(JdbcPractitionerRepository.SEED_URL);
 
         Practitioner practitioner = repository.getPractitioner("1002104").get();
         assertThat(practitioner).hasNoNullFieldsOrProperties();

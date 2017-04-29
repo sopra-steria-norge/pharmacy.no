@@ -18,6 +18,7 @@ import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 public class JdbcPractitionerRepository implements PractitionerRepository {
 
     private JdbcSupport jdbcSupport;
+    public static final URL SEED_URL = JdbcPractitionerRepository.class.getResource("/seed/hpr-mini/");
 
     public JdbcPractitionerRepository(DataSource dataSource, SecretKey secretKey) {
         jdbcSupport = new JdbcSupport(dataSource);

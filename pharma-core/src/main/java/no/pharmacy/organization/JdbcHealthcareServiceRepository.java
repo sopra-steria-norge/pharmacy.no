@@ -13,10 +13,12 @@ import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 
 public class JdbcHealthcareServiceRepository implements HealthcareServiceRepository {
 
+    public static final URL SEED_URL = JdbcHealthcareServiceRepository.class.getResource("/seed/AR-mini.xml.gz");
     private JdbcSupport jdbcSupport;
 
-    public JdbcHealthcareServiceRepository(DataSource dataSource) {
+    public JdbcHealthcareServiceRepository(DataSource dataSource, URL seedUrl) {
         this.jdbcSupport = new JdbcSupport(dataSource);
+        refresh(seedUrl);
     }
 
     @Override
@@ -61,8 +63,7 @@ public class JdbcHealthcareServiceRepository implements HealthcareServiceReposit
     }
 
 
-    @Override
-    public void refresh(URL path) {
+    void refresh(URL path) {
         ArHealthcareServiceImporter importer = new ArHealthcareServiceImporter(this, jdbcSupport);
         importer.refresh(path);
     }

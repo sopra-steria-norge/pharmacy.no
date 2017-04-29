@@ -11,8 +11,6 @@ public interface HealthcareServiceRepository {
 
     void update(HealthcareService organization);
 
-    void refresh(URL path);
-
     HealthcareService retrieve(String herNumber);
 
     long lastImportTime(URL source);

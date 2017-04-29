@@ -35,7 +35,7 @@ public class PharmaTestData {
 
     public synchronized JdbcMedicationRepository getMedicationRepository() {
         if (medicationRepository == null) {
-            String jdbcUrl = System.getProperty("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications");
+            String jdbcUrl = System.getProperty("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/test-medications");
             DataSource dataSource = TestDataSource.createDataSource(jdbcUrl, "db/db-medications");
             medicationRepository = new JdbcMedicationRepository(dataSource);
             medicationRepository.refresh(IOUtil.url(System.getProperty("pharmacy.fest_source", FestMedicationImporter.FEST_URL.toString())));

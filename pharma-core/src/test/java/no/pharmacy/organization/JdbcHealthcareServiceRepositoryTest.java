@@ -10,10 +10,10 @@ public class JdbcHealthcareServiceRepositoryTest {
 
     @Test
     public void shouldReadPharmacies() throws Exception {
-        JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource());
+        JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource(),
+                JdbcHealthcareServiceRepository.SEED_URL);
 
-        repository.refresh(getClass().getResource("/seed/AR-mini.xml.gz"));
-        repository.refresh(getClass().getResource("/seed/AR-mini.xml.gz"));
+        repository.refresh(JdbcHealthcareServiceRepository.SEED_URL);
 
         assertThat(repository.listPharmacies())
             .extracting(HealthcareService::getDisplay)
@@ -28,9 +28,9 @@ public class JdbcHealthcareServiceRepositoryTest {
 
     @Test
     public void shouldUpdatePharmacies() throws Exception {
-        JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource());
-
-        repository.refresh(getClass().getResource("/seed/AR-mini.xml.gz"));
+        JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(
+                TestDataSource.organizationsDataSource(),
+                JdbcHealthcareServiceRepository.SEED_URL);
         assertThat(repository.retrieve("90325").getDisplay())
             .isEqualTo("APOTEK 1 ÅKRA");
 
@@ -38,6 +38,5 @@ public class JdbcHealthcareServiceRepositoryTest {
         assertThat(repository.retrieve("90325").getDisplay())
             .isEqualTo("APOTEK 1 ÅKRA (endret)");
     }
-
 
 }

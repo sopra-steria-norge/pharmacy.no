@@ -20,7 +20,6 @@ import org.jsonbuddy.parse.JsonParser;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.practitioner.Practitioner;
 import no.pharmacy.practitioner.PractitionerRepository;
-import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.PrescriptionSimulator;
 import no.pharmacy.web.server.PharmaApplicationContext;

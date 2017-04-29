@@ -127,8 +127,12 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
     }
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcMedicationRepository.class);
+    public static final URL SEED_URL = JdbcMedicationRepository.class.getResource("/seed/fest-mini.xml.gz");
 
     public void refresh(URL festUrl) {
+        // TODO: Implement with lastmodified timestamp and checksum
+        // TODO: Implement with timestamp entry checking
+        //medicationRepository.refresh(getClass().getResource("/seed/fest-mini.xml.gz"));
         if (isEmpty()) {
             logger.info("Refreshing medications from FEST");
             FestMedicationImporter importer = new FestMedicationImporter();
