@@ -10,12 +10,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.MessageLogEntry;
+import no.pharmacy.test.PrescriptionSimulator;
 
 public class ReseptFormidlerLogTestController extends HttpServlet {
 
-    private FakeReseptFormidler reseptFormidler;
+    private PrescriptionSimulator reseptFormidler;
 
-    public ReseptFormidlerLogTestController(FakeReseptFormidler reseptFormidler) {
+    public ReseptFormidlerLogTestController(PrescriptionSimulator reseptFormidler) {
         this.reseptFormidler = reseptFormidler;
     }
 

@@ -18,21 +18,27 @@ import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.practitioner.Practitioner;
 import no.pharmacy.practitioner.PractitionerRepository;
-import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
+import no.pharmacy.test.PrescriptionSimulator;
+import no.pharmacy.web.server.PharmaApplicationContext;
 
+// TODO: Should be deleted - not in use any more
 public class ReceiptTestCaseController extends HttpServlet {
 
-    private FakeReseptFormidler simulatedReseptFormidler;
+    private PrescriptionSimulator simulatedReseptFormidler;
     private MedicationRepository medicationRepository;
     private PractitionerRepository practitionerRepository;
 
     private PharmaTestData testData = new PharmaTestData();
 
-    public ReceiptTestCaseController(FakeReseptFormidler simulatedReseptFormidler, MedicationRepository medicationRepository, PractitionerRepository practitionerRepository) {
-        this.simulatedReseptFormidler = simulatedReseptFormidler;
+    public ReceiptTestCaseController(PrescriptionSimulator reseptFormidler, MedicationRepository medicationRepository, PractitionerRepository practitionerRepository) {
+        this.simulatedReseptFormidler = reseptFormidler;
         this.medicationRepository = medicationRepository;
         this.practitionerRepository = practitionerRepository;
+    }
+
+    public ReceiptTestCaseController(PrescriptionSimulator reseptFormidler, PharmaApplicationContext context) {
+        this(reseptFormidler, context.getMedicationRepository(), context.getPractitionerRepository());
     }
 
     @Override

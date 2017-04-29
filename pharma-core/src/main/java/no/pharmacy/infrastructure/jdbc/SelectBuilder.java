@@ -19,11 +19,15 @@ public class SelectBuilder {
     }
 
     public SelectBuilder where(String expression, Object parameter) {
-        if (parameter != null) {
+        if (isPresent(parameter)) {
             this.filters.add(expression);
             this.parameters.add(parameter);
         }
         return this;
+    }
+
+    private boolean isPresent(Object parameter) {
+        return ((parameter != null) && !parameter.equals(""));
     }
 
     public <T> List<T> list(ResultSetMapper<T> mapper) {

@@ -17,6 +17,11 @@ public class AuthenticationConfiguration {
     private String authority;
     private String clientId;
 
+    public AuthenticationConfiguration(String authority, String clientId) {
+        this.authority = authority;
+        this.clientId = clientId;
+    }
+
     public AuthenticationConfiguration() {
         List<String> missingFields = new ArrayList<>();
 
@@ -32,6 +37,7 @@ public class AuthenticationConfiguration {
             throw new RuntimeException("Can't start without Active Directory ENVIRONMENT VARIABLES: " + missingFields);
         }
     }
+
 
     private static String getEnv(String name, List<String> missingFields) {
         if (System.getenv(name) == null) {

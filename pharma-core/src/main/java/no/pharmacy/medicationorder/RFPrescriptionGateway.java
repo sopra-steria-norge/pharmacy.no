@@ -12,6 +12,7 @@ import org.eaxy.Element;
 import org.eaxy.Namespace;
 import org.eaxy.Xml;
 
+import lombok.NonNull;
 import no.pharmacy.core.MessageGateway;
 import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.MedicationDispense;
@@ -36,7 +37,10 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
     private MedicationRepository medicationRepository;
     private PatientRepository patientRepository;
 
-    public RFPrescriptionGateway(MessageGateway messageGateway, MedicationRepository medicationRepository, PatientRepository patientRepository) {
+    public RFPrescriptionGateway(
+            @NonNull MessageGateway messageGateway,
+            @NonNull MedicationRepository medicationRepository,
+            @NonNull PatientRepository patientRepository) {
         this.messageGateway = messageGateway;
         this.medicationRepository = medicationRepository;
         this.patientRepository = patientRepository;

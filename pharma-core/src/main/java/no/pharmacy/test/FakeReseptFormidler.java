@@ -16,6 +16,7 @@ import org.eaxy.Namespace;
 import org.eaxy.Validator;
 
 import lombok.Getter;
+import lombok.NonNull;
 import no.pharmacy.core.MessageGateway;
 import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.MedicationDispense;
@@ -24,7 +25,7 @@ import no.pharmacy.medication.Medication;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.patient.PatientRepository;
 
-public class FakeReseptFormidler implements MessageGateway {
+public class FakeReseptFormidler implements MessageGateway, PrescriptionSimulator {
 
     private static final Namespace F = new Namespace("http://www.kith.no/xmlstds/eresept/forskrivning/2013-10-08", "F");
 
@@ -61,7 +62,7 @@ public class FakeReseptFormidler implements MessageGateway {
 
     private final MedicationRepository medicationSource;
 
-    public FakeReseptFormidler(MedicationRepository medicationRepository, PatientRepository patientRepository) {
+    public FakeReseptFormidler(@NonNull MedicationRepository medicationRepository, @NonNull PatientRepository patientRepository) {
         this.medicationSource = medicationRepository;
         this.patientRepository = patientRepository;
     }
@@ -80,6 +81,7 @@ public class FakeReseptFormidler implements MessageGateway {
         return medicationOrder;
     }
 
+    @Override
     public MedicationOrder addPrescription(String nationalId, String productId, PersonReference prescriber) {
         Medication medication = this.medicationSource.findByProductId(productId).orElseThrow(() -> new IllegalArgumentException(productId));
         return addPrescription(nationalId, medication, prescriber);

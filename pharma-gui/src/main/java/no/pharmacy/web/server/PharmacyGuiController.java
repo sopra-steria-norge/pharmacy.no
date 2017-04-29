@@ -21,6 +21,7 @@ import org.jsonbuddy.JsonNode;
 import org.jsonbuddy.JsonObject;
 import org.jsonbuddy.parse.JsonParser;
 
+import lombok.NonNull;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.DispenseOrder;
@@ -61,9 +62,13 @@ public class PharmacyGuiController extends HttpServlet {
     private DispenseOrderService dispenseOrderService;
     private HealthRecordService healthRecordService;
 
-    public PharmacyGuiController(PrescriptionGateway prescriptionGateway, MedicationDispenseRepository repository,
-            PatientRepository patientRepository, MedicationRepository medicationRepository,
-            HealthcareServiceRepository healthcareServiceRepository, PractitionerRepository practitionerRepository) {
+    public PharmacyGuiController(
+            @NonNull PrescriptionGateway prescriptionGateway,
+            @NonNull MedicationDispenseRepository repository,
+            @NonNull PatientRepository patientRepository,
+            @NonNull MedicationRepository medicationRepository,
+            @NonNull HealthcareServiceRepository healthcareServiceRepository,
+            @NonNull PractitionerRepository practitionerRepository) {
         this.repository = repository;
         this.patientRepository = patientRepository;
         this.medicationRepository = medicationRepository;
