@@ -142,34 +142,35 @@ const Index = Vue.component('Index', {
 			</li>
 		</ul>
 
-
 		<h2>Ekspeder resept</h2>
-		
-		<label>
-			Fødselsenummer:
-			<input type="number" maxlength="11" v-model="patient.nationalId" placeholder="Fødselsnummer" />
-		</label>
-		<div>Eller</div>
-		<label>
-			Referansenr:
-			<input type="text" v-model="patient.referenceNumber" placeholder="Referansenr" />
-		</label>
-		<div>Eller</div>
-		<label>
-			Fødselsdato:
-			<input type="date" v-model="patient.dateOfBirth" placeholder="Fødselsdato" />
-		</label>
-		<label>
-			Etternavn:
-			<input type="text" v-model="patient.lastName" placeholder="Etternavn" />
-		</label>
-		<label>
-			Fornavn:
-			<input type="text" v-model="patient.firstName" placeholder="Fornavn" />
-		</label>
-		<div>
-			<button name="action" @click="startPrescriptionSearch">Finn</button>
-		</div>
+
+		<form @submit.prevent="startPrescriptionSearch">
+			<label>
+				Fødselsenummer:
+				<input type="number" maxlength="11" v-model="patient.nationalId" placeholder="Fødselsnummer" id="dispenseNationalId" />
+			</label>
+			<div>Eller</div>
+			<label>
+				Referansenr:
+				<input type="text" v-model="patient.referenceNumber" placeholder="Referansenr" />
+			</label>
+			<div>Eller</div>
+			<label>
+				Fødselsdato:
+				<input type="date" v-model="patient.dateOfBirth" placeholder="Fødselsdato" />
+			</label>
+			<label>
+				Etternavn:
+				<input type="text" v-model="patient.lastName" placeholder="Etternavn" />
+			</label>
+			<label>
+				Fornavn:
+				<input type="text" v-model="patient.firstName" placeholder="Fornavn" />
+			</label>
+			<div>
+				<button name="action">Finn</button>
+			</div>
+		</form>
 	</div>`,
 	props: {
 		currentUser: Object,
@@ -219,13 +220,14 @@ const PrescriptionList = Vue.component('prescriptionList', {
 		<ul>
 			<li v-for="prescription in prescriptionList">
 				<label>
-					<input type="checkbox" :value="prescription.id" v-model="selectedPrescriptions">
+				
+					<input type="checkbox" name="selectedPrescriptions" :value="prescription.id" v-model="selectedPrescriptions">
 					{{prescription.dateWritten}} / {{prescription.prescriber.name}} / {{prescription.medicationName}}
 				</label>
 			</li>
 		</ul>
 		
-		<button :disabled="!dispenseable" @click="startDispenseOrder">Ekspeder resepter</button>
+		<button :disabled="!dispenseable" @click="startDispenseOrder" id="startDispense">Ekspeder resepter</button>
 
 		<button @click="cancelQuery">Kanseller spørring</button>
 	</div>`,
@@ -277,7 +279,7 @@ const SelectMedication = Vue.component('SelectMedication', {
 	<a href="#" @click.prevent='expanded = !expanded'>[info]</a>
 	<div v-if="dispense.dispensedMedicationId == medication.productId">
 		Utsalgspris
-		<input type="number" step="any" v-model="dispense.price" />
+		<input type="number" name="price" step="any" v-model="dispense.price" />
 	</div>
 	<div v-if='expanded'>
 		{{medication.details}}
@@ -340,9 +342,9 @@ const DispenseOrder = Vue.component('DispenseOrder', {
 			</ul>
 		</div>
 		
-		<button @click="update">Oppdater</button>
+		<button @click="update" id="updateDispenseOrder">Oppdater</button>
 
-		<div v-if="dispenseOrder.prices">
+		<div v-if="dispenseOrder.prices" id="prices">
 			<h2>Pris</h2>		
 			<ul>
 				<li><strong>Refusjon:</strong> {{dispenseOrder.prices.refundTotal}}</li>
@@ -772,7 +774,7 @@ const SelectOrganization = Vue.component('selectOrganization', {
 	<ul>
 		<li v-for='organization in currentUser.organizations'>
 			<a :href="'#' + organization.id + '/index'">
-			select {{organization.display}}
+			{{organization.display}}
 			</a>
 		</li>
 	</ul>
