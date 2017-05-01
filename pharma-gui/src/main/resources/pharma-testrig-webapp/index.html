@@ -2,72 +2,90 @@
 <html>
 <head>
 <title>Load test scenario | Pharmacy.no</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+	integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+	crossorigin="anonymous">
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/3.5.2/superagent.js"></script>
 <script src="js/prescriptions-simulator.js"></script>
 </head>
 <body>
 	<div id="app">
-		<h2>Legg inn testscenario</h2>
-		<div v-if="allPatients.length && allMedications.length && allPractitioners.length">
-			<h4>Velg pasient:</h4>
-			<list-select 
-				:all-options="allPatients"
-				:object-filter="filterPatients"
-				v-model="patient">
-				<template slot="selected" scope="item">
-					{{item.selected.firstName}} {{item.selected.lastName}} ({{item.selected.nationalId}})
-				</template>
-				<template scope="item">
-					{{item.option.firstName}} {{item.option.lastName}}
-				</template>
-			</list-select>
-			
-			<div v-if="patient">
-				<a :href="'/pharmacies/?patientNationalId=' + patient.nationalId" target="dispense">Ekspeder</a>
+		<nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse mb-4">
+			<button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<a class="navbar-brand" href="#">DIFA TEST GUI</a>
+			<div class="collapse navbar-collapse" id="navbarCollapse">
+				<ul class="navbar-nav mr-auto">
+					<li><a class="nav-link" href="log">Meldingslogg</a></li>
+				</ul>
 			</div>
-			
-			<h4>Scenario</h4>
+		</nav>
 	
-			<div><label><input type="radio" v-model="scenario" name="scenario" value="custom">Registrer resept manuelt</label></div>
-			<div><label><input type="radio" v-model="scenario" name="scenario" value="interaction">To resepter med interaksjon</label></div>
-	
-			<div v-if="scenario === 'custom'">
-				<h4>Forskriver:</h4>
+		<div class="container">
+			<h2>Legg inn testscenario</h2>
+			<div v-if="allPatients.length && allMedications.length && allPractitioners.length">
+				<h4>Velg pasient:</h4>
 				<list-select 
-					:all-options="allPractitioners"
-					:object-filter="filterPractitioners"
-					v-model="prescriber">
+					:all-options="allPatients"
+					:object-filter="filterPatients"
+					v-model="patient">
 					<template slot="selected" scope="item">
-						{{item.selected.name}} ({{item.selected.id}})
+						{{item.selected.firstName}} {{item.selected.lastName}} ({{item.selected.nationalId}})
 					</template>
 					<template scope="item">
-						{{item.option.name}}
+						{{item.option.firstName}} {{item.option.lastName}}
 					</template>
 				</list-select>
-		
-				<h4>Legemiddelpakning:</h4>
-				<list-select 
-					:all-options="allMedications"
-					:object-filter="filterMedications"
-					v-model="medication">
-					<template slot="selected" scope="item">
-						{{item.selected.productId}}: {{item.selected.display}} ({{item.selected.atc}})
-					</template>
-					<template scope="item">
-						{{item.option.productId}}: {{item.option.display}} ({{item.option.atc}})
-					</template>
-				</list-select>
-		
-				<h4>Dato:</h4>
 				
-				<p><input type="date" v-model="dateWritten" :min="earliestDate" :max="latestDate" /></p>
+				<div v-if="patient">
+					<a :href="'/pharmacies/?patientNationalId=' + patient.nationalId" target="dispense">Ekspeder</a>
+				</div>
+				
+				<h4>Scenario</h4>
+		
+				<div><label><input type="radio" v-model="scenario" name="scenario" value="custom">Registrer resept manuelt</label></div>
+				<div><label><input type="radio" v-model="scenario" name="scenario" value="interaction">To resepter med interaksjon</label></div>
+		
+				<div v-if="scenario === 'custom'">
+					<h4>Forskriver:</h4>
+					<list-select 
+						:all-options="allPractitioners"
+						:object-filter="filterPractitioners"
+						v-model="prescriber">
+						<template slot="selected" scope="item">
+							{{item.selected.name}} ({{item.selected.id}})
+						</template>
+						<template scope="item">
+							{{item.option.name}}
+						</template>
+					</list-select>
+			
+					<h4>Legemiddelpakning:</h4>
+					<list-select 
+						:all-options="allMedications"
+						:object-filter="filterMedications"
+						v-model="medication">
+						<template slot="selected" scope="item">
+							{{item.selected.productId}}: {{item.selected.display}} ({{item.selected.atc}})
+						</template>
+						<template scope="item">
+							{{item.option.productId}}: {{item.option.display}} ({{item.option.atc}})
+						</template>
+					</list-select>
+			
+					<h4>Dato:</h4>
+					
+					<p><input type="date" v-model="dateWritten" :min="earliestDate" :max="latestDate" /></p>
+				</div>
+		
+				<button @click="submit">Registrere resept</button>
 			</div>
-	
-			<button @click="submit">Registrere resept</button>
-		</div>
-		<div v-else>
-			Laster data.
+			<div v-else>
+				Laster data.
+			</div>
 		</div>
 	</div>
 <script>
@@ -166,5 +184,11 @@ window.onload = function() {
 		});
 }
 </script>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 </body>
 </html>

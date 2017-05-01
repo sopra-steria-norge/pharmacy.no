@@ -2,12 +2,17 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Reseptekspedering | pharmacy.no</title>
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/3.5.2/superagent.js"></script>
 <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
 <script src="/pharma-test/js/prescriptions-simulator.js"></script> <!-- TODO move contents of this script! -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+	integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+	crossorigin="anonymous">
 
 <style>
 li.completed {
@@ -39,12 +44,39 @@ li.completed::before {
 
 	<script>
 const Header = Vue.component('Header', {
-	template: `<div>
-		<h4 style="text-align: right">Hei, {{currentUser.display_name}} ({{organization.display}})</h4>
-	</div>`,
+	template: `<nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse mb-4">
+		<button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<a class="navbar-brand" href="#">DIFA GUI</a>
+		<div class="collapse navbar-collapse" id="navbarCollapse">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" 
+						aria-haspopup="true" aria-expanded="false">Resepter</a>
+					<div class="dropdown-menu" aria-labelledby="dropdown01">
+						<a class="dropdown-item" href="#">Reseptekspedering</a>
+						<a class="dropdown-item" v-if="pharmacist" :href="'#' + organization.id + '/pharmacistOrders'">Farmasøytkontroll</a>
+						<a class="dropdown-item" href="#">Resepthistorikk</a>
+					</div>
+				</li>
+				<li class="nav-item"><a class="nav-link" href="#">Veiledning</a></li>
+				<li class="nav-item"><a class="nav-link" href="#">Journal</a></li>
+			</ul>
+			<div class="navbar-brand" >{{currentUser.display_name}}</div>
+			<div class="navbar-brand">
+				{{organization.display}}
+			</div>
+		</div>
+	</nav>`,
 	props: {
 		currentUser: Object,
 		organization: Object
+	},
+	data: function() {
+		return {
+			pharmacist: (this.currentUser.authorizations.indexOf("PHARMACIST") != -1),
+		};
 	}
 });
 
@@ -106,71 +138,69 @@ const Index = Vue.component('Index', {
 	<div>
 		<Header :currentUser="currentUser" :organization="organization" />
 		
-		<div v-if="pharmacist">
-			<a :href="'#' + organization.id + '/pharmacistOrders'">Farmasøytkontroll</a>
-		</div>
+		<div class="container">
+			<h2>Finn person</h2>
 		
-		<h2>Finn person</h2>
+			<form @submit.prevent="findPerson">	
+				<label>
+					Fødselsenummer:
+					<input type="number" maxlength="11" v-model="patient.nationalId" placeholder="Fødselsnummer" autofocus />
+				</label>
+				<div>Eller</div>
+				<label>
+					Fødselsdato:
+					<input type="date" v-model="patient.dateOfBirth" placeholder="Fødselsdato" />
+				</label>
+				<label>
+					Etternavn:
+					<input type="text" v-model="patient.lastName" placeholder="Etternavn" />
+				</label>
+				<label>
+					Fornavn:
+					<input type="text" v-model="patient.firstName" placeholder="Fornavn" />
+				</label>
+				<div>
+					<button name="action">Finn</button>
+				</div>
+			</form>
 	
-		<form @submit.prevent="findPerson">	
-			<label>
-				Fødselsenummer:
-				<input type="number" maxlength="11" v-model="patient.nationalId" placeholder="Fødselsnummer" autofocus />
-			</label>
-			<div>Eller</div>
-			<label>
-				Fødselsdato:
-				<input type="date" v-model="patient.dateOfBirth" placeholder="Fødselsdato" />
-			</label>
-			<label>
-				Etternavn:
-				<input type="text" v-model="patient.lastName" placeholder="Etternavn" />
-			</label>
-			<label>
-				Fornavn:
-				<input type="text" v-model="patient.firstName" placeholder="Fornavn" />
-			</label>
-			<div>
-				<button name="action">Finn</button>
-			</div>
-		</form>
-
-		<ul>
-			<li v-for="person in personList">
-				{{person.lastName}}, {{person.firstName}}
-				<button @click="startPatientInfo(person)">Åpne reseptinformasjon</button>
-			</li>
-		</ul>
-
-		<h2>Ekspeder resept</h2>
-
-		<form @submit.prevent="startPrescriptionSearch">
-			<label>
-				Fødselsenummer:
-				<input type="number" maxlength="11" v-model="patient.nationalId" placeholder="Fødselsnummer" id="dispenseNationalId" />
-			</label>
-			<div>Eller</div>
-			<label>
-				Referansenr:
-				<input type="text" v-model="patient.referenceNumber" placeholder="Referansenr" />
-			</label>
-			<div>Eller</div>
-			<label>
-				Fødselsdato:
-				<input type="date" v-model="patient.dateOfBirth" placeholder="Fødselsdato" />
-			</label>
-			<label>
-				Etternavn:
-				<input type="text" v-model="patient.lastName" placeholder="Etternavn" />
-			</label>
-			<label>
-				Fornavn:
-				<input type="text" v-model="patient.firstName" placeholder="Fornavn" />
-			</label>
-			<div>
-				<button name="action">Finn</button>
-			</div>
-		</form>
+			<ul>
+				<li v-for="person in personList">
+					{{person.lastName}}, {{person.firstName}}
+					<button @click="startPatientInfo(person)">Åpne reseptinformasjon</button>
+				</li>
+			</ul>
+	
+			<h2>Ekspeder resept</h2>
+	
+			<form @submit.prevent="startPrescriptionSearch">
+				<label>
+					Fødselsenummer:
+					<input type="number" maxlength="11" v-model="patient.nationalId" placeholder="Fødselsnummer" id="dispenseNationalId" />
+				</label>
+				<div>Eller</div>
+				<label>
+					Referansenr:
+					<input type="text" v-model="patient.referenceNumber" placeholder="Referansenr" />
+				</label>
+				<div>Eller</div>
+				<label>
+					Fødselsdato:
+					<input type="date" v-model="patient.dateOfBirth" placeholder="Fødselsdato" />
+				</label>
+				<label>
+					Etternavn:
+					<input type="text" v-model="patient.lastName" placeholder="Etternavn" />
+				</label>
+				<label>
+					Fornavn:
+					<input type="text" v-model="patient.firstName" placeholder="Fornavn" />
+				</label>
+				<div>
+					<button name="action">Finn</button>
+				</div>
+			</form>
+		</div>
 	</div>`,
 	props: {
 		currentUser: Object,
@@ -215,21 +245,23 @@ const Index = Vue.component('Index', {
 const PrescriptionList = Vue.component('prescriptionList', {
 	template: `<div>
 		<Header :currentUser="currentUser" :organization="organization" />
-		<h1>Reseptlist</h1>
-		
-		<ul>
-			<li v-for="prescription in prescriptionList">
-				<label>
-				
-					<input type="checkbox" name="selectedPrescriptions" :value="prescription.id" v-model="selectedPrescriptions">
-					{{prescription.dateWritten}} / {{prescription.prescriber.name}} / {{prescription.medicationName}}
-				</label>
-			</li>
-		</ul>
-		
-		<button :disabled="!dispenseable" @click="startDispenseOrder" id="startDispense">Ekspeder resepter</button>
-
-		<button @click="cancelQuery">Kanseller spørring</button>
+		<div class="container">
+			<h1>Velg resepter:</h1>
+			
+			<ul>
+				<li v-for="prescription in prescriptionList">
+					<label>
+					
+						<input type="checkbox" name="selectedPrescriptions" :value="prescription.id" v-model="selectedPrescriptions">
+						{{prescription.dateWritten}} / {{prescription.prescriber.name}} / {{prescription.medicationName}}
+					</label>
+				</li>
+			</ul>
+			
+			<button :disabled="!dispenseable" @click="startDispenseOrder" id="startDispense">Ekspeder resepter</button>
+	
+			<button @click="cancelQuery">Kanseller spørring</button>
+		</div>
 	</div>`,
 	props: {
 		currentUser: Object,
@@ -296,69 +328,71 @@ const SelectMedication = Vue.component('SelectMedication', {
 const DispenseOrder = Vue.component('DispenseOrder', {
 	template: `<div>
 		<Header :currentUser="currentUser" :organization="organization" />
-		<h2 v-if="dispenseOrder.patient">Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
-		
-		<div v-for="dispense in dispenseOrder.medicationDispenses">
-			<h3 class='prescribedMedication'>{{dispense.authorizingPrescription.medicationName}}</h3>
-			<ul>
-				<li>Forskrevet av: <span class='prescriber'>{{dispense.authorizingPrescription.prescriber.name}}</span></li>
-				<li>Forskrevet dato: {{dispense.authorizingPrescription.dateWritten}}</li>
-			</ul>
-			<h4>Doseringstekst</h4>
-
-			<table>
-				<tr>
-					<td>Forskrevet:</td>
-					<td>Oppdatert:</td>
-				</tr>
-				<tr>
-					<td><textarea disabled="disabled" cols="25" rows="6">{{dispense.authorizingPrescription.dosageText}}</textarea></td>
-					<td><textarea cols="25" rows="6" v-model="dispense.printedDosageText"></textarea></td>
-				</tr>
-			</table>
-
-			<h4>Alternative legemidler</h4>
+		<div class="container">
+			<h2 v-if="dispenseOrder.patient">Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
 			
-			<ol>
-				<li v-for='medication in dispense.authorizingPrescription.alternatives'>
-					<SelectMedication :medication="medication" :dispense='dispense' />
-				</li>
-			</ol>
-			<label>
-				Reservasjon:
-				<select>
-					<option></option>
-					<option>Legereservasjon</option>
-					<option>Pasientreservasjon</option>
-					<option>Apotekresevasjon</option>
-				</select>
-			</label>
-
-			<h4>Kanseller</h4>
-			<ul>
-				<li><label><input type='radio' :name='"cancelMedicationOrder[" + dispense.id + "]"'
-					v-model="dispense.dispensedMedicationId"
-					value=""/>Kanseller</label></li>
-			</ul>
-		</div>
-		
-		<button @click="update" id="updateDispenseOrder">Oppdater</button>
-
-		<div v-if="dispenseOrder.prices" id="prices">
-			<h2>Pris</h2>		
-			<ul>
-				<li><strong>Refusjon:</strong> {{dispenseOrder.prices.refundTotal}}</li>
-				<li><strong>Egenandel:</strong> {{dispenseOrder.prices.patientCopay}}</li>
-				<li><strong>Mellomlegg pasient:</strong> {{dispenseOrder.prices.patientUncovered}}</li>
-				<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
-			</ul>
-
-			<a v-if="!dispenseOrder.packagingControlComplete"
-				:href="'#' + organization.id + '/packageControl/' + this.id">Utfør teknisk kontroll</a>
-		</div>
-
-		<div v-if="dispenseOrder.packagingControlComplete && dispenseOrder.pharmacistControlComplete">
-			<a :href="'#' + organization.id + '/completeDispense/' + this.id">Utlever</a>
+			<div v-for="dispense in dispenseOrder.medicationDispenses">
+				<h3 class='prescribedMedication'>{{dispense.authorizingPrescription.medicationName}}</h3>
+				<ul>
+					<li>Forskrevet av: <span class='prescriber'>{{dispense.authorizingPrescription.prescriber.name}}</span></li>
+					<li>Forskrevet dato: {{dispense.authorizingPrescription.dateWritten}}</li>
+				</ul>
+				<h4>Doseringstekst</h4>
+	
+				<table>
+					<tr>
+						<td>Forskrevet:</td>
+						<td>Oppdatert:</td>
+					</tr>
+					<tr>
+						<td><textarea disabled="disabled" cols="25" rows="6">{{dispense.authorizingPrescription.dosageText}}</textarea></td>
+						<td><textarea cols="25" rows="6" v-model="dispense.printedDosageText"></textarea></td>
+					</tr>
+				</table>
+	
+				<h4>Alternative legemidler</h4>
+				
+				<ol>
+					<li v-for='medication in dispense.authorizingPrescription.alternatives'>
+						<SelectMedication :medication="medication" :dispense='dispense' />
+					</li>
+				</ol>
+				<label>
+					Reservasjon:
+					<select>
+						<option></option>
+						<option>Legereservasjon</option>
+						<option>Pasientreservasjon</option>
+						<option>Apotekresevasjon</option>
+					</select>
+				</label>
+	
+				<h4>Kanseller</h4>
+				<ul>
+					<li><label><input type='radio' :name='"cancelMedicationOrder[" + dispense.id + "]"'
+						v-model="dispense.dispensedMedicationId"
+						value=""/>Kanseller</label></li>
+				</ul>
+			</div>
+			
+			<button @click="update" id="updateDispenseOrder">Oppdater</button>
+	
+			<div v-if="dispenseOrder.prices" id="prices">
+				<h2>Pris</h2>		
+				<ul>
+					<li><strong>Refusjon:</strong> {{dispenseOrder.prices.refundTotal}}</li>
+					<li><strong>Egenandel:</strong> {{dispenseOrder.prices.patientCopay}}</li>
+					<li><strong>Mellomlegg pasient:</strong> {{dispenseOrder.prices.patientUncovered}}</li>
+					<li><strong>Mellomlegg apotek:</strong> <span id='pharmacyAmount'></span></li>
+				</ul>
+	
+				<a v-if="!dispenseOrder.packagingControlComplete"
+					:href="'#' + organization.id + '/packageControl/' + this.id">Utfør teknisk kontroll</a>
+			</div>
+	
+			<div v-if="dispenseOrder.packagingControlComplete && dispenseOrder.pharmacistControlComplete">
+				<a :href="'#' + organization.id + '/completeDispense/' + this.id">Utlever</a>
+			</div>
 		</div>
 	</div>
 	</div>`,
@@ -393,8 +427,9 @@ const DispenseOrder = Vue.component('DispenseOrder', {
 
 const CompleteDispense = Vue.component('CompleteDispense', {
 	template: `<div>
-		<Header :currentUser="currentUser" :organization="organization" />
-		
+	<Header :currentUser="currentUser" :organization="organization" />
+	
+	<div class="container">
 		<ShowDispenseOrder :dispenseOrder="dispenseOrder" />
 
 		<h2>Mottakers signatur</h2>
@@ -408,7 +443,8 @@ const CompleteDispense = Vue.component('CompleteDispense', {
 				</div>
 			</div>
 			<button @click="update">Bekreft utlevering</button>
-	</div>`,
+	</div>
+</div>`,
 	props: {
 		currentUser: Object,
 		organization: Object
@@ -452,42 +488,44 @@ const PackageControl = Vue.component('PackageControl', {
 	template: `<div>
 		<Header :currentUser="currentUser" :organization="organization" />
 
-		<h2 v-if="dispenseOrder.patient">Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
-
-		
-		<div v-for="dispense in dispenseOrder.medicationDispenses">
-			<h3 class='prescribedMedication'>{{dispense.dispensedMedication.display}}</h3>
-			<table>
-				<tr>
-					<td>Forskrevet:</td>
-					<td>Oppdatert:</td>
-				</tr>
-				<tr>
-					<td><textarea disabled="disabled" cols="25" rows="6">{{dispense.authorizingPrescription.dosageText}}</textarea></td>
-					<td><textarea disabled="disabled" cols="25" rows="6" v-model="dispense.printedDosageText"></textarea></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td><button tabindex="-1">Print</button></td>
-				</tr>
-				<tr>
-					<td>
-						<input v-model="dispense.scannedDosageLabel" autofocus="autofocus" placeholder="Skan doseringstekst" />
-					</td>
-					<td>
-						<input v-model="dispense.scannedPackagingBarcode" placeholder="Skan pakning" />
-					</td>
-				</tr>
-				<tr>
-					<td>{{dispense.expectedDosageTextBarcode}}</td>
-					<td>{{dispense.dispensedMedication.gtin}}</td>
-				</tr>
-			</table>
-
+		<div class="container">
+			<h2 v-if="dispenseOrder.patient">Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
+	
+			
+			<div v-for="dispense in dispenseOrder.medicationDispenses">
+				<h3 class='prescribedMedication'>{{dispense.dispensedMedication.display}}</h3>
+				<table>
+					<tr>
+						<td>Forskrevet:</td>
+						<td>Oppdatert:</td>
+					</tr>
+					<tr>
+						<td><textarea disabled="disabled" cols="25" rows="6">{{dispense.authorizingPrescription.dosageText}}</textarea></td>
+						<td><textarea disabled="disabled" cols="25" rows="6" v-model="dispense.printedDosageText"></textarea></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><button tabindex="-1">Print</button></td>
+					</tr>
+					<tr>
+						<td>
+							<input v-model="dispense.scannedDosageLabel" autofocus="autofocus" placeholder="Skan doseringstekst" />
+						</td>
+						<td>
+							<input v-model="dispense.scannedPackagingBarcode" placeholder="Skan pakning" />
+						</td>
+					</tr>
+					<tr>
+						<td>{{dispense.expectedDosageTextBarcode}}</td>
+						<td>{{dispense.dispensedMedication.gtin}}</td>
+					</tr>
+				</table>
+	
+			</div>
+			
+			<button @click="update">Oppdater</button>
+	
 		</div>
-		
-		<button @click="update">Oppdater</button>
-
 	</div>
 	</div>`,
 	props: {
@@ -521,8 +559,9 @@ const PackageControl = Vue.component('PackageControl', {
 
 const PatientHistoryQuery = Vue.component('PatientHistoryQuery', {
 	template: `<div>
-		<Header :currentUser="currentUser" :organization="organization" />
-		
+	<Header :currentUser="currentUser" :organization="organization" />
+
+	<div class="container">
 		<div v-if="dispense">
 			<a :href="'#' + organization.id + '/patientHistoryQuery/' + id + '/'">[..]</a>
 
@@ -541,7 +580,8 @@ const PatientHistoryQuery = Vue.component('PatientHistoryQuery', {
 				</li>
 			</ul>
 		</div>
-	</div>`,
+	</div>
+</div>`,
 	props: [ "organization", "currentUser", "hash" ],
 	data: function() {
 		var currentRoute = window.location.hash.substr(1).split(/\//);
@@ -576,7 +616,8 @@ const PatientHistoryQuery = Vue.component('PatientHistoryQuery', {
 
 const PatientInfo = Vue.component('PatientInfo', {
 	template: `<div>
-		<Header :currentUser="currentUser" :organization="organization" />
+	<Header :currentUser="currentUser" :organization="organization" />
+	<div class="container">
 		<div v-if="patient">
 			<h1>Hent pasienthistorikk for {{patient.lastName}}, {{patient.firstName}}</h1>
 
@@ -613,7 +654,8 @@ const PatientInfo = Vue.component('PatientInfo', {
 			</form>
 
 		</div>
-	</div>`,
+	</div>
+</div>`,
 	props: {
 		currentUser: Object,
 		organization: Object
@@ -666,47 +708,50 @@ const PatientInfo = Vue.component('PatientInfo', {
 
 const PharmacistOrderList = Vue.component('PharmacistOrderList', {
 	template: `<div>
-		<h4 style="text-align: right">Hei, {{currentUser.display_name}} ({{organization.display}})</h4>
-		<h1>Farmasøytkontroll</h1>
-		
-		<div v-if="dispenseOrder">
-			<h2>Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
+		<Header :currentUser="currentUser" :organization="organization" />
 
-			<div v-for="dispense in dispenseOrder.medicationDispenses">
-				<h3>{{dispense.dispensedMedication.display}}</h3>
-
-				<ul>
-					<li>Forskrevet av {{dispense.authorizingPrescription.prescriber.name}}</li>
-					<li>Forskrevet dato {{dispense.authorizingPrescription.dateWritten}}</li>
-				</ul>
-
-				<div v-for="action in dispense.warningActions">
-					<h4>Advarsel {{action.warningDisplay}}</h4>
-					<div>{{action.warningDetails}}</div>
-					<div>{{action.warningDetails2}}</div>
-					<div>
-						<input v-model="action.remark" placeholder="Notat" />
-						<select v-model="action.action">
-							<option></option>
-							<option value='1'>Konferert med lege</option>
-							<option value='2'>Konferert med pasient</option>
-							<option value='0'>Ignorert</option>
-						</select>
+		<div class="container">
+			<h1>Farmasøytkontroll</h1>
+			
+			<div v-if="dispenseOrder">
+				<h2>Pasient: {{dispenseOrder.patient.lastName}}, {{dispenseOrder.patient.firstName}}</h2>
+	
+				<div v-for="dispense in dispenseOrder.medicationDispenses">
+					<h3>{{dispense.dispensedMedication.display}}</h3>
+	
+					<ul>
+						<li>Forskrevet av {{dispense.authorizingPrescription.prescriber.name}}</li>
+						<li>Forskrevet dato {{dispense.authorizingPrescription.dateWritten}}</li>
+					</ul>
+	
+					<div v-for="action in dispense.warningActions">
+						<h4>Advarsel {{action.warningDisplay}}</h4>
+						<div>{{action.warningDetails}}</div>
+						<div>{{action.warningDetails2}}</div>
+						<div>
+							<input v-model="action.remark" placeholder="Notat" />
+							<select v-model="action.action">
+								<option></option>
+								<option value='1'>Konferert med lege</option>
+								<option value='2'>Konferert med pasient</option>
+								<option value='0'>Ignorert</option>
+							</select>
+						</div>
 					</div>
 				</div>
+	
+				<button @click="update">Bekreft farmasøytkontroll</button>
 			</div>
-
-			<button @click="update">Bekreft farmasøytkontroll</button>
+			<ul v-else-if="dispenseOrders">
+				<li v-for="order in dispenseOrders"  :class="{completed: order.pharmacistControlComplete}">
+					<label>
+						<strong>{{order.dispenser}}</strong>
+						{{order.patient.lastName}}, {{order.patient.firstName}}
+						<a :href="'#' + organization.id + '/pharmacistOrders/' + order.id" @click="fetchDispenseOrder(order.id)">Farmasøytkontroll</a>
+					</label>
+				</li>
+			</ul>
 		</div>
-		<ul v-else-if="dispenseOrders">
-			<li v-for="order in dispenseOrders"  :class="{completed: order.pharmacistControlComplete}">
-				<label>
-					<strong>{{order.dispenser}}</strong>
-					{{order.patient.lastName}}, {{order.patient.firstName}}
-					<a :href="'#' + organization.id + '/pharmacistOrders/' + order.id" @click="fetchDispenseOrder(order.id)">Farmasøytkontroll</a>
-				</label>
-			</li>
-		</ul>
 	</div>`,
 	props: {
 		currentUser: Object,
@@ -892,5 +937,12 @@ window.onhashchange = function() {
 }
 
 </script>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
 </body>
 </html>
