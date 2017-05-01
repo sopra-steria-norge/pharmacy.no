@@ -1,12 +1,13 @@
 package no.pharmacy.web.server;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
-import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -16,29 +17,23 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
 import ch.qos.logback.classic.Level;
-import no.pharmacy.dispense.JdbcMedicationDispenseRepository;
+import lombok.Getter;
+import lombok.Setter;
 import no.pharmacy.infrastructure.CryptoUtil;
 import no.pharmacy.infrastructure.logging.LogConfiguration;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
-import no.pharmacy.medication.MedicationRepository;
-import no.pharmacy.medicationorder.RFPrescriptionGateway;
-import no.pharmacy.organization.HealthcareServiceRepository;
 import no.pharmacy.organization.JdbcHealthcareServiceRepository;
 import no.pharmacy.patient.JdbcPatientRepository;
-import no.pharmacy.patient.PatientRepository;
 import no.pharmacy.practitioner.JdbcPractitionerRepository;
 import no.pharmacy.practitioner.PractitionerRepository;
 import no.pharmacy.test.FakeReseptFormidler;
 import no.pharmacy.test.PharmaTestData;
+import no.pharmacy.test.PrescriptionSimulator;
 import no.pharmacy.web.infrastructure.auth.AuthenticationConfiguration;
 import no.pharmacy.web.infrastructure.auth.AuthenticationFilter;
 import no.pharmacy.web.infrastructure.auth.IdCheckServlet;
@@ -58,142 +53,81 @@ public class PharmaServer {
 
     private LogDisplayServlet logServlet;
 
-    public PharmaServer() {
+    private AuthenticationConfiguration authConfig;
+
+    @Getter
+    private PharmaApplicationContext applicationContext;
+
+    @Setter
+    private PrescriptionSimulator prescriptionSimulator;
+
+    public PharmaServer(int port, AuthenticationConfiguration authConfig, PharmaApplicationContext applicationContext) {
         logConfiguration.setLevel("org.eclipse.jetty", Level.WARN);
         logConfiguration.setLevel("org.flywaydb", Level.WARN);
         logServlet = new LogDisplayServlet(logConfiguration.getContext());
 
+        this.authConfig = authConfig;
+
+        server = new Server(port);
+        server.addLifeCycleListener(Server.STOP_ON_FAILURE);
+        this.applicationContext = applicationContext;
+    }
+
+    public static void main(String[] args) throws Exception {
         int port = 8080;
         if (System.getenv("HTTP_PORT") != null) {
             port = Integer.parseInt(System.getenv("HTTP_PORT"));
         }
-        server = new Server(port);
-        server.addLifeCycleListener(Server.STOP_ON_FAILURE);
+
+        JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(DataSources.createMedicationDataSource());
+        medicationRepository.refresh(FestMedicationImporter.FEST_URL);
+
+        PharmaServer pharmaServer = new PharmaServer(port, new AuthenticationConfiguration(), new PharmaApplicationContext(medicationRepository));
+        pharmaServer.getApplicationContext().setHealthcareServiceRepository(createHealthcareRepository());
+        pharmaServer.getApplicationContext().setPractitionerRepository(createPractitionerRepository());
+        pharmaServer.getApplicationContext().setPatientRepository(createPatientRepository());
+        pharmaServer.getApplicationContext().setPharmacistDataSource(DataSources.createPharmaDataSource());
+
+        FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository, createPatientRepository());
+        pharmaServer.getApplicationContext().setRfMessageGateway(reseptFormidler);
+        pharmaServer.setPrescriptionSimulator(reseptFormidler);
+        pharmaServer.start();
     }
 
-    public static void main(String[] args) throws Exception {
-        new PharmaServer().start();
+    private static JdbcPatientRepository createPatientRepository() {
+        return new JdbcPatientRepository(DataSources.createPatientDataSource(),
+                s -> new PharmaTestData().samplePatient(),
+                CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
     }
 
-    private void start() throws Exception {
+    public void start() throws Exception {
         server.setHandler(createHandlers());
         server.start();
         logger.warn("Started http://localhost:{}", server.getURI().getPort());
     }
 
-    private Handler createHandlers() throws IOException, URISyntaxException {
+    private HandlerList createHandlers() throws IOException, URISyntaxException {
         HandlerList handlers = new HandlerList();
         handlers.addHandler(new ShutdownHandler(SHUTDOWN_TOKEN, true, true));
 
-        PatientRepository patientRepository = new JdbcPatientRepository(createPatientDataSource(), s -> new PharmaTestData().samplePatient(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
-        MedicationRepository medicationRepository = createMedicationRepository();
-        PractitionerRepository practitionerRepository = createPractitionerRepository();
-        HealthcareServiceRepository healthcareServiceRepository = createHealthcareServiceRepository();
-
-        FakeReseptFormidler reseptFormidler = new FakeReseptFormidler(medicationRepository, patientRepository);
+        PharmaGuiHandler guiHandler = new PharmaGuiHandler(authConfig, applicationContext);
 
         handlers.addHandler(createOpsHandler());
-        handlers.addHandler(createPharmaTestRig(reseptFormidler, medicationRepository, practitionerRepository));
-
-        PharmaGuiHandler guiHandler = new PharmaGuiHandler();
-        guiHandler.setMedicationRepository(medicationRepository);
-        guiHandler.setPatientRepository(patientRepository);
-        guiHandler.setHealthcareServiceRepository(healthcareServiceRepository);
-        guiHandler.setPractitionerRepository(practitionerRepository);
-        guiHandler.setPrescriptionGateway(new RFPrescriptionGateway(reseptFormidler, medicationRepository, patientRepository));
-        guiHandler.setRepository(new JdbcMedicationDispenseRepository(createPharmaDataSource(), medicationRepository));
-
+        handlers.addHandler(createPharmaTestRig());
         handlers.addHandler(guiHandler.createHandler());
 
         return handlers;
     }
 
-    private HealthcareServiceRepository createHealthcareServiceRepository() throws IOException, FileNotFoundException {
-        HealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(createHealthcareServiceDataSource());
-        File arFile = new File("../data-dumps/AR.xml.gz");
-        if (arFile.exists()) {
-            healthcareServiceRepository.refresh(arFile.toURI().toURL());
-        } else {
-            healthcareServiceRepository.refresh(getClass().getResource("/seed/AR-mini.xml.gz"));
-        }
-        return healthcareServiceRepository;
-    }
-
-    private JdbcMedicationRepository createMedicationRepository() {
-        JdbcMedicationRepository medicationRepository = new JdbcMedicationRepository(createMedicationDataSource());
-        // TODO: Implement with lastmodified timestamp and checksum
-        // TODO: Implement with timestamp entry checking
-        //medicationRepository.refresh(getClass().getResource("/seed/fest-mini.xml.gz"));
-        medicationRepository.refresh(FestMedicationImporter.FEST_URL);
-        return medicationRepository;
-    }
-
-    private PractitionerRepository createPractitionerRepository() throws IOException {
-        PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(createPractitionerDataSource(),
-                CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
-        File hprFile = new File("../data-dumps/HprExport.L3.csv.v2.zip");
-        if (hprFile.exists()) {
-            practitionerRepository.refresh(hprFile.toURI().toURL());
-        } else {
-            practitionerRepository.refresh(getClass().getResource("/seed/hpr-mini/"));
-        }
-        return practitionerRepository;
-    }
-
-    private DataSource createHealthcareServiceDataSource() {
-        return createDataSource("jdbc:h2:file:./target/db/organizations", "db/db-organizations");
-    }
-
-    private DataSource createPharmaDataSource() {
-        return createLocalFileDataSource("pharmacist");
-    }
-
-    private DataSource createPatientDataSource() {
-        return createLocalFileDataSource("patient");
-    }
-
-    private DataSource createMedicationDataSource() {
-        return createFileDataSource("medications");
-    }
-
-    private DataSource createPractitionerDataSource() {
-        return createFileDataSource("practitioners");
-    }
-
-    private DataSource createFileDataSource(String name) {
-        return createDataSource("jdbc:h2:file:./target/db/" + name, "db/db-" + name);
-    }
-
-    private DataSource createLocalFileDataSource(String name) {
-        return createDataSource("jdbc:h2:file:./target/db-local/" + name, "db/db-" + name);
-    }
-
-    private DataSource createDataSource(String jdbcUrl, String migrations) {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(jdbcUrl); // config.setJdbcUrlFromProperty(property, jdbcDefault);
-        config.setUsername("sa");
-        config.setPassword("");
-
-        DataSource dataSource = new HikariDataSource(config);
-        logger.info("Initializing {}", jdbcUrl);
-
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
-        flyway.setLocations(migrations);
-        flyway.migrate();
-
-        return dataSource;
-    }
-
-    private Handler createPharmaTestRig(FakeReseptFormidler reseptFormidler, MedicationRepository medicationRepository, PractitionerRepository practitionerRepository) {
+    private Handler createPharmaTestRig() {
         WebAppContext handler = new WebAppContext(null, "/pharma-test");
         handler.setBaseResource(Resource.newClassPathResource("/pharma-testrig-webapp"));
         // Avoid locking files on disk
         handler.setInitParameter("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
 
-        handler.addServlet(new ServletHolder(new ReceiptTestCaseController(reseptFormidler, medicationRepository, practitionerRepository)), "/old");
-        handler.addServlet(new ServletHolder(new ReseptFormidlerLogTestController(reseptFormidler)), "/log");
-        handler.addServlet(new ServletHolder(new PharmaTestCaseApiController(reseptFormidler, medicationRepository, practitionerRepository)), "/api/*");
+        handler.addServlet(new ServletHolder(new ReceiptTestCaseController(prescriptionSimulator, applicationContext)), "/old");
+        handler.addServlet(new ServletHolder(new ReseptFormidlerLogTestController(prescriptionSimulator)), "/log");
+        handler.addServlet(new ServletHolder(new PharmaTestCaseApiController(prescriptionSimulator, applicationContext)), "/api/*");
 
         return handler;
     }
@@ -203,13 +137,41 @@ public class PharmaServer {
         handler.setBaseResource(Resource.newClassPathResource("/pharma-ops-webapp"));
 
         handler.addServlet(new ServletHolder(logServlet), "/log/*");
-
         handler.addServlet(new ServletHolder(new IdCheckServlet()), "/idCheck");
 
-        handler.addFilter(new FilterHolder(new AuthenticationFilter(new AuthenticationConfiguration())), "/idCheck", EnumSet.of(DispatcherType.REQUEST));
-
+        handler.addFilter(new FilterHolder(new AuthenticationFilter(authConfig)), "/idCheck", EnumSet.of(DispatcherType.REQUEST));
 
         return handler;
+    }
+
+    public URI getURL() {
+        return server.getURI();
+    }
+
+    static JdbcHealthcareServiceRepository createHealthcareRepository() throws MalformedURLException {
+        File arFile = new File("../data-dumps/AR.xml.gz");
+        URL url;
+        if (arFile.exists()) {
+            url = arFile.toURI().toURL();
+        } else {
+            url = JdbcHealthcareServiceRepository.SEED_URL;
+        }
+        return new JdbcHealthcareServiceRepository(DataSources.createHealthcareServiceDataSource(), url);
+    }
+
+    public static PractitionerRepository createPractitionerRepository() throws IOException {
+        File hprFile = new File("../data-dumps/HprExport.L3.csv.v2.zip");
+        URL url;
+        if (hprFile.exists()) {
+            url = hprFile.toURI().toURL();
+        } else {
+            url = JdbcPractitionerRepository.SEED_URL;
+        }
+        PractitionerRepository practitionerRepository = new JdbcPractitionerRepository(
+                DataSources.createPractitionerDataSource(),
+                CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
+        practitionerRepository.refresh(url);
+        return practitionerRepository;
     }
 
 }

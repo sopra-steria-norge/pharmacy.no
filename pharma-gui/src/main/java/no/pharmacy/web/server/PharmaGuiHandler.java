@@ -12,7 +12,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-import lombok.Setter;
 import no.pharmacy.dispense.DispenseOrderService;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.medication.MedicationRepository;
@@ -28,25 +27,16 @@ import no.pharmacy.web.infrastructure.auth.AuthenticationFilter;
 
 public class PharmaGuiHandler {
 
-    @Setter
-    private PrescriptionGateway prescriptionGateway;
-
-    @Setter
-    private MedicationRepository medicationRepository;
-
-    @Setter
-    private MedicationDispenseRepository repository;
-
-    @Setter
-    private PatientRepository patientRepository;
-
-    @Setter
-    private HealthcareServiceRepository healthcareServiceRepository;
-
-    @Setter
-    private PractitionerRepository practitionerRepository;
-
     private WebAppContext handler = new WebAppContext(null, "/");
+
+    private final AuthenticationConfiguration authConfig;
+
+    private PharmaApplicationContext context;
+
+    public PharmaGuiHandler(AuthenticationConfiguration authConfig, PharmaApplicationContext context) {
+        this.authConfig = authConfig;
+        this.context = context;
+    }
 
     @SuppressWarnings("resource")
     public Handler createHandler() throws IOException {
@@ -58,6 +48,13 @@ public class PharmaGuiHandler {
             // Avoid locking files on disk
             handler.setInitParameter("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
         }
+
+        PrescriptionGateway prescriptionGateway = context.getPrescriptionGateway();
+        MedicationRepository medicationRepository = context.getMedicationRepository();
+        MedicationDispenseRepository repository = context.getRepository();
+        PatientRepository patientRepository = context.getPatientRepository();
+        HealthcareServiceRepository healthcareServiceRepository = context.getHealthcareServiceRepository();
+        PractitionerRepository practitionerRepository = context.getPractitionerRepository();
 
         DispenseOrderService dispenseOrderService = new DispenseOrderService(prescriptionGateway, repository, patientRepository);
         addServlet(new PrescriptionsController(prescriptionGateway, repository, patientRepository, dispenseOrderService), "/prescriptions/");
@@ -72,7 +69,7 @@ public class PharmaGuiHandler {
                 healthcareServiceRepository,
                 practitionerRepository), "/pharmacies/api/*");
 
-        handler.addFilter(new FilterHolder(new AuthenticationFilter(new AuthenticationConfiguration())), "/pharmacies/*", EnumSet.of(DispatcherType.REQUEST));
+        handler.addFilter(new FilterHolder(new AuthenticationFilter(authConfig)), "/pharmacies/*", EnumSet.of(DispatcherType.REQUEST));
 
         return handler;
     }
