@@ -1,3 +1,5 @@
+@startuml
+
 title Tjenester for fullfør ekspedering
 
 package Bransjeløsning {
@@ -55,3 +57,6 @@ Pakningskontroll ..> Forfalskningsregisteret
 
 node Reseptformideleren
 FullførEkspedering ..> Reseptformideleren
+
+
+@enduml
