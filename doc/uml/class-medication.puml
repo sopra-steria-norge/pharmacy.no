@@ -1,57 +1,49 @@
 @startuml
 
-package Medication {
-    ' Legemiddel
-    class Medication {
-        productName
-        producer
+package Legemiddel {
+    class Legemiddel {
+        produktnavn
+        produsent
     }
 
-    ' Virkestoff
-    class Substance
+    class Virkestoff
 
-    ' VirkestoffMedStyrke
-    class SubstanceConcentration {
-        amount
-        unit: mg/ml, mg/tablet
+    class VirkestoffMedStyrke {
+        mengde
+        enhet: mg/ml, mg/tablett
     }
 
-    ' Legemiddel
-    class MedicationConcentration {
-        amount
-        unit : mg/ml, mg/tablet
+    class Legemiddelstyrke {
+        mengde
+        enhet : mg/ml, mg/tablett
     }
 
-    ' Legemiddelform
-    class MedicationForm {
+    class Legemiddelform {
         
     }
 
-    ' Legemiddelpakning
-    class MedicationPackaging {
-        productIdentifier
-        amount
-        unit : count, grams, ml
+    class Legemiddelpakning {
+        produktID
+        mengde
+        enhet : antall, gram, ml
     }
 
-    ' Byttegruppe
-    class SubstitutionGroup
+    class Byttegruppe
 
-    SubstanceConcentration "*" -up-> Substance
-    Medication "*" -up- "1..*" SubstanceConcentration
-    MedicationForm "1..*" -up- Medication
-    MedicationConcentration "1..*" - MedicationForm
-    MedicationConcentration -up- SubstanceConcentration
-    MedicationPackaging "1..*" -up- MedicationConcentration
-    MedicationPackaging "1.*" - "0..1" SubstitutionGroup    
+    VirkestoffMedStyrke "*" -up-> Virkestoff
+    Legemiddel "*" -up- "1..*" VirkestoffMedStyrke
+    Legemiddelform "1..*" -up- Legemiddel
+    Legemiddelstyrke "1..*" - Legemiddelform
+    Legemiddelstyrke -up- VirkestoffMedStyrke
+    Legemiddelpakning "1..*" -up- Legemiddelstyrke
+    Legemiddelpakning "1.*" - "0..1" Byttegruppe    
 }
 
-' Resept
-class MedicationOrder
+class Resept
 
-MedicationOrder -right-> SubstanceConcentration
-MedicationOrder -right-> MedicationConcentration
-MedicationOrder -right-> MedicationPackaging
+Resept -right-> VirkestoffMedStyrke
+Resept -right-> Legemiddelstyrke
+Resept -right-> Legemiddelpakning
 
 
 
