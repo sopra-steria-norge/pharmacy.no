@@ -6,17 +6,17 @@ frame Kjedesystem {
     node POS as "Ekspedisjon"
 }
 
-Apotekansatt -down-> POS: UtfÃ¸r operasjon
+Apotekansatt -down-> POS: Utfør operasjon
 POS -> IdP: SSO hent \nid_token for DIFA
 
 
-frame BransjelÃ¸sningen {
+frame Bransjeløsningen {
     node DIFA as "DIFA API"
 }
 
-frame "Norsk medisinnett" {
+frame "Norsk helsenett" {
     node RF as "Reseptformidleren"
-    node Personregister
+    node PREG
     node HELFO
 }
 
@@ -24,6 +24,6 @@ POS -> DIFA: API kall med id_token
 DIFA -> IdP: Valider token
 DIFA -> RF
 DIFA -> HELFO
-DIFA -> Personregister
+DIFA -> PREG
 
 @enduml

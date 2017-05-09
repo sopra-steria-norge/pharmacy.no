@@ -3,11 +3,11 @@
 title Versjon 0.3: Resepthistorikk
 
 actor Pasient
-actor FarmasÃ¸yt
+actor Farmasøyt
 
 node DifaGUI #limegreen
 
-note bottom of DifaGUI: MellomlÃ¸sning slik at alle\nblir med fra starten
+note bottom of DifaGUI: Mellomløsning slik at alle\nblir med fra starten
 
 package Kjedesystem {
     node POS as "Ekspedering" #lime
@@ -37,11 +37,11 @@ FarmaPro4 .up.> Meldingstjenesten: Nattlig migrering
 Meldingstjenesten .up.> Journal: Nattlig migrering
 
 
-Pasient <-> FarmasÃ¸yt
-FarmasÃ¸yt -down-> DifaGUI
+Pasient <-> Farmasøyt
+Farmasøyt -down-> DifaGUI
 
 DifaGUI -down-> DIFA: Alternativ
-FarmasÃ¸yt -down-> POS
+Farmasøyt -down-> POS
 POS -down-> DIFA
 Rapportering -down-> DIFA
 Regnskap -down-> DIFA: Refusjonstatus
