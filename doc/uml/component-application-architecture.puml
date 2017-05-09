@@ -1,0 +1,68 @@
+title Applikasjonsarkitektur
+
+node VMWare {
+    node OpenShift {
+        node HAProxy
+    
+        node Docker {
+            node JVM {
+                node Jetty {
+                    component AccessControl
+                    component Controller
+                    component Action
+                    component Service
+                    component "Gateway" as RFGateway
+                    component "Gateway" as HELFOGateway
+                    component "Gateway" as MailGateway
+                    component "Repository" as ApotekRepository
+                    component "Repository" as PasientRepository
+                    
+                    () servlet
+                    servlet -down- Controller
+                    
+                    Controller - "*" Action
+                    Action -down- Service
+                    Service -down- ApotekRepository
+                    Service -down- PasientRepository
+                    Service -- RFGateway
+                    Service -- HELFOGateway
+                    Service -- MailGateway
+                    
+                    AccessControl .left.> servlet
+                }
+                Jetty ..> servlet
+            }
+        }
+        () "https" as jettyhttps
+        jettyhttps -down- Jetty
+        
+        HAProxy .down.> jettyhttps
+    }
+}    
+https -down- HAProxy
+
+node "PostgreSQL VMWare" {
+    node PostgreSQL {
+        database Apotek
+        database Pasient
+        database "..." as db
+    }
+}
+() "SQL" as ApotekSQL
+ApotekSQL - Apotek
+
+() "SQL" as PasientSQL
+PasientSQL - Pasient
+
+ApotekRepository .down.> ApotekSQL
+PasientRepository .down.> PasientSQL
+
+cloud "Eksterne tjenester" {
+    node Reseptformidleren
+    node HELFO
+    node Mailserver
+}
+
+RFGateway -right- Reseptformidleren
+HELFOGateway -right- HELFO
+MailGateway -right- Mailserver

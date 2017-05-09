@@ -1,0 +1,33 @@
+title Applikasjonsarkitektur under last og oppgradering
+
+node VMWare {
+    node OpenShift {
+        node HAProxy
+    
+        node Docker
+        () "https" as dockerhttps
+        dockerhttps -down- Docker
+        HAProxy .down.> dockerhttps: /api/*/*
+
+        node "Docker" as Docker2
+        () "https" as dockerhttps2
+        dockerhttps2 -down- Docker2
+        HAProxy .down.> dockerhttps2: /api/*/*
+
+        node "Docker\nnew version" as Docker3
+        () "https" as dockerhttps3
+        dockerhttps3 -down- Docker3
+        HAProxy .down.> dockerhttps3: /api/{90433,90396}/*
+
+        note bottom of Docker3: "Canary" av ny versjon for\nBoots Tøyen og Oslo S
+    }
+}    
+https -down- HAProxy
+
+node "PostgreSQL VMWare" {
+    database PostgreSQL
+}
+
+Docker -down- PostgreSQL
+Docker2 -down- PostgreSQL
+Docker3 -down- PostgreSQL
