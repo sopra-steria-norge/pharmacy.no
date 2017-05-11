@@ -1,22 +1,25 @@
 @startuml
 
-actor ApotekA as "Kjede A"
-actor ApotekB as "Kjede B"
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
 
-node POS #lime
-node ERP #lime
-node DIFA #limegreen
-node RF #pink
-node Farmalogg #yellow
-node SLV #yellow
-node HELFO #pink
-node Nettapotek #lime
-node Multidose #lime
-node FarmaPro <<bro>> #pink
+actor ApotekA as "Brukersystem A" #ececec
+actor ApotekB as "Brukersystem B" #ececec
 
-ApotekA -down-> POS
-POS -down-> DIFA
-POS -left-> ERP
+node Ekspedering #8ccbdb
+node ERP #8ccbdb
+node DIFA #5bb6cc
+node RF #e8cad8
+node Farmalogg #c7395b
+node SLV #c7395b
+node HELFO #e8cad8
+node Nettapotek #8ccbdb
+node Multidose #8ccbdb
+node FarmaPro <<bro>> #e8cad8
+
+ApotekA -down-> Ekspedering
+Ekspedering -down-> DIFA
+Ekspedering -left-> ERP
 Nettapotek -down-> DIFA
 Multidose -down-> DIFA
 ApotekB -down-> FarmaPro
