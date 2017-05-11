@@ -1,30 +1,31 @@
 @startuml
 
-title DIFA som Software-as-a-Service (SaaS) tjeneste
+node Apotek1 #c7395b
+node Apotek2 #c7395b
+node ApotekN #c7395b
+node Kjede #c7395b
+node FHI #80d3a4
 
-node Apotek1 #yellow
-node Apotek2 #yellow
-node ApotekN #yellow
-node Kjede #yellow
-node FHI #Aquamarine
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
 
-interface FarmasøytApp <<opsjon>> #lime
+interface FarmasøytApp <<opsjon>> #8ccbdb
 
 cloud DIFA {
-    cloud NAN as "Point of delivery"
+    cloud NAN as "Point of delivery" #ff8fa3
     
-    node LegemiddelSync <<Java>> #lime
-    node HPRSync <<Java>> #lime
-    node Reseptur <<Java>> #lime
-    node Resepthistorikk <<Java>> #lime
-    node Farmasøytisk <<Java>> #lime
+    node LegemiddelSync <<Java>> #8ccbdb
+    node HPRSync <<Java>> #8ccbdb
+    node Reseptur <<Java>> #8ccbdb
+    node Resepthistorikk <<Java>> #8ccbdb
+    node Farmasøytisk <<Java>> #8ccbdb
 
-    database Legemidler <<PostgreSQL>> #lime
-    database Resepter <<PostgreSQL>> #lime
-    database Journal <<PostgreSQL>> #lime
-    database HPR <<PostgreSQL>> #lime
+    database Legemidler <<PostgreSQL>> #8ccbdb
+    database Resepter <<PostgreSQL>> #8ccbdb
+    database Journal <<PostgreSQL>> #8ccbdb
+    database HPR <<PostgreSQL>> #8ccbdb
     
-    node KeyVault #lime
+    node KeyVault #8ccbdb
 
     Reseptur -down-> Resepter
     Reseptur -down-> KeyVault
@@ -34,17 +35,17 @@ cloud DIFA {
 }
 
 cloud DifaRapport {
-    node Rapport #lime
-    database RapportDB <<SQL Server>> #lime
+    node Rapport #8ccbdb
+    database RapportDB <<SQL Server>> #8ccbdb
 
     Rapport -down-> RapportDB
 }
 
-node FarmaLogg #Aquamarine
+node FarmaLogg #80d3a4
 LegemiddelSync <-right- FarmaLogg
 LegemiddelSync -down-> Legemidler
 
-node Helsedir #Aquamarine
+node Helsedir #80d3a4
 HPRSync <-right- Helsedir
 HPRSync -down-> HPR
 
@@ -67,12 +68,12 @@ FHI -down-> Internet
 data.norge.no -down-> Internet
 Internet -down-> Rapport
 
-cloud NHN as "Norsk helsenett" #Aquamarine
+cloud NHN as "Norsk helsenett" #80d3a4
 
 package eHelse {
-    node RF #Aquamarine
-    node HELFO #Aquamarine
-    node helsenorge.no #Aquamarine
+    node RF #80d3a4
+    node HELFO #80d3a4
+    node helsenorge.no #80d3a4
 }
 
 Reseptur -> NHN
