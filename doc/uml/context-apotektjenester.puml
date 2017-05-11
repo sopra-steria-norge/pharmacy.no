@@ -1,30 +1,37 @@
 @startuml
 
+title Versjon 0.2: Farmasøytiske tjenester
+
 actor Pasient
 actor Farmasøyt
 
 node DifaGUI #limegreen
 
-package Kjedesystemer {
-    node POS #lime
+note bottom of DifaGUI: Mellomløsning slik at alle\nblir med fra starten
+
+package Kjedesystem {
+    node POS as "Ekspedering" #lime
     node Regnskap #lime
 }
 
-node DIFA #limegreen
+package Bransjesystem {
+    node DIFA #limegreen
+    database Journal #limegreen
+    DIFA -> Journal
+}
 
-node helsenorge.no #yellow
 node HELFO #pink
 node HPR #yellow
 
 Pasient <-> Farmasøyt
 Farmasøyt -down-> DifaGUI
 
-DifaGUI -down-> DIFA
-Farmasøyt -down-> POS: Alternativ
+DifaGUI -down-> DIFA: Alternativ
+DifaGUI -down-> Journal
+Farmasøyt -down-> POS
 POS -down-> DIFA
 Regnskap -down-> DIFA: Refusjonstatus
 
-DIFA -down-> helsenorge.no: Journal
 DIFA -down-> HELFO: Refusjon
 DIFA -down-> HPR: Autorisasjon
 

@@ -1,0 +1,29 @@
+@startuml
+
+actor Apotekansatt
+frame Kjedesystem {
+    node IdP as "Identity Provider"
+    node POS as "Ekspedisjon"
+}
+
+Apotekansatt -down-> POS: Utfør operasjon
+POS -> IdP: SSO hent \nid_token for DIFA
+
+
+frame Bransjeløsningen {
+    node DIFA as "DIFA API"
+}
+
+frame "Norsk helsenett" {
+    node RF as "Reseptformidleren"
+    node PREG
+    node HELFO
+}
+
+POS -> DIFA: API kall med id_token
+DIFA -> IdP: Valider token
+DIFA -> RF
+DIFA -> HELFO
+DIFA -> PREG
+
+@enduml

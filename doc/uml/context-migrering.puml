@@ -1,0 +1,52 @@
+@startuml
+
+title Versjon 0.3: Resepthistorikk
+
+actor Pasient
+actor Farmasøyt
+
+node DifaGUI #limegreen
+
+note bottom of DifaGUI: Mellomløsning slik at alle\nblir med fra starten
+
+package Kjedesystem {
+    node POS as "Ekspedering" #lime
+    node Regnskap #lime
+    node Rapportering #lime
+}
+
+package Bransjesystem {
+    node DIFA #limegreen
+    database Journal #limegreen
+    DIFA -> Journal
+}
+
+package FarmaPro {
+    node Meldingstjenesten #orange
+    node FarmaPro1 as "FarmaPro" #orange
+    node FarmaPro2 as "FarmaPro" #orange
+    node FarmaPro3 as "FarmaPro" #orange
+    node FarmaPro4 as "FarmaPro" #orange
+}
+
+FarmaPro1 .up.> Meldingstjenesten: Nattlig migrering
+FarmaPro2 .up.> Meldingstjenesten: Nattlig migrering
+FarmaPro3 .up.> Meldingstjenesten: Nattlig migrering
+FarmaPro4 .up.> Meldingstjenesten: Nattlig migrering
+
+Meldingstjenesten .up.> Journal: Nattlig migrering
+
+
+Pasient <-> Farmasøyt
+Farmasøyt -down-> DifaGUI
+
+DifaGUI -down-> DIFA: Alternativ
+Farmasøyt -down-> POS
+POS -down-> DIFA
+Rapportering -down-> DIFA
+Regnskap -down-> DIFA: Refusjonstatus
+
+
+
+
+@enduml

@@ -1,0 +1,62 @@
+@startuml
+
+title Tjenester for fullfør ekspedering
+
+package Bransjeløsning {
+    node Autorisasjonslag {
+        component DIFA {
+            component FullførEkspedering
+            component ValiderUtlevering
+            component Pakningskontroll
+            component Farmasøytkontroll
+            component Forskriverkontroll
+            component Refusjonshjemmelkontroll
+            component Refusjonsberegning
+            
+            FullførEkspedering ..> ValiderUtlevering
+            ValiderUtlevering ..> Pakningskontroll
+            ValiderUtlevering ..> Farmasøytkontroll
+            ValiderUtlevering ..> Forskriverkontroll
+            ValiderUtlevering ..> Refusjonshjemmelkontroll
+            ValiderUtlevering ..> Refusjonsberegning
+
+            () "API" as API_FullførEkspedering
+            API_FullførEkspedering -down- FullførEkspedering
+            () "API" as API_ValiderUtlevering
+            API_ValiderUtlevering -down- ValiderUtlevering
+
+            () "API" as API_Pakningskontroll
+            API_Pakningskontroll -down- Pakningskontroll
+            () "API" as API_Farmasøytkontroll
+            API_Farmasøytkontroll -down- Farmasøytkontroll
+            () "API" as API_Forskriverkontroll
+            API_Forskriverkontroll -down- Forskriverkontroll
+            () "API" as API_Refusjonshjemmelkontroll
+            API_Refusjonshjemmelkontroll -down- Refusjonshjemmelkontroll
+            () "API" as API_Refusjonsberegning
+            API_Refusjonsberegning -down- Refusjonsberegning
+        }
+    }
+
+    database Resepthistorikk
+    database HPR
+    database Legemidler
+    database Regelverk
+
+    FullførEkspedering -> Resepthistorikk
+    Farmasøytkontroll -> Resepthistorikk
+    Farmasøytkontroll -> Legemidler
+    Forskriverkontroll -> HPR
+    Refusjonshjemmelkontroll -> Regelverk
+}
+
+() API -down- DIFA
+
+node Forfalskningsregisteret
+Pakningskontroll ..> Forfalskningsregisteret
+
+node Reseptformideleren
+FullførEkspedering ..> Reseptformideleren
+
+
+@enduml

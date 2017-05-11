@@ -1,0 +1,33 @@
+@startuml
+
+title Versjon 0.1: Integrasjonstestsystem
+
+actor Tester
+
+package Demo {
+    node DemoPOS as "Ekspedering" #limegreen
+}
+
+package Kjedesystem {
+    node POS as "Ekspedering" #green
+    node ERP #silver
+}
+
+node DIFA #limegreen
+
+package Teststillas {
+    node RF #yellow
+    node HELFO #yellow    
+}
+
+Tester -right-> RF: Resept
+Tester -down-> POS
+
+DemoPOS -down-> DIFA: DIFA API
+POS -down-> DIFA: DIFA API
+POS -left-> ERP
+DIFA <-down-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
+DIFA <-down-> HELFO: M18, M22, M23
+
+
+@enduml

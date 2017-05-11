@@ -4,9 +4,10 @@ actor Pasient
 actor Apotekansatt
 actor Farmasøyt
 actor Lege
+node EPJ
 
 package Kjedesystemer {
-    node POS #lime
+    node POS as "Ekspedering" #lime
     node ERP #lime
     node Nettapotek #lime
     node Multidose #lime

@@ -1,0 +1,32 @@
+title Ekspederingsanmodning
+
+box "Kjede"
+    actor Apotekansatt
+    participant Ekspedering
+    participant Kjedesystem
+end box
+
+box "Bransjeløsning"
+    participant DIFA
+    participant Database
+end box
+
+
+Kjedesystem -> DIFA: Hent varsler siden 01:31
+Kjedesystem <-- DIFA: ingenting\n(svar i løpet av 0.2 sekunder)
+...
+Reseptformidleren -> DIFA: Ekspedisjonsvarsel (HER-nummer i header)
+Reseptformidleren <-- DIFA
+Kjedesystem -> DIFA: Hent varsler siden 01:32
+Kjedesystem <-- DIFA: Ekspederingsanmodning\nmed HER-nummer
+Kjedesystem -> Apotekansatt: Varsel
+...
+Apotekansatt -> Ekspedering: Start reseptekspedering (reseptId)
+Ekspedering -> DIFA ++: Hent resept
+DIFA -> Reseptformidleren: M9.3
+DIFA <-- Reseptformidleren: M9.4
+DIFA -> Database: Mellomlagre reseptkurv
+DIFA -> Database: Hente resepthistorikk
+DIFA -> DIFA: Beregne varsler
+Ekspedering  <-- DIFA --: Resept
+

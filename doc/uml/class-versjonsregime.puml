@@ -1,0 +1,44 @@
+class ApiControllerV1
+interface APIv1
+APIv1 <|.. ApiControllerV1
+
+package V1 {
+    class Legemiddel {
+        NavnFormStyrke
+        Unødigfelt
+    }
+}
+
+package V1oppdatert {
+    class Legemiddel' {
+        NavnFormStyrke
+        Varenummer
+        Unødigfelt
+    }
+}
+note top of Legemiddel': Nytt outputfelt\ner bakoverkompatibelt
+
+V1 <.. APIv1
+V1oppdatert <.. APIv1
+
+
+class ApiControllerV2
+interface APIv2
+APIv2 <|.. ApiControllerV2
+
+package V2 {
+    class Legemiddel'' {
+        NavnFormStyrke
+        Varenummer
+        <strike>Unødigfelt</strike>
+    }
+}
+note top of Legemiddel'': Fjerning av outputfelt\nkrever ny versjon
+
+V2 <.. APIv2
+
+
+class Service
+ApiControllerV1 -down- Service
+ApiControllerV2 -down- Service
+

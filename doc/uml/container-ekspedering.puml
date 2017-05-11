@@ -1,0 +1,48 @@
+title Ekspeder resept
+
+box "Kjede"
+    actor Apotekansatt
+    participant Ekspedering
+end box
+
+box "Bransjeløsning"
+    participant DIFA
+    participant Database
+end box
+
+participant RF as "Reseptformidleren"
+
+Apotekansatt -> Ekspedering ++: Hent reseptliste
+Ekspedering -> DIFA ++: Hent reseptliste
+DIFA -> RF: Hent reseptliste (M9.1)
+DIFA <-- RF: Reseptliste (M9.2)
+Ekspedering <-- DIFA --: Reseptliste
+Apotekansatt <-- Ekspedering --: Reseptliste
+
+Apotekansatt -> Ekspedering ++: Velg resepter
+Ekspedering -> DIFA ++: Velg resepter
+loop For hver resept
+    DIFA -> RF: Ekspeder (M9.3)
+    DIFA <-- RF: Resept (M9.4)
+    DIFA -> DIFA: Beregn byttegruppe, varsler
+end loop
+Ekspedering <-- DIFA --: Reseptkurv
+Apotekansatt <-- Ekspedering --: Reseptkurv
+
+
+Apotekansatt -> Ekspedering ++: Utfør generisk bytte
+Note right of Ekspedering: Kan bytte medføre uforutsette varsler?
+Apotekansatt <-- Ekspedering --: Vis oppdaterte varsler (?)
+Apotekansatt -> Ekspedering ++: Farmasøytkontroll
+Note right of Apotekansatt: Dersom ekpeditør er Apotektekniker må en farmasøyt utføre
+Note right of Apotekansatt: Dokumenter aksjon for varsler
+Apotekansatt <-- Ekspedering --
+
+Note right of Apotekansatt: Ønsker man å motta betaling før man vet om DIFA sier ok?
+Apotekansatt -> Ekspedering ++: Motta betaling
+Ekspedering -> DIFA ++: Fullfør ekspedering
+DIFA -> DIFA: Valider utlevering
+DIFA -> RF: M10
+Note left of DIFA: Skal M18 sendes eller batches opp?
+Ekspedering <-- DIFA --
+Apotekansatt <-- Ekspedering --
