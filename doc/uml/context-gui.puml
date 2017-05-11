@@ -1,25 +1,28 @@
 @startuml
 
-actor Pasient
-actor Apotekansatt
-actor Farmasøyt
-actor Lege
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
+actor Pasient #ececec
+actor Apotekansatt #ececec
+actor Farmasøyt #ececec
+actor Lege #ececec
 
 package Kjede {
-    node POS #lime
-    node ERP #lime
+    node Brukersystem #8ccbdb
+    node ERP #8ccbdb
 }
 
-node DifaGUI #limegreen
-node DIFA #limegreen
+node DifaGUI #319aad
+node DIFA #319aad
 
-node RF #pink
-node Farmalogg #yellow
-node EPJ #yellow
-node HELFO #pink
-node SLV #yellow
-node HDIR #yellow
-node helsenorge.no #yellow
+node RF #e8cad8
+node Farmalogg #c7395b
+node EPJ #c7395b
+node HELFO #e8cad8
+node SLV #c7395b
+node HDIR #c7395b
+node helsenorge.no #c7395b
 
 
 Pasient <-down-> Lege
@@ -27,7 +30,7 @@ Lege -right-> EPJ: Resept
 EPJ -right-> RF: Resept
 Pasient <-right-> Apotekansatt
 Apotekansatt -down-> DifaGUI: Ekspeder
-Apotekansatt -down-> POS: Motta betaling
+Apotekansatt -down-> Brukersystem: Motta betaling
 Farmasøyt -down-> DifaGUI: Farmasøytkontroll
 
 DIFA <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
@@ -38,8 +41,8 @@ DIFA -down-> helsenorge.no: Journal
 Farmalogg <-down- SLV: FEST
 DifaGUI -down-> DIFA
 DifaGUI -down-> ERP: Priser og beholdning
-ERP <-left- POS
-POS -down-> DIFA: Reseptkurv, utlever
+ERP <-left- Brukersystem
+Brukersystem -down-> DIFA: Reseptkurv, utlever
 DIFA <-right- Farmalogg
 
 

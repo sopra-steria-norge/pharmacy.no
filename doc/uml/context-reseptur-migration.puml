@@ -6,7 +6,7 @@ skinparam BorderColor #b1b1b0
 actor ApotekA as "Brukersystem A" #ececec
 actor ApotekB as "Brukersystem B" #ececec
 
-node Ekspedering #8ccbdb
+node Brukersystem #8ccbdb
 node ERP #8ccbdb
 node DIFA #5bb6cc
 node RF #e8cad8
@@ -17,9 +17,9 @@ node Nettapotek #8ccbdb
 node Multidose #8ccbdb
 node FarmaPro <<bro>> #e8cad8
 
-ApotekA -down-> Ekspedering
-Ekspedering -down-> DIFA
-Ekspedering -left-> ERP
+ApotekA -down-> Brukersystem
+Brukersystem -down-> DIFA
+Brukersystem -left-> ERP
 Nettapotek -down-> DIFA
 Multidose -down-> DIFA
 ApotekB -down-> FarmaPro
