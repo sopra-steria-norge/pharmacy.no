@@ -1,0 +1,56 @@
+@startuml
+
+title Reseptekspedering
+
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
+box "Apoteksystem" #ececec
+    participant Kjedesystem #8ccbdb
+end box
+
+box "Bransjeløsningen" #ececec
+    participant Refusjon #319aad
+    database Refusjonstatus #319aad
+    database Mailserver #319aad
+end box
+
+box "Norsk Helsenett" #ececec
+    participant HELFO #ff8fa3
+end box
+
+
+== Send refusjonskrav ==
+
+Kjedesystem -> Refusjon ++: M18
+Refusjon -> Mailserver ++: M18
+Refusjon <-- Mailserver --
+Mailserver -> HELFO: M18
+Refusjon -> Refusjonstatus: Registrer refusjonskrav
+Kjedesystem <-- Refusjon --
+
+== Motta status på refusjonskrav ==
+
+HELFO -> Mailserver: M22
+activate Refusjon
+Refusjon -> Mailserver: Hent mail
+Refusjon -> Refusjonstatus: Oppdater status på refusjonskrav
+deactivate Refusjon
+
+Kjedesystem -> Refusjon ++: Hent status på refusjonskrav
+Refusjon <-- Refusjonstatus: Status på refusjonskrav
+Kjedesystem <-- Refusjon --: Status på refusjonskrav
+
+== Motta utbetalingsmelding ==
+
+HELFO -> Mailserver: M23
+activate Refusjon
+Refusjon -> Mailserver: Hent mail
+Refusjon -> Refusjonstatus: Oppdater status på refusjonskrav
+deactivate Refusjon
+
+Kjedesystem -> Refusjon ++: Hent status på refusjonskrav
+Refusjon <-- Refusjonstatus: Status på refusjonskrav
+Kjedesystem <-- Refusjon --: Status på refusjonskrav
+
+@enduml

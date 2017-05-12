@@ -1,0 +1,46 @@
+@startuml
+
+title Implementasjon av tjenesten Hent Resept
+
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
+box "Apoteksystem" #ececec
+    'actor Apotekansatt
+    participant Kjedesystem #8ccbdb
+end box
+
+box "Bransjeløsningen" #ececec
+    participant Reseptekspedering as "Resept\nekspedering" #319aad
+    participant Ekspedisjonsstøtte as "Ekspedisjons\nstøtte" #319aad
+    participant Regelmotor #319aad
+    database LegemiddelInfo as "Legemiddel\ninformasjon" #319aad
+    database Resepthistorikk as "Resept\nhistorikk" #319aad
+    participant ReseptformidlerTjeneste as "Reseptformidler\nTjeneste" #319aad
+end box
+
+box "Norsk Helsenett" #ececec
+    participant Reseptformidleren as "Resept\nformidleren" #ff8fa3
+end box
+
+
+Kjedesystem -> Reseptekspedering ++: M9.3
+Reseptekspedering -> ReseptformidlerTjeneste ++: M9.3
+ReseptformidlerTjeneste -> Reseptformidleren ++: M9.3
+ReseptformidlerTjeneste <-- Reseptformidleren --: M9.4
+Reseptekspedering <-- ReseptformidlerTjeneste --: M9.4,M1,M10
+Reseptekspedering -> Ekspedisjonsstøtte ++: Beregn\ntilleggsinformasjon
+Ekspedisjonsstøtte <-- Resepthistorikk--: Historikk
+Ekspedisjonsstøtte <-- LegemiddelInfo--: Legemiddelinfo
+Ekspedisjonsstøtte  -> Regelmotor++: Legemiddel
+Ekspedisjonsstøtte  <-- Regelmotor--: Byttevarer
+Ekspedisjonsstøtte  -> Regelmotor++: M1, Historikk
+Ekspedisjonsstøtte  <-- Regelmotor--: Faglige varsler
+Ekspedisjonsstøtte  -> Regelmotor++: M1, Legemiddel, Etikettekst
+Ekspedisjonsstøtte  <-- Regelmotor--: Beriket Etikettekst
+Ekspedisjonsstøtte  -> Regelmotor++: ...
+Ekspedisjonsstøtte  <-- Regelmotor--: 
+Reseptekspedering <-- Ekspedisjonsstøtte --
+Kjedesystem <-- Reseptekspedering--: "M9.4,\n historikk,\n støtte"
+
+@enduml
