@@ -1,0 +1,64 @@
+@startuml
+
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
+box "Apoteksystem" #ececec
+    'actor Apotekansatt
+    participant Kjedesystem #8ccbdb
+end box
+
+box "Bransjeløsningen" #ececec
+    participant Reseptekspedering as "Resept\nekspedering" #319aad
+    participant Ekspedisjonsstøtte as "Ekspedisjons\nstøtte" #319aad
+    database Resepthistorikk as "Resept\nhistorikk" #319aad
+    database LegemiddelInfo as "Legemiddel\ninformasjon" #319aad
+    participant ReseptformidlerTjeneste as "Reseptformidler\nTjeneste" #319aad
+end box
+
+box "Norsk Helsenett" #ececec
+    participant Reseptformidleren as "Resept\nformidleren" #ff8fa3
+    participant HELFO #ff8fa3
+end box
+
+
+== Hent reseptliste ==
+
+Kjedesystem -> ReseptformidlerTjeneste ++: M9.1
+ReseptformidlerTjeneste -> Reseptformidleren ++: M9.1
+ReseptformidlerTjeneste <-- Reseptformidleren --: M9.2
+Kjedesystem <-- ReseptformidlerTjeneste --: M9.2
+
+
+== Start ekspedering ==
+
+Kjedesystem -> Reseptekspedering ++: M9.3
+Reseptekspedering -> ReseptformidlerTjeneste ++: M9.3
+ReseptformidlerTjeneste -> Reseptformidleren ++: M9.5
+ReseptformidlerTjeneste <-- Reseptformidleren --: M9.4
+Reseptekspedering <-- ReseptformidlerTjeneste --: M9.4,M1,M10
+Reseptekspedering -> Resepthistorikk++: ??
+Reseptekspedering <-- Resepthistorikk--: Historikk
+Reseptekspedering -> LegemiddelInfo++: ??
+Reseptekspedering <-- LegemiddelInfo--: ??
+Reseptekspedering  -> Ekspedisjonsstøtte++: M1
+Reseptekspedering  <-- Ekspedisjonsstøtte--: ?
+Reseptekspedering  -> Ekspedisjonsstøtte++: Etikettdata?
+Reseptekspedering  <-- Ekspedisjonsstøtte--: Beriket Etikettekst
+Kjedesystem <-- Reseptekspedering--: "M9.4,\n historikk,\n støtte"
+
+== Beregne refusjon ==
+Kjedesystem -> Reseptekspedering ++: M1, M10
+Kjedesystem <-- Reseptekspedering --: M18 forslag
+
+== ==
+Kjedesystem -> Reseptekspedering ++: M10
+Reseptekspedering -> ReseptformidlerTjeneste ++: ?
+ReseptformidlerTjeneste -> Reseptformidleren ++: ?
+ReseptformidlerTjeneste <-- Reseptformidleren --: ?
+Reseptekspedering <-- ReseptformidlerTjeneste --: ?
+Reseptekspedering -> Resepthistorikk: ?
+Reseptekspedering -> Ekspedisjonsstøtte:?
+Reseptekspedering --> Kjedesystem --: M18, ?
+
+@endtuml
