@@ -25,37 +25,37 @@ end box
 
 == Hent reseptliste ==
 
-Kjedesystem -> ReseptformidlerTjeneste ++: M9.1
-ReseptformidlerTjeneste -> Reseptformidleren ++: M9.1
-ReseptformidlerTjeneste <-- Reseptformidleren --: M9.2
-Kjedesystem <-- ReseptformidlerTjeneste --: M9.2
+Kjedesystem -> ReseptformidlerTjeneste ++: M9.1 Forespørsel resepter
+ReseptformidlerTjeneste -> Reseptformidleren ++: M9.1 Forespørsel resepter
+ReseptformidlerTjeneste <-- Reseptformidleren --: M9.2 Reseptliste
+Kjedesystem <-- ReseptformidlerTjeneste --: M9.2 Reseptliste
 
 == Hent resept ==
 
-Kjedesystem -> Reseptekspedering ++: M9.3
-Reseptekspedering -> ReseptformidlerTjeneste ++: M9.3
-ReseptformidlerTjeneste -> Reseptformidleren ++: M9.3
-ReseptformidlerTjeneste <-- Reseptformidleren --: M9.4
-Reseptekspedering <-- ReseptformidlerTjeneste --: M9.4 [M1]
+Kjedesystem -> Reseptekspedering ++: M9.3 Valg av resept
+Reseptekspedering -> ReseptformidlerTjeneste ++: M9.3 Valg av resept
+ReseptformidlerTjeneste -> Reseptformidleren ++: M9.3 Valg av resept
+ReseptformidlerTjeneste <-- Reseptformidleren --: M9.4 [+ M1] Reseptnedlastning
+Reseptekspedering <-- ReseptformidlerTjeneste --: M9.4 [+ M1] Reseptnedlastning
 Reseptekspedering -> Ekspedisjonsstøtte ++: Beregn tilleggsinformasjon (M1)
 Ekspedisjonsstøtte <-- Resepthistorikk: Historikk
 Ekspedisjonsstøtte <-- LegemiddelInfo: Legemiddelinfo
 Ekspedisjonsstøtte  -> Ekspedisjonsstøtte++: Regler
 Ekspedisjonsstøtte <-- Ekspedisjonsstøtte--: Varsler, Tillegginfo
 Reseptekspedering <-- Ekspedisjonsstøtte --
-Kjedesystem <-- Reseptekspedering--: "M9.4 [M1],\n historikk,\n støtteinformasjon"
+Kjedesystem <-- Reseptekspedering--: "M9.4 [+ M1],\n historikk,\n støtteinformasjon"
 
 == Ekspedisjonsstøtte ==
 
 Kjedesystem -> Ekspedisjonsstøtte ++: Beregne refusjon
 Kjedesystem <-- Ekspedisjonsstøtte --: M18 Enkeltregning forslag
 
-Kjedesystem -> Ekspedisjonsstøtte ++: Faglige varsler (M10)
+Kjedesystem -> Ekspedisjonsstøtte ++: Faglige varsler for M10
 Ekspedisjonsstøtte <-- Resepthistorikk: Historikk
 Ekspedisjonsstøtte <-- LegemiddelInfo: Legemiddelinfo
 Ekspedisjonsstøtte  -> Ekspedisjonsstøtte++: Regler
 Ekspedisjonsstøtte <-- Ekspedisjonsstøtte--: Varsler
-Kjedesystem <-- Ekspedisjonsstøtte --: M18 forslag
+Kjedesystem <-- Ekspedisjonsstøtte --: Varsler
 
 ...
 
@@ -64,11 +64,11 @@ Kjedesystem <-- Ekspedisjonsstøtte --: M18 forslag
 Kjedesystem -> Reseptekspedering ++: M1, M10, M18, priser
 Reseptekspedering -> Ekspedisjonsstøtte ++: Valider utlevering (M10, M18, priser)
 Reseptekspedering <-- Ekspedisjonsstøtte --: Varsler
-Reseptekspedering -> ReseptformidlerTjeneste ++: M10
-ReseptformidlerTjeneste -> Reseptformidleren ++: M1,M10
+Reseptekspedering -> ReseptformidlerTjeneste ++: M10 Utleveringsrapport 
+ReseptformidlerTjeneste -> Reseptformidleren ++: M10 Utleveringsrapport
 ReseptformidlerTjeneste <-- Reseptformidleren --
 Reseptekspedering <-- ReseptformidlerTjeneste --
-Reseptekspedering -> Resepthistorikk: M10
-Kjedesystem <-- Reseptekspedering --: Varsler
+Reseptekspedering -> Resepthistorikk: M10 Utleveringsrapport + M1 Resept
+Kjedesystem <-- Reseptekspedering --: Utleveringsvarsler
 
 @enduml

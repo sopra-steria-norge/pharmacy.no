@@ -1,6 +1,6 @@
 @startuml
 
-title Reseptekspedering
+title Refusjon
 
 skinparam ArrowColor #b1b1b0
 skinparam BorderColor #b1b1b0
@@ -9,7 +9,7 @@ box "Apoteksystem" #ececec
     participant Kjedesystem #8ccbdb
 end box
 
-box "BransjelÃ¸sningen" #ececec
+box "Bransjeløsningen" #ececec
     participant Refusjon #319aad
     database Refusjonstatus #319aad
     database Mailserver #319aad
@@ -22,35 +22,35 @@ end box
 
 == Send refusjonskrav ==
 
-Kjedesystem -> Refusjon ++: M18
-Refusjon -> Mailserver ++: M18
+Kjedesystem -> Refusjon ++: M18 Oppgjørskrav
+Refusjon -> Mailserver ++: M18 Oppgjørskrav
 Refusjon <-- Mailserver --
-Mailserver -> HELFO: M18
+Mailserver -> HELFO: M18 Oppgjørskrav
 Refusjon -> Refusjonstatus: Registrer refusjonskrav
 Kjedesystem <-- Refusjon --
 
-== Motta status pÃ¥ refusjonskrav ==
+== Motta status på refusjonskrav ==
 
-HELFO -> Mailserver: M22
+HELFO -> Mailserver: M22 Oppgjørsresulat
 activate Refusjon
 Refusjon -> Mailserver: Hent mail
-Refusjon -> Refusjonstatus: Oppdater status pÃ¥ refusjonskrav
+Refusjon -> Refusjonstatus: Oppdater status på refusjonskrav
 deactivate Refusjon
 
-Kjedesystem -> Refusjon ++: Hent status pÃ¥ refusjonskrav
-Refusjon <-- Refusjonstatus: Status pÃ¥ refusjonskrav
-Kjedesystem <-- Refusjon --: Status pÃ¥ refusjonskrav
+Kjedesystem -> Refusjon ++: Hent status på refusjonskrav
+Refusjon <-- Refusjonstatus: Status på refusjonskrav
+Kjedesystem <-- Refusjon --: M22 Oppgjørsresultat
 
 == Motta utbetalingsmelding ==
 
-HELFO -> Mailserver: M23
+HELFO -> Mailserver: M23 Utbetaling
 activate Refusjon
 Refusjon -> Mailserver: Hent mail
-Refusjon -> Refusjonstatus: Oppdater status pÃ¥ refusjonskrav
+Refusjon -> Refusjonstatus: Oppdater status på refusjonskrav
 deactivate Refusjon
 
-Kjedesystem -> Refusjon ++: Hent status pÃ¥ refusjonskrav
-Refusjon <-- Refusjonstatus: Status pÃ¥ refusjonskrav
-Kjedesystem <-- Refusjon --: Status pÃ¥ refusjonskrav
+Kjedesystem -> Refusjon ++: Hent status på refusjonskrav
+Refusjon <-- Refusjonstatus: Status på refusjonskrav
+Kjedesystem <-- Refusjon --: M23 Utbetaling
 
 @enduml

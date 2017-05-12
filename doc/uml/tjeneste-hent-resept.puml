@@ -10,9 +10,9 @@ box "Apoteksystem" #ececec
     participant Kjedesystem #8ccbdb
 end box
 
-box "BransjelÃ¸sningen" #ececec
+box "Bransjeløsningen" #ececec
     participant Reseptekspedering as "Resept\nekspedering" #319aad
-    participant EkspedisjonsstÃ¸tte as "Ekspedisjons\nstÃ¸tte" #319aad
+    participant Ekspedisjonsstøtte as "Ekspedisjons\nstøtte" #319aad
     participant Regelmotor #319aad
     database LegemiddelInfo as "Legemiddel\ninformasjon" #319aad
     database Resepthistorikk as "Resept\nhistorikk" #319aad
@@ -24,23 +24,23 @@ box "Norsk Helsenett" #ececec
 end box
 
 
-Kjedesystem -> Reseptekspedering ++: M9.3
-Reseptekspedering -> ReseptformidlerTjeneste ++: M9.3
-ReseptformidlerTjeneste -> Reseptformidleren ++: M9.3
-ReseptformidlerTjeneste <-- Reseptformidleren --: M9.4
-Reseptekspedering <-- ReseptformidlerTjeneste --: M9.4,M1,M10
-Reseptekspedering -> EkspedisjonsstÃ¸tte ++: Beregn\ntilleggsinformasjon
-EkspedisjonsstÃ¸tte <-- Resepthistorikk--: Historikk
-EkspedisjonsstÃ¸tte <-- LegemiddelInfo--: Legemiddelinfo
-EkspedisjonsstÃ¸tte  -> Regelmotor++: Legemiddel
-EkspedisjonsstÃ¸tte  <-- Regelmotor--: Byttevarer
-EkspedisjonsstÃ¸tte  -> Regelmotor++: M1, Historikk
-EkspedisjonsstÃ¸tte  <-- Regelmotor--: Faglige varsler
-EkspedisjonsstÃ¸tte  -> Regelmotor++: M1, Legemiddel, Etikettekst
-EkspedisjonsstÃ¸tte  <-- Regelmotor--: Beriket Etikettekst
-EkspedisjonsstÃ¸tte  -> Regelmotor++: ...
-EkspedisjonsstÃ¸tte  <-- Regelmotor--: 
-Reseptekspedering <-- EkspedisjonsstÃ¸tte --
-Kjedesystem <-- Reseptekspedering--: "M9.4,\n historikk,\n stÃ¸tte"
+Kjedesystem -> Reseptekspedering ++: M9.3 Valg av resept
+Reseptekspedering -> ReseptformidlerTjeneste ++: M9.3 Valg av resept
+ReseptformidlerTjeneste -> Reseptformidleren ++: M9.3 Valg av resept
+ReseptformidlerTjeneste <-- Reseptformidleren --: M9.4 [+ M1] Reseptnedlastning
+Reseptekspedering <-- ReseptformidlerTjeneste --: M9.4 [+ M1] Reseptnedlastning
+Reseptekspedering -> Ekspedisjonsstøtte ++: Beregn\ntilleggsinformasjon [M1]
+Ekspedisjonsstøtte <-- Resepthistorikk--: Historikk
+Ekspedisjonsstøtte <-- LegemiddelInfo--: Legemiddelinfo
+Ekspedisjonsstøtte  -> Regelmotor++: Legemiddel
+Ekspedisjonsstøtte  <-- Regelmotor--: Byttevarer
+Ekspedisjonsstøtte  -> Regelmotor++: M1, Historikk
+Ekspedisjonsstøtte  <-- Regelmotor--: Faglige varsler
+Ekspedisjonsstøtte  -> Regelmotor++: M1, Legemiddel, Etikettekst
+Ekspedisjonsstøtte  <-- Regelmotor--: Beriket Etikettekst
+Ekspedisjonsstøtte  -> Regelmotor++: ...
+Ekspedisjonsstøtte  <-- Regelmotor--: 
+Reseptekspedering <-- Ekspedisjonsstøtte --
+Kjedesystem <-- Reseptekspedering--: "M9.4 [+ M1],\n historikk,\n støtte"
 
 @enduml
