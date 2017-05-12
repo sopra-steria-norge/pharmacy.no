@@ -22,7 +22,6 @@ node EPJ #c7395b
 node HELFO #e8cad8
 node SLV #c7395b
 node HDIR #c7395b
-node helsenorge.no #c7395b
 
 
 Pasient <-down-> Lege
@@ -36,7 +35,6 @@ Farmasøyt -down-> DifaGUI: Farmasøytkontroll
 DIFA <-left-> RF: M9.1, M9.2,\nM9.3, M9.4,\nM10
 DIFA <-down-> HELFO: M18, M22, M23
 DIFA <-down- HDIR: HPR db
-DIFA -down-> helsenorge.no: Journal
 
 Farmalogg <-down- SLV: FEST
 DifaGUI -down-> DIFA

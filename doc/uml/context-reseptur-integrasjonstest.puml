@@ -1,23 +1,27 @@
 @startuml
 
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
 title Versjon 0.1: Integrasjonstestsystem
 
 actor Tester
 
 package Demo {
-    node DemoPOS as "Ekspedering" #limegreen
+    node DemoPOS as "Ekspedering" #319aad
 }
 
 package Kjedesystem {
-    node POS as "Ekspedering" #green
+    node POS as "Ekspedering" #8ccbdb
     node ERP #silver
 }
 
-node DIFA #limegreen
+node DIFA #319aad
 
 package Teststillas {
-    node RF #yellow
-    node HELFO #yellow    
+    node RF #e8cad8
+    node HELFO #e8cad8
+    node FMD #e8cad8
 }
 
 Tester -right-> RF: Resept

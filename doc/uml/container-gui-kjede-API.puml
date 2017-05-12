@@ -1,16 +1,19 @@
 @startuml
 
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
 title DIFA leser fra kjedenes varesystem (opsjon)
 
 actor Apotekansatt
 actor Farmasøyt
 box "Kjede"
-    participant POS
-    participant Varesystem
+    participant POS #8ccbdb
+    participant Varesystem #8ccbdb
 end box
 box "DIFA"
-    participant DifaGUI
-    participant DIFA
+    participant DifaGUI #319aad
+    participant DIFA #319aad
 end box
 
 Apotekansatt -> POS: Velger hent resept
@@ -25,7 +28,7 @@ DifaGUI-> DIFA: Hent resept
 DIFA -> DIFA: Hent varer i byttegruppe
 DIFA -> DIFA: Påfør informasjon og varsler
 DifaGUI <-- DIFA
-note over Varesystem : Kjeden har ansvar for at varesystem\nimplementere API spesfisert av DIFA
+note over Varesystem #ff8fa3: Kjeden har ansvar for at varesystem\nimplementere API spesfisert av DIFA
 DifaGUI-> Varesystem: <color red>Pris og beholdning for\n<color red>alle aktuelle legemidler\n<color red>for apotek
 DifaGUI<-- Varesystem
 Apotekansatt <--DifaGUI: Varsler, byttealternativer med priser, beholdning
@@ -35,10 +38,10 @@ Apotekansatt <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
 
 newpage
 
-note right of Apotekansatt: DIFA GUI åpner nettlesers print-dialog
+note right of Apotekansatt #ff8fa3: DIFA GUI åpner nettlesers print-dialog
 Apotekansatt -> Apotekansatt: Skriv reseptetikett
 Apotekansatt -> DifaGUI: Scan strekkode på etikett og pakning
-note right of Apotekansatt: Strekkodescanner i tastaturmodus
+note right of Apotekansatt #ff8fa3: Strekkodescanner i tastaturmodus
 DifaGUI -> DIFA: Teknisk kontroll
 Apotekansatt -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
 Farmasøyt -> DifaGUI: Vis resepter klar til farmasøytkontroll

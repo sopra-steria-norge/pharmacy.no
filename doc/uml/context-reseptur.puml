@@ -1,5 +1,8 @@
 @startuml
 
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
 actor Pasient
 actor Apotekansatt
 actor Farmasøyt
@@ -7,19 +10,19 @@ actor Lege
 node EPJ
 
 package Kjedesystemer {
-    node POS as "Ekspedering" #lime
-    node ERP #lime
-    node Nettapotek #lime
-    node Multidose #lime
+    node POS as "Ekspedering" #8ccbdb
+    node ERP #8ccbdb
+    node Nettapotek #8ccbdb
+    node Multidose #8ccbdb
 }
-node DIFA #limegreen
+node DIFA #319aad
 
-node RF #pink
-node Farmalogg #yellow
-node SLV #yellow
-node HELFO #pink
-node HDIR #yellow
-node helsenorge.no #yellow
+node RF #e8cad8
+node Farmalogg #c7395b
+node EPJ #c7395b
+node HELFO #e8cad8
+node SLV #c7395b
+node HDIR #c7395b
 
 Pasient <-down-> Lege
 Lege -right-> EPJ: Resept
@@ -38,7 +41,6 @@ DIFA <-right- Farmalogg
 Farmalogg <-down- SLV: FEST
 DIFA <-down-> HELFO: M18, M22, M23
 DIFA <-down- HDIR: HPR db
-DIFA -down-> helsenorge.no: Journal
 
 
 @enduml

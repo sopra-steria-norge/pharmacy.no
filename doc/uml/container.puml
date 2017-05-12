@@ -1,5 +1,8 @@
 @startuml
 
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
 node Apotek1 #c7395b
 node Apotek2 #c7395b
 node ApotekN #c7395b
@@ -36,7 +39,7 @@ cloud DIFA {
 
 cloud DifaRapport {
     node Rapport #8ccbdb
-    database RapportDB <<SQL Server>> #8ccbdb
+    database RapportDB <<PostgreSQL>> #8ccbdb
 
     Rapport -down-> RapportDB
 }

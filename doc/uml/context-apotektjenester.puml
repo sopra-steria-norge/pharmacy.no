@@ -1,27 +1,30 @@
 @startuml
 
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
 title Versjon 0.2: Farmasøytiske tjenester
 
 actor Pasient
 actor Farmasøyt
 
-node DifaGUI #limegreen
+node DifaGUI #319aad
 
-note bottom of DifaGUI: Mellomløsning slik at alle\nblir med fra starten
+note bottom of DifaGUI #ff8fa3: Mellomløsning slik at alle\nblir med fra starten
 
 package Kjedesystem {
-    node POS as "Ekspedering" #lime
-    node Regnskap #lime
+    node POS as "Ekspedering" #8ccbdb
+    node Regnskap #8ccbdb
 }
 
 package Bransjesystem {
-    node DIFA #limegreen
-    database Journal #limegreen
+    node DIFA #319aad
+    database Journal #319aad
     DIFA -> Journal
 }
 
-node HELFO #pink
-node HPR #yellow
+node HELFO #e8cad8
+node HPR #c7395b
 
 Pasient <-> Farmasøyt
 Farmasøyt -down-> DifaGUI
