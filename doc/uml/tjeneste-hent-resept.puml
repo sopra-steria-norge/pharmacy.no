@@ -24,7 +24,7 @@ box "Norsk Helsenett" #ececec
 end box
 
 
-Kjedesystem -> Reseptekspedering ++: M9.3 Valg av resept
+Brukersystemsystem -> Reseptekspedering ++: M9.3 Valg av resept
 Reseptekspedering -> ReseptformidlerTjeneste ++: M9.3 Valg av resept
 ReseptformidlerTjeneste -> Reseptformidleren ++: M9.3 Valg av resept
 ReseptformidlerTjeneste <-- Reseptformidleren --: M9.4 [+ M1] Reseptnedlastning
@@ -41,6 +41,6 @@ Ekspedisjonsstøtte  <-- Regelmotor--: Beriket Etikettekst
 Ekspedisjonsstøtte  -> Regelmotor++: ...
 Ekspedisjonsstøtte  <-- Regelmotor--: 
 Reseptekspedering <-- Ekspedisjonsstøtte --
-Kjedesystem <-- Reseptekspedering--: "M9.4 [+ M1],\n historikk,\n støtte"
+Brukersystem <-- Reseptekspedering--: "M9.4 [+ M1],\n historikk,\n støtte"
 
 @enduml
