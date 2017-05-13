@@ -24,7 +24,7 @@ box "Norsk Helsenett" #ececec
 end box
 
 
-Brukersystemsystem -> Reseptekspedering ++: M9.3 Valg av resept
+Brukersystem -> Reseptekspedering ++: M9.3 Valg av resept
 Reseptekspedering -> ReseptformidlerTjeneste ++: M9.3 Valg av resept
 ReseptformidlerTjeneste -> Reseptformidleren ++: M9.3 Valg av resept
 ReseptformidlerTjeneste <-- Reseptformidleren --: M9.4 [+ M1] Reseptnedlastning
