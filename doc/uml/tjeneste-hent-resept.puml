@@ -7,20 +7,20 @@ skinparam BorderColor #b1b1b0
 
 box "Apoteksystem" #ececec
     'actor Apotekansatt
-    participant Kjedesystem #8ccbdb
+    participant Brukersystem #8ccbdb
 end box
 
 box "Bransjeløsningen" #ececec
-    participant Reseptekspedering as "Resept\nekspedering" #319aad
-    participant Ekspedisjonsstøtte as "Ekspedisjons\nstøtte" #319aad
+    participant Reseptekspedering as "Resept-\nekspedering" #319aad
+    participant Ekspedisjonsstøtte as "Ekspedisjons-\nstøtte" #319aad
     participant Regelmotor #319aad
-    database LegemiddelInfo as "Legemiddel\ninformasjon" #319aad
-    database Resepthistorikk as "Resept\nhistorikk" #319aad
-    participant ReseptformidlerTjeneste as "Reseptformidler\nTjeneste" #319aad
+    database LegemiddelInfo as "Legemiddel-\ninformasjon" #319aad
+    database Resepthistorikk as "Resept-\nhistorikk" #319aad
+    participant ReseptformidlerTjeneste as "Reseptformidler-\nTjeneste" #319aad
 end box
 
 box "Norsk Helsenett" #ececec
-    participant Reseptformidleren as "Resept\nformidleren" #ff8fa3
+    participant Reseptformidleren as "Resept-\nformidleren" #ff8fa3
 end box
 
 
