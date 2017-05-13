@@ -7,32 +7,32 @@ skinparam BorderColor #b1b1b0
 
 box "Apoteksystem" #ececec
     'actor Apotekansatt
-    participant Kjedesystem #8ccbdb
+    participant Brukersystem #8ccbdb
 end box
 
 box "Bransjeløsningen" #ececec
-    participant Reseptekspedering as "Resept\nekspedering" #319aad
-    participant Ekspedisjonsstøtte as "Ekspedisjons\nstøtte" #319aad
-    database Resepthistorikk as "Resept\nhistorikk" #319aad
-    database LegemiddelInfo as "Legemiddel\ninformasjon" #319aad
-    participant ReseptformidlerTjeneste as "Reseptformidler\nTjeneste" #319aad
+    participant Reseptekspedering as "Resept-\nekspedering" #319aad
+    participant Ekspedisjonsstøtte as "Ekspedisjons-\nstøtte" #319aad
+    database Resepthistorikk as "Resept-\nhistorikk" #319aad
+    database LegemiddelInfo as "Legemiddel-\ninformasjon" #319aad
+    participant ReseptformidlerTjeneste as "Reseptformidler-\nTjeneste" #319aad
 end box
 
 box "Norsk Helsenett" #ececec
-    participant Reseptformidleren as "Resept\nformidleren" #ff8fa3
+    participant Reseptformidleren as "Resept-\nformidleren" #ff8fa3
 end box
 
 
 == Hent reseptliste ==
 
-Kjedesystem -> ReseptformidlerTjeneste ++: M9.1 Forespørsel resepter
+Brukersystem -> ReseptformidlerTjeneste ++: M9.1 Forespørsel resepter
 ReseptformidlerTjeneste -> Reseptformidleren ++: M9.1 Forespørsel resepter
 ReseptformidlerTjeneste <-- Reseptformidleren --: M9.2 Reseptliste
-Kjedesystem <-- ReseptformidlerTjeneste --: M9.2 Reseptliste
+Brukersystem <-- ReseptformidlerTjeneste --: M9.2 Reseptliste
 
 == Hent resept ==
 
-Kjedesystem -> Reseptekspedering ++: M9.3 Valg av resept
+Brukersystem -> Reseptekspedering ++: M9.3 Valg av resept
 Reseptekspedering -> ReseptformidlerTjeneste ++: M9.3 Valg av resept
 ReseptformidlerTjeneste -> Reseptformidleren ++: M9.3 Valg av resept
 ReseptformidlerTjeneste <-- Reseptformidleren --: M9.4 [+ M1] Reseptnedlastning
@@ -43,25 +43,25 @@ Ekspedisjonsstøtte <-- LegemiddelInfo: Legemiddelinfo
 Ekspedisjonsstøtte  -> Ekspedisjonsstøtte++: Regler
 Ekspedisjonsstøtte <-- Ekspedisjonsstøtte--: Varsler, Tillegginfo
 Reseptekspedering <-- Ekspedisjonsstøtte --
-Kjedesystem <-- Reseptekspedering--: "M9.4 [+ M1],\n historikk,\n støtteinformasjon"
+Brukersystem <-- Reseptekspedering--: "M9.4 [+ M1],\n historikk,\n støtteinformasjon"
 
 == Ekspedisjonsstøtte ==
 
-Kjedesystem -> Ekspedisjonsstøtte ++: Beregne refusjon
-Kjedesystem <-- Ekspedisjonsstøtte --: M18 Enkeltregning forslag
+Brukersystem -> Ekspedisjonsstøtte ++: Beregne refusjon
+Brukersystem <-- Ekspedisjonsstøtte --: M18 Enkeltregning forslag
 
-Kjedesystem -> Ekspedisjonsstøtte ++: Faglige varsler for M10
+Brukersystem -> Ekspedisjonsstøtte ++: Faglige varsler for M10
 Ekspedisjonsstøtte <-- Resepthistorikk: Historikk
 Ekspedisjonsstøtte <-- LegemiddelInfo: Legemiddelinfo
 Ekspedisjonsstøtte  -> Ekspedisjonsstøtte++: Regler
 Ekspedisjonsstøtte <-- Ekspedisjonsstøtte--: Varsler
-Kjedesystem <-- Ekspedisjonsstøtte --: Varsler
+Brukersystem <-- Ekspedisjonsstøtte --: Varsler
 
 ...
 
 == Sluttfør reseptekspedisjon ==
 
-Kjedesystem -> Reseptekspedering ++: M1, M10, M18, priser
+Brukersystem -> Reseptekspedering ++: M1, M10, M18, priser
 Reseptekspedering -> Ekspedisjonsstøtte ++: Valider utlevering (M10, M18, priser)
 Reseptekspedering <-- Ekspedisjonsstøtte --: Varsler
 Reseptekspedering -> ReseptformidlerTjeneste ++: M10 Utleveringsrapport 
@@ -69,6 +69,6 @@ ReseptformidlerTjeneste -> Reseptformidleren ++: M10 Utleveringsrapport
 ReseptformidlerTjeneste <-- Reseptformidleren --
 Reseptekspedering <-- ReseptformidlerTjeneste --
 Reseptekspedering -> Resepthistorikk: M10 Utleveringsrapport + M1 Resept
-Kjedesystem <-- Reseptekspedering --: Utleveringsvarsler
+Brukersystem <-- Reseptekspedering --: Utleveringsvarsler
 
 @enduml
