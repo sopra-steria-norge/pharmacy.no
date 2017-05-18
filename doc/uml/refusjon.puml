@@ -1,12 +1,10 @@
 @startuml
 
-title Refusjon
-
 skinparam ArrowColor #b1b1b0
 skinparam BorderColor #b1b1b0
 
 box "Apoteksystem" #ececec
-    participant Kjedesystem #8ccbdb
+    participant Brukersystem #8ccbdb
 end box
 
 box "Bransjeløsningen" #ececec
@@ -22,12 +20,12 @@ end box
 
 == Send refusjonskrav ==
 
-Kjedesystem -> Refusjon ++: M18 Oppgjørskrav
+Brukersystem -> Refusjon ++: M18 Oppgjørskrav
 Refusjon -> Mailserver ++: M18 Oppgjørskrav
 Refusjon <-- Mailserver --
 Mailserver -> HELFO: M18 Oppgjørskrav
 Refusjon -> Refusjonstatus: Registrer refusjonskrav
-Kjedesystem <-- Refusjon --
+Brukersystem <-- Refusjon --
 
 == Motta status på refusjonskrav ==
 
@@ -37,9 +35,9 @@ Refusjon -> Mailserver: Hent mail
 Refusjon -> Refusjonstatus: Oppdater status på refusjonskrav
 deactivate Refusjon
 
-Kjedesystem -> Refusjon ++: Hent status på refusjonskrav
+Brukersystem -> Refusjon ++: Hent status på refusjonskrav
 Refusjon <-- Refusjonstatus: Status på refusjonskrav
-Kjedesystem <-- Refusjon --: M22 Oppgjørsresultat
+Brukersystem <-- Refusjon --: M22 Oppgjørsresultat
 
 == Motta utbetalingsmelding ==
 
@@ -49,8 +47,8 @@ Refusjon -> Mailserver: Hent mail
 Refusjon -> Refusjonstatus: Oppdater status på refusjonskrav
 deactivate Refusjon
 
-Kjedesystem -> Refusjon ++: Hent status på refusjonskrav
+Brukersystem -> Refusjon ++: Hent status på refusjonskrav
 Refusjon <-- Refusjonstatus: Status på refusjonskrav
-Kjedesystem <-- Refusjon --: M23 Utbetaling
+Brukersystem <-- Refusjon --: M23 Utbetaling
 
 @enduml

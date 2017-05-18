@@ -3,17 +3,13 @@
 skinparam ArrowColor #b1b1b0
 skinparam BorderColor #b1b1b0
 
-title Versjon 0.2: Farmasøytiske tjenester
-
-actor Pasient
-actor Farmasøyt
+actor Pasient #ececec
+actor Apotekansatt #ececec
 
 node DifaGUI #319aad
 
-note bottom of DifaGUI #ff8fa3: Mellomløsning slik at alle\nblir med fra starten
-
-package Kjedesystem {
-    node POS as "Ekspedering" #8ccbdb
+package Apoteksystem {
+    node POS as "Brukersystem" #8ccbdb
     node Regnskap #8ccbdb
 }
 
@@ -26,12 +22,12 @@ package Bransjesystem {
 node HELFO #e8cad8
 node HPR #c7395b
 
-Pasient <-> Farmasøyt
-Farmasøyt -down-> DifaGUI
+Pasient <-> Apotekansatt
+Apotekansatt -down-> DifaGUI
 
 DifaGUI -down-> DIFA: Alternativ
 DifaGUI -down-> Journal
-Farmasøyt -down-> POS
+Apotekansatt -down-> POS
 POS -down-> DIFA
 Regnskap -down-> DIFA: Refusjonstatus
 

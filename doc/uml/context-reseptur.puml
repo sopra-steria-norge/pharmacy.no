@@ -3,14 +3,15 @@
 skinparam ArrowColor #b1b1b0
 skinparam BorderColor #b1b1b0
 
+
 actor Pasient
 actor Apotekansatt
 actor Farmasøyt
 actor Lege
 node EPJ
 
-package Kjedesystemer {
-    node POS as "Ekspedering" #8ccbdb
+package Apoteksystemer {
+    node POS as "Brukersystemer" #8ccbdb
     node ERP #8ccbdb
     node Nettapotek #8ccbdb
     node Multidose #8ccbdb

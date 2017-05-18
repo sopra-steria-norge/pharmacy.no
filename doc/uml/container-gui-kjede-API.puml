@@ -3,64 +3,62 @@
 skinparam ArrowColor #b1b1b0
 skinparam BorderColor #b1b1b0
 
-title DIFA leser fra kjedenes varesystem (opsjon)
-
 actor Apotekansatt
 actor Farmasøyt
-box "Kjede"
+box "Apoteksystem"
     participant POS #8ccbdb
     participant Varesystem #8ccbdb
 end box
-box "DIFA"
-    participant DifaGUI #319aad
-    participant DIFA #319aad
+box "Bransjeløsning"
+    participant Bransjelønsinggrensesnitt as "Bransjelønsing\n-grensesnitt" #319aad
+    participant Bransjeløsning #319aad
 end box
 
 Apotekansatt -> POS: Velger hent resept
 Apotekansatt <-- POS: Redirect
-group Dialog med DIFA
-Apotekansatt -> DifaGUI: Vis Personsøk skjema
-Apotekansatt -> DifaGUI: Angi person (fødselsnummer eller navn + fødselsdato)
-Apotekansatt <-- DifaGUI: Vis resepter
-Apotekansatt -> DifaGUI: Velg resept
-activate DifaGUI
-DifaGUI-> DIFA: Hent resept 
-DIFA -> DIFA: Hent varer i byttegruppe
-DIFA -> DIFA: Påfør informasjon og varsler
-DifaGUI <-- DIFA
-note over Varesystem #ff8fa3: Kjeden har ansvar for at varesystem\nimplementere API spesfisert av DIFA
-DifaGUI-> Varesystem: <color red>Pris og beholdning for\n<color red>alle aktuelle legemidler\n<color red>for apotek
-DifaGUI<-- Varesystem
-Apotekansatt <--DifaGUI: Varsler, byttealternativer med priser, beholdning
-deactivate DifaGUI
-Apotekansatt -> DifaGUI: Velg legemiddel
-Apotekansatt <-- DifaGUI: Klargjør reseptetikett, ta opp print-dialog
+group Dialog med Bransjeløsning
+Apotekansatt -> Bransjelønsinggrensesnitt: Vis Personsøk skjema
+Apotekansatt -> Bransjelønsinggrensesnitt: Søk opp resept
+Apotekansatt <-- Bransjelønsinggrensesnitt: Vis resepter
+Apotekansatt -> Bransjelønsinggrensesnitt: Velg resept
+activate Bransjelønsinggrensesnitt
+Bransjelønsinggrensesnitt-> Bransjeløsning: Hent resept 
+Bransjeløsning -> Bransjeløsning: Hent varer i byttegruppe
+Bransjeløsning -> Bransjeløsning: Ekspederingsstøtte
+Bransjelønsinggrensesnitt <-- Bransjeløsning
+note over Varesystem #ff8fa3: Kjeden har ansvar for at varesystem\nimplementere API spesfisert av Bransjeløsningen
+Bransjelønsinggrensesnitt-> Varesystem: <color red>Pris og beholdning for\n<color red>alle aktuelle legemidler\n<color red>for apotek
+Bransjelønsinggrensesnitt<-- Varesystem
+Apotekansatt <--Bransjelønsinggrensesnitt: Varsler, byttealternativer med priser, beholdning
+deactivate Bransjelønsinggrensesnitt
+Apotekansatt -> Bransjelønsinggrensesnitt: Velg legemiddel
+Apotekansatt <-- Bransjelønsinggrensesnitt: Klargjør reseptetikett, ta opp print-dialog
 
 newpage
 
-note right of Apotekansatt #ff8fa3: DIFA GUI åpner nettlesers print-dialog
+note right of Apotekansatt #ff8fa3: Bransjeløsning GUI åpner nettlesers print-dialog
 Apotekansatt -> Apotekansatt: Skriv reseptetikett
-Apotekansatt -> DifaGUI: Scan strekkode på etikett og pakning
+Apotekansatt -> Bransjelønsinggrensesnitt: Scan etikett og pakning
 note right of Apotekansatt #ff8fa3: Strekkodescanner i tastaturmodus
-DifaGUI -> DIFA: Teknisk kontroll
+Bransjelønsinggrensesnitt -> Bransjeløsning: Teknisk kontroll
 Apotekansatt -> Farmasøyt: "Kan du gjøre\nfarmasøytkontroll"
-Farmasøyt -> DifaGUI: Vis resepter klar til farmasøytkontroll
-Farmasøyt -> DifaGUI: Utfør farmasøytkontroll
+Farmasøyt -> Bransjelønsinggrensesnitt: Vis resepter klar til farmasøytkontroll
+Farmasøyt -> Bransjelønsinggrensesnitt: Utfør farmasøytkontroll
 Apotekansatt <- Farmasøyt: "Vær så god"
-Apotekansatt -> DifaGUI: Utlever
+Apotekansatt -> Bransjelønsinggrensesnitt: Utlever
 Apotekansatt -> POS: Importer reseptkurver
 activate POS
-POS -> DIFA: <color red>List reseptkurver tilhørende apotekansatt
+POS -> Bransjeløsning: <color red>List reseptkurver tilhørende apotekansatt
 Apotekansatt <-- POS: Reseptkurvliste
 deactivate POS
 Apotekansatt -> POS: Plukk en eller flere reseptkurver
 activate POS
-POS -> DIFA: <color red>Hent reseptkurv
+POS -> Bransjeløsning: <color red>Hent reseptkurv
 Apotekansatt <-- POS: Vis oppdatert "handlekurv"
 deactivate POS
 Apotekansatt -> POS: <color red>Registrer signatur og betaling
 activate POS
-POS -> DIFA: <color red>Fullfør utlevering
+POS -> Bransjeløsning: <color red>Fullfør utlevering
 Apotekansatt <-- POS
 deactivate POS
 
