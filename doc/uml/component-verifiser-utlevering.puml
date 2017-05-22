@@ -1,17 +1,22 @@
 @startuml
 
-title Tjenester for fullfør ekspedering
-
 package Bransjeløsning {
+
+skinparam component {
+BorderColor black
+ArrowColor black
+}
+
+
     node Autorisasjonslag {
         component DIFA {
-            component FullførEkspedering
-            component ValiderUtlevering
-            component Pakningskontroll
-            component Farmasøytkontroll
-            component Forskriverkontroll
-            component Refusjonshjemmelkontroll
-            component Refusjonsberegning
+            component FullførEkspedering #8ccbdb
+            component ValiderUtlevering #8ccbdb
+            component Pakningskontroll #8ccbdb
+            component Farmasøytkontroll #8ccbdb
+            component Forskriverkontroll #8ccbdb
+            component Refusjonshjemmelkontroll #8ccbdb
+            component Refusjonsberegning #8ccbdb
             
             FullførEkspedering ..> ValiderUtlevering
             ValiderUtlevering ..> Pakningskontroll
@@ -20,28 +25,28 @@ package Bransjeløsning {
             ValiderUtlevering ..> Refusjonshjemmelkontroll
             ValiderUtlevering ..> Refusjonsberegning
 
-            () "API" as API_FullførEkspedering
+            () "API" as API_FullførEkspedering #ececec
             API_FullførEkspedering -down- FullførEkspedering
-            () "API" as API_ValiderUtlevering
+            () "API" as API_ValiderUtlevering #ececec
             API_ValiderUtlevering -down- ValiderUtlevering
 
-            () "API" as API_Pakningskontroll
+            () "API" as API_Pakningskontroll #ececec
             API_Pakningskontroll -down- Pakningskontroll
-            () "API" as API_Farmasøytkontroll
+            () "API" as API_Farmasøytkontroll #ececec
             API_Farmasøytkontroll -down- Farmasøytkontroll
-            () "API" as API_Forskriverkontroll
+            () "API" as API_Forskriverkontroll #ececec
             API_Forskriverkontroll -down- Forskriverkontroll
-            () "API" as API_Refusjonshjemmelkontroll
+            () "API" as API_Refusjonshjemmelkontroll #ececec
             API_Refusjonshjemmelkontroll -down- Refusjonshjemmelkontroll
-            () "API" as API_Refusjonsberegning
+            () "API" as API_Refusjonsberegning #ececec
             API_Refusjonsberegning -down- Refusjonsberegning
         }
     }
 
-    database Resepthistorikk
-    database HPR
-    database Legemidler
-    database Regelverk
+    database Resepthistorikk #8ccbdb
+    database HPR #e8baa0
+    database Legemidler #e8baa0
+    database Regelverk #e8baa0
 
     FullførEkspedering -> Resepthistorikk
     Farmasøytkontroll -> Resepthistorikk
@@ -50,12 +55,13 @@ package Bransjeløsning {
     Refusjonshjemmelkontroll -> Regelverk
 }
 
-() API -down- DIFA
+() "API" as Vei_inn #ececec
+Vei_inn -down- DIFA
 
-node Forfalskningsregisteret
+node Forfalskningsregisteret #e8baa0
 Pakningskontroll ..> Forfalskningsregisteret
 
-node Reseptformideleren
+node Reseptformideleren #e8baa0
 FullførEkspedering ..> Reseptformideleren
 
 
