@@ -1,0 +1,34 @@
+@startuml
+
+title Ekspederingsanmodning
+
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
+box "Apoteksystem" #ececec
+    participant Kjedesystem #8ccbdb
+end box
+
+box "Bransjeløsningen" #ececec
+    participant Reseptekspedering #319aad
+    database Database #319aad
+    database Mailserver #319aad
+end box
+
+box "Norsk Helsenett" #ececec
+    participant Reseptformidleren as "Resept\nformidleren" #ff8fa3
+end box
+
+Reseptformidleren -> Mailserver: M21 Ekspederingsanmodning
+activate Reseptekspedering
+Reseptekspedering -> Mailserver: Hent mail
+Reseptekspedering -> Reseptekspedering: Valider ekspederingsanmodning
+Reseptekspedering -> Database: Legg inn ekspederingsandmoding
+Reseptekspedering -> Mailserver: Slett mail
+deactivate Reseptekspedering
+
+Kjedesystem -> Reseptekspedering ++: Hent ekspederingsanmodninger siden <tidspunkt>
+Reseptekspedering <-- Database: Ekspederingsanmodninger
+Kjedesystem <-- Reseptekspedering --: M21 Ekspederingsanmodning
+
+@enduml

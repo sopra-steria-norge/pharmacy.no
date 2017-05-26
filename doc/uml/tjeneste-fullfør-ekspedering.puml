@@ -1,0 +1,49 @@
+@startuml
+
+title Implementasjon av tjenesten Sluttfør reseptekspedering
+
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
+box "Apoteksystem" #ececec
+    'actor Apotekansatt
+    participant Kjedesystem #8ccbdb
+end box
+
+box "Bransjeløsningen" #ececec
+    participant Reseptekspedering as "Resept\nekspedering" #319aad
+    participant Ekspedisjonsstøtte as "Ekspedisjons\nstøtte" #319aad
+    participant Regelmotor #319aad
+    database Resepthistorikk as "Resept\nhistorikk" #319aad
+    participant ReseptformidlerTjeneste as "Reseptformidler\nTjeneste" #319aad
+end box
+
+box "Norsk Helsenett" #ececec
+    participant Reseptformidleren as "Resept\nformidleren" #ff8fa3
+end box
+
+participant FMD as "Forfalskning\ndirektivet" #ff8fa3
+
+
+Kjedesystem -> Reseptekspedering ++: M1, M10, M18, priser
+Reseptekspedering -> Ekspedisjonsstøtte ++: Valider utlevering\n(M10, M18, priser)
+Ekspedisjonsstøtte  -> Regelmotor++: M10, M1, Historikk
+Ekspedisjonsstøtte  <-- Regelmotor--: Faglige varsler
+Ekspedisjonsstøtte -> Regelmotor ++: Kontroll av varsler 
+Ekspedisjonsstøtte <-- Regelmotor --
+Ekspedisjonsstøtte -> Regelmotor ++: Refusjonskontroll
+Ekspedisjonsstøtte <-- Regelmotor --
+Ekspedisjonsstøtte -> Regelmotor ++: Legemiddelkontroll
+Ekspedisjonsstøtte <-- Regelmotor --
+Ekspedisjonsstøtte -> FMD ++: Pakningskontroll
+Ekspedisjonsstøtte <-- FMD --
+Reseptekspedering <-- Ekspedisjonsstøtte --: Varsler
+Reseptekspedering -> ReseptformidlerTjeneste ++: M10 Utleveringsrapport 
+ReseptformidlerTjeneste -> Reseptformidleren ++: M10 Utleveringsrapport
+ReseptformidlerTjeneste <-- Reseptformidleren --
+Reseptekspedering <-- ReseptformidlerTjeneste --
+Reseptekspedering -> Resepthistorikk ++: Lagre resept M1, M10 (utvalgte felter)
+Reseptekspedering <-- Resepthistorikk --
+Kjedesystem <-- Reseptekspedering --: Utleveringsvarsler
+
+@enduml
