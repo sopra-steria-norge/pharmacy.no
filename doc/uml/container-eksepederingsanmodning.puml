@@ -1,32 +1,33 @@
+@startuml
+
 title Ekspederingsanmodning
 
-box "Kjede"
-    actor Apotekansatt
-    participant Ekspedering
-    participant Kjedesystem
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
+box "Apoteksystem" #ececec
+    participant Kjedesystem #8ccbdb
 end box
 
-box "Bransjeløsning"
-    participant DIFA
-    participant Database
+box "Bransjeløsningen" #ececec
+    participant Reseptekspedering #319aad
+    database Database #319aad
+    database Mailserver #319aad
 end box
 
+box "Norsk Helsenett" #ececec
+    participant Reseptformidleren as "Resept\nformidleren" #ff8fa3
+end box
 
-Kjedesystem -> DIFA: Hent varsler siden 01:31
-Kjedesystem <-- DIFA: ingenting\n(svar i løpet av 0.2 sekunder)
-...
-Reseptformidleren -> DIFA: Ekspedisjonsvarsel (HER-nummer i header)
-Reseptformidleren <-- DIFA
-Kjedesystem -> DIFA: Hent varsler siden 01:32
-Kjedesystem <-- DIFA: Ekspederingsanmodning\nmed HER-nummer
-Kjedesystem -> Apotekansatt: Varsel
-...
-Apotekansatt -> Ekspedering: Start reseptekspedering (reseptId)
-Ekspedering -> DIFA ++: Hent resept
-DIFA -> Reseptformidleren: M9.3
-DIFA <-- Reseptformidleren: M9.4
-DIFA -> Database: Mellomlagre reseptkurv
-DIFA -> Database: Hente resepthistorikk
-DIFA -> DIFA: Beregne varsler
-Ekspedering  <-- DIFA --: Resept
+Reseptformidleren -> Mailserver: M21 Ekspederingsanmodning
+activate Reseptekspedering
+Reseptekspedering -> Mailserver: Hent mail
+Reseptekspedering -> Reseptekspedering: Valider ekspederingsanmodning
+Reseptekspedering -> Database: Legg inn ekspederingsandmoding
+Reseptekspedering -> Mailserver: Slett mail
+deactivate Reseptekspedering
+
+Kjedesystem -> Reseptekspedering ++: Hent ekspederingsanmodninger siden <tidspunkt>
+Reseptekspedering <-- Database: Ekspederingsanmodninger
+Kjedesystem <-- Reseptekspedering --: M21 Ekspederingsanmodning
 
