@@ -8,14 +8,13 @@ node Apotek2 #c7395b
 node ApotekN #c7395b
 node Kjede #c7395b
 node FHI #80d3a4
+node mattilsynet #80d3a4
 
 skinparam ArrowColor #b1b1b0
 skinparam BorderColor #b1b1b0
 
-interface FarmasøytApp <<opsjon>> #8ccbdb
-
 cloud DIFA {
-    cloud NAN as "Point of delivery" #ff8fa3
+    cloud POD as "Point of delivery" #ff8fa3
     
     node LegemiddelSync <<Java>> #8ccbdb
     node HPRSync <<Java>> #8ccbdb
@@ -60,15 +59,14 @@ cloud Internet
 Apotek1 -down-> Kjede
 Apotek2 -down-> Kjede
 ApotekN -down-> Kjede
-Kjede -down-> NAN
-FarmasøytApp -down-> NAN
-NAN -down-> Reseptur
-NAN -down-> Resepthistorikk
-NAN -down-> Farmasøytisk
+Kjede -down-> POD
+POD -down-> Reseptur
+POD -down-> Resepthistorikk
+POD -down-> Farmasøytisk
 
 Kjede -down-> Internet
 FHI -down-> Internet
-data.norge.no -down-> Internet
+mattilsynet -down-> Internet
 Internet -down-> Rapport
 
 cloud NHN as "Norsk helsenett" #80d3a4

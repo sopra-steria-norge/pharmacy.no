@@ -1,23 +1,25 @@
+@startuml
+
 title Applikasjonsarkitektur
 
 node VMWare {
     node OpenShift {
-        node HAProxy
+        node HAProxy  #319aad
     
         node Docker {
             node JVM {
                 node Jetty {
-                    component AccessControl
-                    component Controller
-                    component Action
-                    component Service
-                    component "Gateway" as RFGateway
-                    component "Gateway" as HELFOGateway
-                    component "Gateway" as MailGateway
-                    component "Repository" as ApotekRepository
-                    component "Repository" as PasientRepository
+                    component AccessControl #319aad
+                    component Controller #319aad
+                    component Action #319aad
+                    component Service #319aad
+                    component "Gateway" as RFGateway #319aad
+                    component "Gateway" as HELFOGateway #319aad
+                    component "Gateway" as MailGateway #319aad
+                    component "Repository" as ApotekRepository #319aad
+                    component "Repository" as PasientRepository #319aad
                     
-                    () servlet
+                    () servlet  #319aad
                     servlet -down- Controller
                     
                     Controller - "*" Action
@@ -33,19 +35,20 @@ node VMWare {
                 Jetty ..> servlet
             }
         }
-        () "https" as jettyhttps
+        () "https" as jettyhttps #319aad
         jettyhttps -down- Jetty
         
         HAProxy .down.> jettyhttps
     }
-}    
+}
+() https #319aad
 https -down- HAProxy
 
 node "PostgreSQL VMWare" {
     node PostgreSQL {
-        database Apotek
-        database Pasient
-        database "..." as db
+        database Apotek  #319aad
+        database Pasient  #319aad
+        database "..." as db  #319aad
     }
 }
 () "SQL" as ApotekSQL
@@ -58,11 +61,13 @@ ApotekRepository .down.> ApotekSQL
 PasientRepository .down.> PasientSQL
 
 cloud "Eksterne tjenester" {
-    node Reseptformidleren
-    node HELFO
-    node Mailserver
+    node Reseptformidleren #e8cad8
+    node HELFO #e8cad8
+    node Mailserver #c7395b
 }
 
 RFGateway -right- Reseptformidleren
 HELFOGateway -right- HELFO
 MailGateway -right- Mailserver
+
+@enduml

@@ -1,33 +1,42 @@
+@startuml
+
+skinparam ArrowColor #b1b1b0
+skinparam BorderColor #b1b1b0
+
 title Applikasjonsarkitektur under last og oppgradering
 
 node VMWare {
     node OpenShift {
-        node HAProxy
+        node HAProxy #ff8fa3
     
-        node Docker
-        () "https" as dockerhttps
+        node Docker #8ccbdb
+        () "https" as dockerhttps #8ccbdb
         dockerhttps -down- Docker
         HAProxy .down.> dockerhttps: /api/*/*
 
-        node "Docker" as Docker2
-        () "https" as dockerhttps2
+        node "Docker" as Docker2 #8ccbdb
+        () "https" as dockerhttps2 #8ccbdb
         dockerhttps2 -down- Docker2
         HAProxy .down.> dockerhttps2: /api/*/*
 
-        node "Docker\nnew version" as Docker3
-        () "https" as dockerhttps3
+        node "Docker\nnew version" as Docker3 #8ccbdb
+        () "https" as dockerhttps3 #8ccbdb
         dockerhttps3 -down- Docker3
         HAProxy .down.> dockerhttps3: /api/{90433,90396}/*
 
-        note bottom of Docker3: "Canary" av ny versjon for\nBoots TÃ¸yen og Oslo S
+        note bottom of Docker3 #ff8fa3: "Canary" av ny versjon for\nBoots Tøyen og Oslo S
     }
-}    
+}
+() https #ff8fa3
 https -down- HAProxy
 
 node "PostgreSQL VMWare" {
-    database PostgreSQL
+    database PostgreSQL #8ccbdb
 }
 
 Docker -down- PostgreSQL
 Docker2 -down- PostgreSQL
 Docker3 -down- PostgreSQL
+
+
+@enduml
