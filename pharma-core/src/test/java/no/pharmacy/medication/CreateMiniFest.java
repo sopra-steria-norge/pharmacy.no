@@ -1,8 +1,12 @@
 package no.pharmacy.medication;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +18,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.input.BOMInputStream;
 import org.eaxy.Document;
 import org.eaxy.Element;
 import org.eaxy.ElementSet;
@@ -22,6 +28,7 @@ import org.eaxy.Namespace;
 import org.eaxy.Validator;
 import org.eaxy.Xml;
 
+import no.pharmacy.infrastructure.IOUtil;
 import no.pharmacy.test.PharmaTestData;
 
 public class CreateMiniFest {
@@ -323,7 +330,16 @@ public class CreateMiniFest {
     }
 
     public static void main(String[] args) throws IOException {
-        Document festDoc = FestMedicationImporter.downloadFestDoc(FestMedicationImporter.FEST_URL);
+        Document festDoc;
+
+        File festFile = new File("target/fest251.zip");
+        IOUtil.copy(FestMedicationImporter.FEST_URL, festFile, new File("target/tmp"));
+        try (ZipInputStream zip = new ZipInputStream(new FileInputStream(festFile))) {
+            try(InputStream entry = new BOMInputStream(IOUtil.zipEntry(zip, "fest251.xml"))) {
+                festDoc = Xml.read(new InputStreamReader(zip));
+            }
+        }
+
         Document miniFest = new CreateMiniFest(festDoc).extractMiniFest(10);
         System.out.println("Extract complete");
 

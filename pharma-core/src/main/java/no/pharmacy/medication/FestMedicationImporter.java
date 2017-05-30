@@ -12,13 +12,11 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
-import javax.sql.DataSource;
-
-import org.eaxy.Document;
+import org.apache.commons.io.input.BOMInputStream;
 import org.eaxy.Element;
+import org.eaxy.ElementFilters;
 import org.eaxy.ElementSet;
 import org.eaxy.Validator;
-import org.eaxy.Xml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +24,6 @@ import no.pharmacy.core.Money;
 import no.pharmacy.core.Reference;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.infrastructure.IOUtil;
-import no.pharmacy.test.TestDataSource;
 
 public class FestMedicationImporter {
     private Validator validator = new Validator(new String[] { "R1808-eResept-M30-2014-12-01/ER-M30-2014-12-01.xsd" });
@@ -36,17 +33,17 @@ public class FestMedicationImporter {
     private static final Logger logger = LoggerFactory.getLogger(FestMedicationImporter.class);
 
     void saveFest(URL url, JdbcMedicationRepository repository) {
-        if (url.getProtocol().startsWith("http")) {
-            saveFest(downloadFestDoc(url), repository);
+        if (url.getPath().endsWith("zip")) {
+            downloadFestDoc(url, repository);
         } else if (url.getPath().endsWith(".gz")) {
             try (Reader reader = new InputStreamReader(new GZIPInputStream(url.openStream()))) {
-                saveFest(Xml.read(reader), repository);
+                saveFest(reader, repository);
             } catch (IOException e) {
                 throw ExceptionUtil.softenException(e);
             }
         } else {
             try (Reader reader = new InputStreamReader(url.openStream())) {
-                saveFest(Xml.read(reader), repository);
+                saveFest(reader, repository);
             } catch (IOException e) {
                 throw ExceptionUtil.softenException(e);
             }
@@ -54,7 +51,7 @@ public class FestMedicationImporter {
     }
 
 
-    static Document downloadFestDoc(URL url) {
+    void downloadFestDoc(URL url, JdbcMedicationRepository repository) {
         if (System.getProperty("pharmacy.disable_fest_refresh") != null) {
             throw new IllegalStateException("FEST refresh is disabled");
         }
@@ -66,15 +63,10 @@ public class FestMedicationImporter {
             logger.info("Downloaded {} into {}", url, festFile);
 
             try (ZipInputStream zip = new ZipInputStream(new FileInputStream(festFile))) {
-                try(InputStream entry = IOUtil.zipEntry(zip, "fest251.xml")) {
-                    int byteOrderMark = entry.read(); // \uEFBBBF
-                    if (byteOrderMark == 0xef) {
-                        entry.read(); entry.read();
-                    }
+                try(InputStream entry = new BOMInputStream(IOUtil.zipEntry(zip, "fest251.xml"))) {
                     logger.info("Reading fest251.xml");
-                    Document festDoc = Xml.read(new InputStreamReader(zip));
-                    logger.info("Read complete");
-                    return festDoc;
+                    saveFest(new InputStreamReader(entry), repository);
+                    logger.info("Import complete");
                 }
             }
         } catch (IOException e) {
@@ -90,16 +82,6 @@ public class FestMedicationImporter {
         for (Element byttegruppe : oppfByttegruppe.elements()) {
             Element byttegruppeKode = byttegruppe.find("Byttegruppe", "Kode").first();
             result.add(new Reference(byttegruppeKode.attr("V"), byttegruppeKode.attr("DN")));
-        }
-
-        return result;
-    }
-
-
-    List<Medication> readMedicationPackages(Element katLegemiddelpakning) {
-        List<Medication> result = new ArrayList<>();
-        for (Element oppfLegemiddelpakning : katLegemiddelpakning.elements()) {
-            result.add(readMedication(oppfLegemiddelpakning));
         }
 
         return result;
@@ -132,21 +114,12 @@ public class FestMedicationImporter {
         return null;
     }
 
-
-    List<MedicationInteraction> readInteractions(Element katInteraksjon) {
-        ArrayList<MedicationInteraction> result = new ArrayList<>();
-        for (Element interaksjon : katInteraksjon.find("OppfInteraksjon", "Interaksjon")) {
-            MedicationInteraction interaction = readInteraction(interaksjon);
-
-            if (interaction != null) {
-                result.add(interaction);
-            }
+    MedicationInteraction readInteraction(Element oppfInteraksjon) {
+        ElementSet interactions = oppfInteraksjon.find("Interaksjon");
+        if (interactions.isEmpty()) {
+            return null;
         }
-        return result;
-    }
-
-
-    private MedicationInteraction readInteraction(Element interaksjon) {
+        Element interaksjon = interactions.first();
         MedicationInteraction interaction = new MedicationInteraction();
         interaction.setId(interaksjon.find("Id").first().text());
         interaction.setClinicalConsequence(interaksjon.find("KliniskKonsekvens").firstTextOrNull());
@@ -164,26 +137,16 @@ public class FestMedicationImporter {
         return interaction;
     }
 
-
-    private void saveFest(Document festDoc, MedicationRepository medicationRepository) {
-        logger.info("Inserting medications");
-        for (Element oppfLegemiddelpakning : festDoc.find("KatLegemiddelpakning").first().elements()) {
-            medicationRepository.save(readMedication(oppfLegemiddelpakning));
+    private void saveFest(Reader festDoc, MedicationRepository medicationRepository) {
+        for (Element element : ElementFilters.create("*", "*").iterate(festDoc)) {
+            if (element.tagName().equals("OppfLegemiddelpakning")) {
+                medicationRepository.save(readMedication(element));
+            } else if (element.tagName().equals("OppfInteraksjon")) {
+                medicationRepository.save(readInteraction(element));
+            } else if (!element.tagName().startsWith("Oppf")) {
+                throw new IllegalArgumentException("Unexpected element " + element);
+            }
         }
-        logger.info("Inserted medications");
-
-        logger.info("Inserting interactions");
-        for (MedicationInteraction interaction : readInteractions(festDoc.find("KatInteraksjon").first())) {
-            medicationRepository.save(interaction);
-        }
-        logger.info("Inserted interactions");
     }
 
-    public static void main(String[] args) {
-        DataSource dataSource = TestDataSource.createDataSource(
-                System.getProperty("pharmacy.medication.jdbc.url", "jdbc:h2:file:./target/db/medications"), "db/db-medications");
-        JdbcMedicationRepository repository = new JdbcMedicationRepository(dataSource);
-        FestMedicationImporter importer = new FestMedicationImporter();
-        importer.saveFest(FEST_URL, repository);
-    }
 }

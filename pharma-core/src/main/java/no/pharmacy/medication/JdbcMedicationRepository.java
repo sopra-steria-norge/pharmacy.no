@@ -142,6 +142,9 @@ public class JdbcMedicationRepository extends JdbcSupport implements MedicationR
 
     @Override
     public void save(MedicationInteraction interaction) {
+        if (interaction == null) {
+            return;
+        }
         insertInto("medication_interactions")
             .value("id", interaction.getId())
             .value("severity", interaction.getSeverity())

@@ -45,7 +45,7 @@ public class FestMedicationImporterTest {
     }
 
     @Test
-    public void readMedicationPackage() {
+    public void shouldReadMedicationPackage() {
         Element legemiddelpakning = F.el("Legemiddelpakning",
                 F.el("Atc").attr("V", "A12AX").attr("S", "2.16.578.1.12.4.1.1.7180").attr("DN", "Kalsium..."),
                 F.el("NavnFormStyrke", "Calcigran Forte Tyggetab 1000 mg/800 IE"),
@@ -99,7 +99,7 @@ public class FestMedicationImporterTest {
                 );
         validator.validate(katWrapper(interaksjon));
 
-        MedicationInteraction interaction = importer.readInteractions(katWrapper(interaksjon)).get(0);
+        MedicationInteraction interaction = importer.readInteraction(oppfWrapper(interaksjon));
 
         assertThat(interaction).hasNoNullFieldsOrProperties();
         assertThat(interaction.getSubstanceCodes()).contains("N06BA05", "N06AG02");
@@ -128,7 +128,7 @@ public class FestMedicationImporterTest {
                 );
         validator.validate(katWrapper(interaksjon));
 
-        MedicationInteraction interaction = importer.readInteractions(katWrapper(interaksjon)).get(0);
+        MedicationInteraction interaction = importer.readInteraction(oppfWrapper(interaksjon));
 
         assertThat(interaction).hasNoNullFieldsOrProperties();
         assertThat(interaction.getSeverity()).isEqualTo(MedicalInteractionSeverity.SERIOUS);
@@ -159,7 +159,7 @@ public class FestMedicationImporterTest {
                         F.el("Navn", "(ikke angitt)"))),
                 katWrapper(interaksjon)));
 
-        assertThat(importer.readInteractions(katWrapper(interaksjon))).isEmpty();
+        assertThat(importer.readInteraction(oppfWrapper(interaksjon))).isNull();
     }
 
     @Test
@@ -184,6 +184,10 @@ public class FestMedicationImporterTest {
     }
 
     public static void main(String[] args) throws IOException {
-        CreateMiniFest.main(args);
+        DataSource dataSource = TestDataSource.createDataSource(
+                System.getProperty("pharmacy.medication.jdbc.url", "jdbc:h2:mem:medications"), "db/db-medications");
+        JdbcMedicationRepository repository = new JdbcMedicationRepository(dataSource);
+        FestMedicationImporter importer = new FestMedicationImporter();
+        importer.saveFest(FestMedicationImporter.FEST_URL, repository);
     }
 }
