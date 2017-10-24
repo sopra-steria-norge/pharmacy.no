@@ -38,7 +38,7 @@ public class PrescriptionWebTest {
     private static FakeReseptFormidler rfMessageGateway;
 
     @BeforeClass
-    public static void setupChromeDriver() throws Exception {
+    public static void setupServer() throws Exception {
         System.setProperty("webdriver.chrome.driver", downloadChromeDriver().getPath());
 
         JdbcMedicationRepository medicationRepository = testData.getMedicationRepository();

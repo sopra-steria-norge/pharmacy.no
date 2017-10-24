@@ -1,15 +1,26 @@
 package no.pharmacy.test;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import lombok.SneakyThrows;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.MedicationOrder;
@@ -17,7 +28,18 @@ import no.pharmacy.infrastructure.IOUtil;
 import no.pharmacy.medication.FestMedicationImporter;
 import no.pharmacy.medication.JdbcMedicationRepository;
 import no.pharmacy.medication.Medication;
+import no.pharmacy.organization.HealthcareService;
+import no.pharmacy.organization.JdbcHealthcareServiceRepository;
 import no.pharmacy.practitioner.Practitioner;
+import sun.security.x509.AlgorithmId;
+import sun.security.x509.CertificateAlgorithmId;
+import sun.security.x509.CertificateSerialNumber;
+import sun.security.x509.CertificateValidity;
+import sun.security.x509.CertificateVersion;
+import sun.security.x509.CertificateX509Key;
+import sun.security.x509.X500Name;
+import sun.security.x509.X509CertImpl;
+import sun.security.x509.X509CertInfo;
 
 public class PharmaTestData {
 
@@ -215,5 +237,40 @@ public class PharmaTestData {
 
     public static LocalDate randomPastDate(int maxDaysAgo) {
         return LocalDate.now().minusDays(random(maxDaysAgo));
+    }
+
+    private List<HealthcareService> healthcareServices;
+
+    @SneakyThrows(GeneralSecurityException.class)
+    public HealthcareService sampleHealthcareService() {
+        if (healthcareServices == null) {
+            JdbcHealthcareServiceRepository repository = new JdbcHealthcareServiceRepository(TestDataSource.createMemDataSource("organizations"),
+                    JdbcHealthcareServiceRepository.SEED_URL);
+            healthcareServices = repository.listPharmacies();
+        }
+
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        keyPairGenerator.initialize(512);
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+
+        HealthcareService result = pickOne(healthcareServices);
+        result.setCertificateAsBase64(sampleX509Certificate(result.getDN(), keyPair.getPublic(), keyPair.getPrivate()));
+        return result;
+    }
+
+    @SneakyThrows({GeneralSecurityException.class, IOException.class})
+    private String sampleX509Certificate(String display, PublicKey publicKey, PrivateKey caPrivateKey) {
+        X509CertInfo info = new sun.security.x509.X509CertInfo();
+        info.set(X509CertInfo.VALIDITY, new CertificateValidity(new Date(), new Date(System.currentTimeMillis() + 3600 * 24 * 364)));
+        info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(new BigInteger(64, new SecureRandom())));
+        info.set(X509CertInfo.SUBJECT, new X500Name(display));
+        info.set(X509CertInfo.ISSUER, new X500Name("CN=Unit Test CA, O=DIFA Testing, C=NO"));
+        info.set(X509CertInfo.KEY, new CertificateX509Key(publicKey));
+        info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
+        info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(new AlgorithmId(AlgorithmId.sha1WithRSAEncryption_oid)));
+
+        X509CertImpl certificate = new X509CertImpl(info);
+        certificate.sign(caPrivateKey, "SHA1withRSA");
+        return Base64.getMimeEncoder().encodeToString(certificate.getEncoded());
     }
 }

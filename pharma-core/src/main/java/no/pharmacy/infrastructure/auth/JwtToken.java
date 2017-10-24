@@ -1,13 +1,11 @@
 package no.pharmacy.infrastructure.auth;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HashMap;
@@ -20,6 +18,7 @@ import org.jsonbuddy.parse.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.pharmacy.infrastructure.CryptoUtil;
 import no.pharmacy.infrastructure.ExceptionUtil;
 import no.pharmacy.infrastructure.IOUtil;
 
@@ -27,8 +26,6 @@ import no.pharmacy.infrastructure.IOUtil;
 public class JwtToken {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtToken.class);
-
-    private static CertificateFactory certificateFactory;
 
     private static Map<String,Certificate> certificates = new HashMap<>();
     private String[] tokenValues;
@@ -173,7 +170,7 @@ public class JwtToken {
                 URL jwksUrl = new URL(fetchOpenidConfiguration().requiredString("jwks_uri"));
                 logger.debug("Getting JWK from {}", jwksUrl);
                 JsonObject keyJson = httpGetJsonObject(jwksUrl);
-                certificates.put(keyId, decodeCertificate(getKey(keyJson, keyId)));
+                certificates.put(keyId, CryptoUtil.decodeCertificate(getKey(keyJson, keyId)));
             } catch (IOException e) {
                 throw ExceptionUtil.softenException(e);
             }
@@ -183,18 +180,6 @@ public class JwtToken {
 
     private JsonObject fetchOpenidConfiguration() throws IOException {
         return httpGetJsonObject(new URL(authority + "/.well-known/openid-configuration"));
-    }
-
-    private static synchronized Certificate decodeCertificate(String key) throws CertificateException {
-        if (certificateFactory == null) {
-            certificateFactory = CertificateFactory.getInstance("X.509");
-        }
-        logger.debug("Decoding certificate {}", key);
-        return certificateFactory.generateCertificate(asInputStream(key));
-    }
-
-    private static ByteArrayInputStream asInputStream(String key) {
-        return new ByteArrayInputStream(Base64.getDecoder().decode(key));
     }
 
     private static JsonObject httpGetJsonObject(URL keyUrl) throws IOException {

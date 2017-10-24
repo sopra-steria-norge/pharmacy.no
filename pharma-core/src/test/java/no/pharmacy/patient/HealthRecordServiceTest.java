@@ -15,6 +15,7 @@ import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.infrastructure.CryptoUtil;
+import no.pharmacy.organization.JdbcHealthcareServiceRepository;
 import no.pharmacy.patient.HealthRecordQuery.HealthRecordQueryPurpose;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.TestDataSource;
@@ -23,9 +24,11 @@ public class HealthRecordServiceTest {
 
     private DataSource dataSource = TestDataSource.pharmacistInstance();
     private PharmaTestData testData = new PharmaTestData();
+    private JdbcHealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource(), JdbcHealthcareServiceRepository.SEED_URL);
     private MedicationDispenseRepository repository = new JdbcMedicationDispenseRepository(
             dataSource,
-            testData.getMedicationRepository());
+            testData.getMedicationRepository(),
+            healthcareServiceRepository);
     private PatientRepository patientRepository = new JdbcPatientRepository(TestDataSource.patientInstance(), s -> testData.samplePatient(), CryptoUtil.aesKey("sndglsngl ndsglsn".getBytes()));
     private HealthRecordService healthRecordService = new HealthRecordService(repository, patientRepository);
 

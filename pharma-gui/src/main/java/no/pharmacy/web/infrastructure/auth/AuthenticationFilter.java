@@ -51,9 +51,7 @@ public class AuthenticationFilter implements Filter {
             Authentication auth = decodeAuthentication(req.getParameter("id_token"));
 
             String redirect = (String) req.getSession().getAttribute("login_redirect_url");
-            if (redirect == null) {
-                redirect = req.getContextPath();
-            }
+            redirect = "/";
 
             ((Request)request).setAuthentication(auth);
             req.getSession().invalidate();

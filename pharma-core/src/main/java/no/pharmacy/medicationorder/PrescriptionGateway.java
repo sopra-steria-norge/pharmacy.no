@@ -4,6 +4,7 @@ import java.util.List;
 
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
+import no.pharmacy.organization.HealthcareService;
 
 public interface PrescriptionGateway {
 
@@ -19,7 +20,7 @@ public interface PrescriptionGateway {
     MedicationOrder cancelMedicationOrderDispense(String prescriptionId, String referenceNumber, String employeeId);
 
 
-    void completeDispense(MedicationDispense dispense, String employeeId);
+    void completeDispense(MedicationDispense dispense, String employeeId, HealthcareService dispensingOrganization);
 
     void cancelDispense(String reason, String referenceNumber, String employeeId);
 

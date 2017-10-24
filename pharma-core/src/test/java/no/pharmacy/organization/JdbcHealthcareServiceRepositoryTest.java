@@ -23,7 +23,7 @@ public class JdbcHealthcareServiceRepositoryTest {
             .isEqualTo("BOOTS APOTEK SOLLI");
 
         assertThat(repository.listPharmacies().iterator().next())
-            .hasNoNullFieldsOrProperties();
+            .hasNoNullFieldsOrPropertiesExcept("certificateAsBase64");
     }
 
     @Test

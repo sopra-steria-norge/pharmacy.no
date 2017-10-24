@@ -53,7 +53,7 @@ public class DispenseOrderService {
         medicationDispenseRepository.update(dispenseOrder);
 
         for (MedicationDispense dispense : dispenseOrder.getDispenses()) {
-            prescriptionsGateway.completeDispense(dispense, "123");
+            prescriptionsGateway.completeDispense(dispense, "123", dispenseOrder.getDispensingOrganization());
         }
 
         // TODO: Send M18

@@ -1,5 +1,9 @@
 package no.pharmacy.medicationorder;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,15 +13,21 @@ import java.util.UUID;
 
 import org.eaxy.Document;
 import org.eaxy.Element;
+import org.eaxy.ElementPath;
 import org.eaxy.Namespace;
 import org.eaxy.Xml;
+import org.eaxy.XmlFormatter;
+import org.jcp.xml.dsig.internal.DigesterOutputStream;
 
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import no.pharmacy.core.MessageGateway;
 import no.pharmacy.core.PersonReference;
 import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationOrder;
+import no.pharmacy.infrastructure.messages.EbXmlMessage;
 import no.pharmacy.medication.MedicationRepository;
+import no.pharmacy.organization.HealthcareService;
 import no.pharmacy.patient.PatientRepository;
 
 public class RFPrescriptionGateway implements PrescriptionGateway {
@@ -184,10 +194,42 @@ public class RFPrescriptionGateway implements PrescriptionGateway {
     }
 
     @Override
-    public void completeDispense(MedicationDispense dispense, String employeeId) {
-        messageGateway.processRequest(msgHead(
+    public void completeDispense(MedicationDispense dispense, String employeeId, HealthcareService dispensingOrganization) {
+        messageGateway.processRequest(signMessage(msgHead(
                 msgInfo("ERM10", sender(), getReseptFormidleren()),
-                createMedicationDispenseRequest(dispense, employeeId)));
+                createMedicationDispenseRequest(dispense, employeeId)), dispensingOrganization));
+    }
+
+    private static Namespace XMLDSIG = new Namespace("http://www.w3.org/2000/09/xmldsig#");
+
+    @SneakyThrows({IOException.class, GeneralSecurityException.class})
+    private Element signMessage(Element msgHead, HealthcareService dispensingOrganization) {
+        if (dispensingOrganization.getCertificateAsBase64() == null) {
+            return msgHead;
+        }
+
+        MessageDigest md = MessageDigest.getInstance(EbXmlMessage.getDigestMethod("http://www.w3.org/2000/09/xmldsig#rsa-sha1"));
+        try(OutputStreamWriter writer = new OutputStreamWriter(new DigesterOutputStream(md))) {
+            XmlFormatter.canonical("http://www.w3.org/TR/2001/REC-xml-c14n-20010315").format(writer, new ElementPath(null, msgHead));
+            writer.flush();
+        }
+        String digestMessage = Base64.getMimeEncoder().encodeToString(md.digest());
+
+        msgHead.add(XMLDSIG.el("Signature",
+                XMLDSIG.el("SignedInfo",
+                        XMLDSIG.el("CanonicalizationMethod").attr("Algorithm", ""),
+                        XMLDSIG.el("SignatureMethod").attr("Algorithm", ""),
+                        XMLDSIG.el("Reference",
+                                XMLDSIG.el("Transforms",
+                                        XMLDSIG.el("Transform").attr("Algorithm", "http://www.w3.org/2000/09/xmldsig#enveloped-signature"),
+                                        XMLDSIG.el("Transform").attr("Algorithm", "http://www.w3.org/TR/2001/REC-xml-c14n-20010315")
+                                        ),
+                                XMLDSIG.el("DigestMethod").attr("Algorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1"),
+                                XMLDSIG.el("DigestValue", digestMessage))),
+                XMLDSIG.el("SignatureValue"),
+                XMLDSIG.el("KeyInfo", XMLDSIG.el("X509Data",
+                        XMLDSIG.el("X509Certificate", dispensingOrganization.getCertificateAsBase64())))));
+        return msgHead;
     }
 
     private Element createMedicationDispenseRequest(MedicationDispense dispense, String employeeId) {

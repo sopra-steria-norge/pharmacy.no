@@ -443,6 +443,7 @@ public class PharmacyGuiController extends HttpServlet {
             String herNumber = match.group(1);
 
             DispenseOrder order = repository.getDispenseOrderById(match.group(2));
+            order.setDispensingOrganization(principal.getOrganization(herNumber));
 
             JsonObject prescriptions = JsonParser.parseToObject(req.getParameter("JSON"));
             order.setCustomerSignature(prescriptions.requiredString("customerSignature"));

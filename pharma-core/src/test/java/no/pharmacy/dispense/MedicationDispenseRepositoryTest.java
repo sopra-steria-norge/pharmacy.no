@@ -13,6 +13,7 @@ import no.pharmacy.dispense.MedicationDispenseAction;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.medication.Medication;
+import no.pharmacy.organization.JdbcHealthcareServiceRepository;
 import no.pharmacy.test.PharmaTestData;
 import no.pharmacy.test.TestDataSource;
 
@@ -20,9 +21,11 @@ public class MedicationDispenseRepositoryTest {
 
     private DataSource dataSource = TestDataSource.pharmacistInstance();
     private PharmaTestData testData = new PharmaTestData();
+    private JdbcHealthcareServiceRepository healthcareServiceRepository = new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource(), JdbcHealthcareServiceRepository.SEED_URL);
     private MedicationDispenseRepository repository = new JdbcMedicationDispenseRepository(
             dataSource,
-            testData.getMedicationRepository());
+            testData.getMedicationRepository(),
+            healthcareServiceRepository);
 
     @Test
     public void shouldRetrieveSimpleDispenseOrder() {
@@ -31,6 +34,7 @@ public class MedicationDispenseRepositoryTest {
         dispense.setPrice(PharmaTestData.samplePrice());
         dispense.setPrintedDosageText("Corrected text");
 
+        order.setDispensingOrganization(testData.sampleHealthcareService());
         order.setPatient(testData.samplePatient());
         order.setCustomerSignature(testData.samplePng());
 

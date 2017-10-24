@@ -16,7 +16,9 @@ import no.pharmacy.dispense.MedicationDispense;
 import no.pharmacy.dispense.MedicationDispenseRepository;
 import no.pharmacy.dispense.MedicationOrder;
 import no.pharmacy.infrastructure.CryptoUtil;
+import no.pharmacy.infrastructure.messages.EbXmlMessage;
 import no.pharmacy.medication.JdbcMedicationRepository;
+import no.pharmacy.organization.JdbcHealthcareServiceRepository;
 import no.pharmacy.patient.JdbcPatientRepository;
 import no.pharmacy.patient.PatientRepository;
 import no.pharmacy.test.FakeReseptFormidler;
@@ -37,7 +39,9 @@ public class RFPrescriptionGatewayTest {
 
     private String employeeId = testData.samplePractitioner().getReference().getReference();
 
-    private MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(TestDataSource.pharmacistInstance(), new JdbcMedicationRepository(TestDataSource.medicationInstance()));
+    private MedicationDispenseRepository medicationDispenseRepository = new JdbcMedicationDispenseRepository(TestDataSource.pharmacistInstance(),
+            new JdbcMedicationRepository(TestDataSource.medicationInstance()),
+            new JdbcHealthcareServiceRepository(TestDataSource.organizationsDataSource(), JdbcHealthcareServiceRepository.SEED_URL));
 
     private DispenseOrderService dispenseOrderService = new DispenseOrderService(gateway, medicationDispenseRepository, patientRepository);
 
@@ -78,7 +82,7 @@ public class RFPrescriptionGatewayTest {
         dispense.setPackagingControlled(true);
         dispense.setDateDispensed(PharmaTestData.randomPastDate(14));
 
-        gateway.completeDispense(dispense, employeeId);
+        gateway.completeDispense(dispense, employeeId, testData.sampleHealthcareService());
 
         assertThat(fakeReseptFormidler.getPrintedDosageTexts(medicationOrder))
             .contains(dispense.getPrintedDosageText());
@@ -97,6 +101,29 @@ public class RFPrescriptionGatewayTest {
             .extracting(MedicationDispense::getAuthorizingPrescription)
             .extracting(MedicationOrder::getPrescriptionId)
             .containsOnly(medicationOrder1.getPrescriptionId(), medicationOrder2.getPrescriptionId());
+    }
+
+    @Test
+    public void shouldCompleteMedicationDispense() {
+        DispenseOrder dispenseOrder = new DispenseOrder();
+        dispenseOrder.setDispensingOrganization(testData.sampleHealthcareService());
+        MedicationOrder medicationOrder = testData.sampleMedicationOrder();
+        MedicationDispense dispense = dispenseOrder.addMedicationOrder(medicationOrder);
+        dispense.setMedication(medicationOrder.getMedication());
+        dispense.setPrice(PharmaTestData.samplePrice());
+        dispense.setPrintedDosageText("Corrected text");
+
+        dispenseOrderService.completeDispenseOrder(dispenseOrder);
+
+        EbXmlMessage dispenseMessage = fakeReseptFormidler
+                .getPrescriptionMessages(medicationOrder.getPrescriptionId())
+                .singleDispenseMessage();
+        assertThat(dispenseMessage.getContent()
+                .find("Utleveringsrapport", "Utlevering", "ReseptId").first().text())
+            .isEqualTo(medicationOrder.getPrescriptionId());
+        dispenseMessage.verifySignature();
+        assertThat(dispenseMessage.getCertificate().getSubjectDN().toString())
+            .isEqualTo(dispenseOrder.getDispensingOrganization().getDN());
     }
 
     @Test

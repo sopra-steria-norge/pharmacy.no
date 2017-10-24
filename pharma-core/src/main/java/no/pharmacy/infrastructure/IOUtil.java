@@ -2,6 +2,7 @@ package no.pharmacy.infrastructure;
 
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -309,6 +310,10 @@ public class IOUtil {
         } catch (IOException e) {
             throw ExceptionUtil.softenException(e);
         }
+    }
+
+    public static ByteArrayInputStream asInputStream(String key) {
+        return new ByteArrayInputStream(Base64.getMimeDecoder().decode(key));
     }
 
 }

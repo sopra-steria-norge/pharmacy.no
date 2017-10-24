@@ -36,6 +36,8 @@ public class FakeReseptFormidler implements MessageGateway, PrescriptionSimulato
     private static final Namespace HEAD = new Namespace("http://www.kith.no/xmlstds/msghead/2006-05-24", "HEAD");
     private static final Namespace bas = new Namespace("http://www.kith.no/xmlstds/base64container", "bas");
 
+    private Map<String, PrescriptionMessages> prescriptionMessages = new HashMap<>();
+
     private Validator validator = new Validator(new String[] {
             "felles/kith-base64.xsd",
             "felles/MsgHead-v1_2.xsd",
@@ -123,6 +125,7 @@ public class FakeReseptFormidler implements MessageGateway, PrescriptionSimulato
             return generateM94Envelope(order, senderOrganization);
         } else if (request.tagName().equals("Utleveringsrapport")) {
             String prescriptionId = request.find("Utlevering", "ReseptId").first().text();
+            getPrescriptionMessages(prescriptionId).addDispense(message);
             String dosageText = request.find("Utlevering", "ReseptDokLegemiddel", "Forskrivning").check()
                     .find("DosVeiledEnkel").firstTextOrNull();
             printedDosageTexts
@@ -266,6 +269,10 @@ public class FakeReseptFormidler implements MessageGateway, PrescriptionSimulato
         dispensesForPrescription
             .computeIfAbsent(dispense.getAuthorizingPrescription().getPrescriptionId(), s -> new ArrayList<>())
             .add(dispense);
+    }
+
+    public PrescriptionMessages getPrescriptionMessages(String prescriptionId) {
+        return prescriptionMessages.computeIfAbsent(prescriptionId, (k) -> new PrescriptionMessages());
     }
 
 }

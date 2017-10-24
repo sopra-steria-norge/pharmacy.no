@@ -21,4 +21,13 @@ public class PharmacyPrincipal {
     @Getter @Setter
     private String jwtToken;
 
+    public HealthcareService getOrganization(String herNumber) {
+        for (HealthcareService organization : organizations) {
+            if (organization.getId().equals(herNumber)) {
+                return organization;
+            }
+        }
+        throw new IllegalArgumentException(hprNumber + " is not authorized for " + herNumber);
+    }
+
 }

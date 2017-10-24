@@ -39,7 +39,7 @@ public class PharmaApplicationContext {
     }
 
     public void setPharmacistDataSource(DataSource dataSource) {
-        repository = new JdbcMedicationDispenseRepository(dataSource, medicationRepository);
+        repository = new JdbcMedicationDispenseRepository(dataSource, medicationRepository, healthcareServiceRepository);
     }
 
     public PrescriptionGateway getPrescriptionGateway() {

@@ -41,6 +41,9 @@ public class JdbcHealthcareServiceRepository implements HealthcareServiceReposit
 
     @Override
     public HealthcareService retrieve(String herNumber) {
+        if (herNumber == null) {
+            return null;
+        }
         return jdbcSupport.retrieveSingle(
                 "select * from organizations where her_number = ?",
                 Arrays.asList(herNumber), this::readOrganization).get();

@@ -15,16 +15,19 @@ import no.pharmacy.core.PersonReference;
 import no.pharmacy.infrastructure.jdbc.JdbcSupport;
 import no.pharmacy.medication.MedicationRepository;
 import no.pharmacy.medicationorder.MedicationOrderSummary;
+import no.pharmacy.organization.HealthcareServiceRepository;
 import no.pharmacy.patient.HealthRecordQuery;
 import no.pharmacy.patient.HealthRecordQuery.HealthRecordQueryPurpose;
 
 public class JdbcMedicationDispenseRepository extends JdbcSupport implements MedicationDispenseRepository {
 
+    private HealthcareServiceRepository healthcareServiceRepository;
     private MedicationRepository medicationRepository;
 
-    public JdbcMedicationDispenseRepository(DataSource dataSource, MedicationRepository medicationRepository) {
+    public JdbcMedicationDispenseRepository(DataSource dataSource, MedicationRepository medicationRepository, HealthcareServiceRepository healthcareServiceRepository) {
         super(dataSource);
         this.medicationRepository = medicationRepository;
+        this.healthcareServiceRepository = healthcareServiceRepository;
     }
 
     @Override
@@ -52,6 +55,7 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
             .value("dispensed", order.isDispensed())
             .value("patient_id", order.getPatient().getReference())
             .value("patient_name", order.getPatient().getDisplay())
+            .value("dispensing_organization", order.getDispensingOrganization() != null ? order.getDispensingOrganization().getId() : null)
             .executeUpdate();
 
         for (MedicationOrder medicationOrder : order.getMedicationOrders()) {
@@ -119,6 +123,8 @@ public class JdbcMedicationDispenseRepository extends JdbcSupport implements Med
         result.getMedicationOrders().addAll(findMedicationOrders(result.getIdentifier()));
         result.getMedicationDispenses().addAll(findMedicationDispenses(result.getIdentifier(),
                 result.getMedicationOrders()));
+
+        result.setDispensingOrganization(healthcareServiceRepository.retrieve(rs.getString("dispensing_organization")));
 
         return result;
     }

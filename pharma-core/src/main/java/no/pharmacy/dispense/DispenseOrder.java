@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 import no.pharmacy.core.Money;
 import no.pharmacy.core.PersonReference;
+import no.pharmacy.organization.HealthcareService;
 
 @EqualsAndHashCode
 @ToString(of = { "identifier" })
@@ -38,6 +39,9 @@ public class DispenseOrder implements MedicationHistory {
 
     @Getter @Setter
     private LocalDate dateDispensed;
+
+    @Getter @Setter
+    private HealthcareService dispensingOrganization;
 
     @Override
     public List<MedicationDispense> getDispenses() {
